@@ -35,7 +35,7 @@
       bulletList = config.bullets || [];
     }
 
-    const atTime = config.at || "00:03:17.433";
+    const atTime = config.at || "00:03:05.433";
     const duration = typeof config.duration === 'number' ? config.duration : 24;
 
     return {
