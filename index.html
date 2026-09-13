@@ -846,27 +846,27 @@
       (SEGMENTS || []).forEach(seg => {
         const atSeconds = parseTimestamp(seg.at);
         const item = {
-          at: seg.at,
+          at: formatTime(atSeconds),
           atSeconds,
           title: seg.title,
           note: seg.note || ''
         };
         merged.push(item);
-        seenTimes.set(Math.round(atSeconds * 10), item);
+        seenTimes.set(Math.round(atSeconds), item);
       });
 
       // 2. Automatically include announcements as segments unless explicitly set { segment: false }
       (SLIDES || []).forEach(slide => {
         if (slide.kind === 'announcement' && slide.segment !== false) {
           const atSeconds = parseTimestamp(slide.at);
-          const key = Math.round(atSeconds * 10);
+          const key = Math.round(atSeconds);
           if (seenTimes.has(key)) {
             const existing = seenTimes.get(key);
             if (!existing.title) existing.title = slide.primaryText || slide.title;
             if (!existing.note && slide.secondaryText) existing.note = slide.secondaryText;
           } else {
             const item = {
-              at: slide.at,
+              at: formatTime(atSeconds),
               atSeconds,
               title: slide.primaryText || slide.title,
               note: slide.secondaryText || slide.note || ''
@@ -965,11 +965,11 @@
         btn.className = 'segment-button';
         btn.id = `segment-btn-${seg.index}`;
         btn.setAttribute('type', 'button');
-        btn.setAttribute('aria-label', `Seek to ${seg.title} at ${seg.at}`);
+        btn.setAttribute('aria-label', `Seek to ${seg.title} at ${formatTime(seg.atSeconds)}`);
 
         const timeSpan = document.createElement('span');
         timeSpan.className = 'segment-timestamp';
-        timeSpan.textContent = seg.at;
+        timeSpan.textContent = formatTime(seg.atSeconds);
 
         const contentWrapper = document.createElement('div');
         contentWrapper.className = 'segment-content-wrapper';
