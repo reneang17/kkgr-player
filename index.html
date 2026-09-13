@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khenchen Thrangu Rinpoche — Teachings Player</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM & VARIABLES
+       Quiet, contemplative aesthetic with soft celadon green accents.
+       ========================================================================== */
+    :root {
+      --bg-color: #121413;
+      --surface-color: #1a1d1b;
+      --surface-elevated: #222724;
+      --surface-hover: #29302c;
+      --border-color: #2b332e;
+      --border-light: #3a453f;
+      
+      --accent-celadon: #94b5a3;
+      --accent-celadon-light: #b3ccbf;
+      --accent-celadon-dim: rgba(148, 181, 163, 0.15);
+      --accent-celadon-glow: rgba(148, 181, 163, 0.35);
+
+      --text-main: #e6eae7;
+      --text-muted: #8d9790;
+      --text-dim: #606963;
+
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-serif: 'Lora', Georgia, 'Times New Roman', serif;
+      --font-title: 'Cinzel', 'Lora', serif;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1.25rem 4rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Page container */
+    .app-container {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ==========================================================================
+       1. HEADER (Title & Subtitle)
+       ========================================================================== */
+    header.page-header {
+      text-align: center;
+      padding: 0.5rem 0 1rem;
+    }
+
+    header.page-header h1 {
+      font-family: var(--font-title);
+      font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+
+    header.page-header p.subtitle {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(0.95rem, 2vw, 1.1rem);
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ==========================================================================
+       2. PLAYER CONTAINER (16:9 box that scales with the window)
+       ========================================================================== */
+    .player-aspect-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000000;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--border-color);
+      container-type: inline-size;
+    }
+
+    /* YouTube iframe wrapper */
+    .video-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .video-layer iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ==========================================================================
+       SLIDE OVERLAY LAYERS
+       ========================================================================== */
+
+    /* A. Full-frame Stopping Slide Layer */
+    .stopping-slide-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(1.25rem, 4.5cqw, 3rem);
+      background: #111312;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .stopping-slide-layer.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Backdrop overlay for stopping slide if custom background is used */
+    .stopping-slide-layer::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(18, 21, 19, 0.88) 0%, rgba(12, 14, 13, 0.97) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .stopping-slide-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      max-width: 85%;
+      pointer-events: none; /* Allows click to pass to slide container */
+    }
+
+    .slide-label {
+      display: inline-block;
+      font-family: var(--font-sans);
+      font-size: clamp(0.7rem, 1.8cqw, 0.85rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--accent-celadon);
+      margin-bottom: clamp(0.4rem, 1.5cqw, 0.9rem);
+    }
+
+    .slide-heading {
+      font-family: var(--font-serif);
+      font-size: clamp(1.15rem, 3.8cqw, 2.1rem);
+      font-weight: 500;
+      line-height: 1.25;
+      color: #ffffff;
+      margin-bottom: clamp(0.8rem, 2.5cqw, 1.75rem);
+    }
+
+    .slide-bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.4rem, 1.6cqw, 1rem);
+      font-family: var(--font-serif);
+      font-size: clamp(0.85rem, 2.4cqw, 1.25rem);
+      color: var(--text-main);
+      line-height: 1.45;
+    }
+
+    .slide-bullets li {
+      position: relative;
+      padding-left: clamp(1.1rem, 2.5cqw, 1.6rem);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .slide-bullets li.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .slide-bullets li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--accent-celadon);
+      font-size: 1.2em;
+      line-height: 1;
+    }
+
+    /* Footer in stopping slide: instruction hint & Continue button */
+    .stopping-slide-footer {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: auto;
+    }
+
+    .slide-tip {
+      font-size: clamp(0.7rem, 1.6cqw, 0.85rem);
+      color: var(--text-dim);
+      font-family: var(--font-sans);
+      pointer-events: none;
+    }
+
+    .continue-btn {
+      appearance: none;
+      border: 1px solid var(--border-light);
+      background: rgba(26, 30, 28, 0.8);
+      color: var(--text-dim);
+      font-family: var(--font-sans);
+      font-size: clamp(0.75rem, 1.8cqw, 0.95rem);
+      font-weight: 500;
+      padding: clamp(0.4rem, 1.2cqw, 0.65rem) clamp(0.85rem, 2cqw, 1.4rem);
+      border-radius: var(--radius-sm);
+      cursor: not-allowed;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(8px);
+      pointer-events: auto;
+    }
+
+    .continue-btn.ready {
+      cursor: pointer;
+      background: var(--accent-celadon);
+      color: #0e1210;
+      border-color: var(--accent-celadon-light);
+      box-shadow: 0 0 16px var(--accent-celadon-glow);
+      font-weight: 600;
+    }
+
+    .continue-btn.ready:hover {
+      background: var(--accent-celadon-light);
+      transform: translateY(-1px);
+    }
+
+    .continue-btn:focus-visible {
+      outline: 2px solid var(--accent-celadon);
+      outline-offset: 2px;
+    }
+
+    /* B. Timed Panel Layer (Left side gradient, speaker visible on right) */
+    .timed-panel-layer {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 62%;
+      max-width: 580px;
+      z-index: 10;
+      padding: clamp(1.25rem, 4.5cqw, 3rem);
+      background: linear-gradient(to right, 
+        rgba(14, 17, 15, 0.96) 0%, 
+        rgba(14, 17, 15, 0.88) 60%, 
+        rgba(14, 17, 15, 0) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+      pointer-events: none;
+    }
+
+    .timed-panel-layer.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .timed-panel-content {
+      max-width: 88%;
+    }
+
+    /* ==========================================================================
+       3. THIN CONTROL BAR
+       ========================================================================== */
+    .control-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0.85rem;
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-container input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 1.05rem;
+      height: 1.05rem;
+      border: 1.5px solid var(--border-light);
+      border-radius: 4px;
+      background: var(--bg-color);
+      cursor: pointer;
+      display: grid;
+      place-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .toggle-container input[type="checkbox"]:checked {
+      background: var(--accent-celadon);
+      border-color: var(--accent-celadon);
+    }
+
+    .toggle-container input[type="checkbox"]:checked::before {
+      content: "";
+      width: 0.55rem;
+      height: 0.35rem;
+      border-left: 2px solid #0e1210;
+      border-bottom: 2px solid #0e1210;
+      transform: rotate(-45deg) translate(1px, -1px);
+    }
+
+    .toggle-container input[type="checkbox"]:focus-visible {
+      outline: 2px solid var(--accent-celadon);
+      outline-offset: 2px;
+    }
+
+    .toggle-label-text {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .time-display {
+      font-variant-numeric: tabular-nums;
+      font-family: var(--font-sans);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* ==========================================================================
+       4. SEGMENTS SECTION
+       ========================================================================== */
+    .segments-section {
+      margin-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .segments-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+
+    .segments-title {
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .segments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      list-style: none;
+    }
+
+    .segment-button {
+      appearance: none;
+      width: 100%;
+      text-align: left;
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      align-items: baseline;
+      gap: 1.25rem;
+      transition: all 0.2s ease;
+      color: inherit;
+      font-family: inherit;
+    }
+
+    .segment-button:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-light);
+    }
+
+    .segment-button:focus-visible {
+      outline: 2px solid var(--accent-celadon);
+      outline-offset: 2px;
+    }
+
+    .segment-button.active {
+      border-color: var(--accent-celadon);
+      background: var(--accent-celadon-dim);
+    }
+
+    .segment-timestamp {
+      font-family: var(--font-sans);
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--accent-celadon);
+      letter-spacing: 0.03em;
+    }
+
+    .segment-content-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .segment-name {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .segment-note {
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+
+    /* Accessibility: Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      body {
+        padding: 1.5rem 0.75rem 3rem;
+      }
+      .segment-button {
+        grid-template-columns: 65px 1fr;
+        gap: 0.75rem;
+        padding: 0.75rem 0.85rem;
+      }
+      .timed-panel-layer {
+        width: 85%;
+        background: linear-gradient(to right, 
+          rgba(14, 17, 15, 0.98) 0%, 
+          rgba(14, 17, 15, 0.92) 75%, 
+          rgba(14, 17, 15, 0) 100%);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- 1. Header -->
+    <header class="page-header">
+      <h1>Khenchen Thrangu Rinpoche</h1>
+      <p class="subtitle">Teachings on the Jewel Ornament of Liberation</p>
+    </header>
+
+    <!-- 2. Player with 16:9 Aspect Ratio Container -->
+    <div class="player-aspect-box" id="player-box">
+      <!-- YouTube Video Container Layer -->
+      <div class="video-layer">
+        <div id="yt-player"></div>
+      </div>
+
+      <!-- Stopping Slide Overlay Layer -->
+      <div class="stopping-slide-layer" id="stopping-slide" role="dialog" aria-modal="true" aria-hidden="true" tabindex="0">
+        <div class="stopping-slide-content">
+          <span class="slide-label" id="stopping-label">Overview</span>
+          <h2 class="slide-heading" id="stopping-title">Slide Title</h2>
+          <ul class="slide-bullets" id="stopping-bullets"></ul>
+        </div>
+        <div class="stopping-slide-footer">
+          <span class="slide-tip" id="slide-hint">Click or press Space for next point</span>
+          <button class="continue-btn" id="continue-btn" disabled>
+            <span>Continue</span>
+            <span aria-hidden="true">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Timed Side Panel Overlay Layer -->
+      <div class="timed-panel-layer" id="timed-panel" aria-hidden="true">
+        <div class="timed-panel-content">
+          <span class="slide-label" id="timed-label">Take-home</span>
+          <h2 class="slide-heading" id="timed-title">Slide Title</h2>
+          <ul class="slide-bullets" id="timed-bullets"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Thin Control Bar directly under the player -->
+    <div class="control-bar">
+      <label class="toggle-container" for="pause-toggle">
+        <input type="checkbox" id="pause-toggle" checked>
+        <span class="toggle-label-text">Pause at each slide</span>
+      </label>
+      <div class="time-display" id="time-display">0:00 / 0:00</div>
+    </div>
+
+    <!-- 4. Segments Section -->
+    <section class="segments-section" aria-label="Video Segments">
+      <div class="segments-header">
+        <span class="segments-title">Segments</span>
+      </div>
+      <ul class="segments-list" id="segments-list">
+        <!-- Dynamically generated from SLIDES array -->
+      </ul>
+    </section>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       CONFIGURATION
+       Edit video ID, background image, and slide markers here without touching logic.
+       ========================================================================== */
+    const VIDEO_ID = "OYxOe_v7ZL0";
+    const SLIDE_BG = "";   // optional 1920x1080 background image for stopping slides
+
+    const SLIDES = [
+      { 
+        at: "2:14", 
+        kind: "overview", 
+        title: "Overview",
+        bullets: ["line one", "line two", "line three"] 
+      },
+      { 
+        at: "11:40", 
+        until: "11:55", 
+        kind: "takehome", 
+        title: "Holding this while he speaks",
+        bullets: ["short line", "short line"] 
+      }
+    ];
+
+    /* ==========================================================================
+       VIDEO PLAYER ADAPTER
+       Abstracted player calls so YouTube can easily be swapped for HTML5 / H5P.
+       ========================================================================== */
+    let ytPlayerInstance = null;
+    let isPlayerReady = false;
+
+    function playerPlay() {
+      if (ytPlayerInstance && typeof ytPlayerInstance.playVideo === 'function') {
+        ytPlayerInstance.playVideo();
+      }
+    }
+
+    function playerPause() {
+      if (ytPlayerInstance && typeof ytPlayerInstance.pauseVideo === 'function') {
+        ytPlayerInstance.pauseVideo();
+      }
+    }
+
+    function playerSeekTo(seconds) {
+      if (ytPlayerInstance && typeof ytPlayerInstance.seekTo === 'function') {
+        ytPlayerInstance.seekTo(seconds, true);
+      }
+    }
+
+    function playerGetCurrentTime() {
+      if (ytPlayerInstance && typeof ytPlayerInstance.getCurrentTime === 'function') {
+        return ytPlayerInstance.getCurrentTime();
+      }
+      return 0;
+    }
+
+    function playerGetDuration() {
+      if (ytPlayerInstance && typeof ytPlayerInstance.getDuration === 'function') {
+        return ytPlayerInstance.getDuration();
+      }
+      return 0;
+    }
+
+    function playerGetState() {
+      if (ytPlayerInstance && typeof ytPlayerInstance.getPlayerState === 'function') {
+        return ytPlayerInstance.getPlayerState();
+      }
+      return -1;
+    }
+
+    /* ==========================================================================
+       UTILITIES & DATA NORMALIZATION
+       ========================================================================== */
+    // Parse "m:ss", "mm:ss", "h:mm:ss" or number of seconds into float seconds
+    function parseTimestamp(timeStr) {
+      if (typeof timeStr === 'number') return timeStr;
+      if (!timeStr || typeof timeStr !== 'string') return 0;
+      const parts = timeStr.trim().split(':').map(Number);
+      if (parts.some(isNaN)) return 0;
+      if (parts.length === 3) {
+        return parts[0] * 3600 + parts[1] * 60 + parts[2];
+      } else if (parts.length === 2) {
+        return parts[0] * 60 + parts[1];
+      } else if (parts.length === 1) {
+        return parts[0];
+      }
+      return 0;
+    }
+
+    // Format seconds into "m:ss" or "h:mm:ss"
+    function formatTime(totalSeconds) {
+      if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
+      const s = Math.floor(totalSeconds);
+      const hrs = Math.floor(s / 3600);
+      const mins = Math.floor((s % 3600) / 60);
+      const secs = s % 60;
+      const secStr = secs < 10 ? '0' + secs : secs;
+
+      if (hrs > 0) {
+        const minStr = mins < 10 ? '0' + mins : mins;
+        return `${hrs}:${minStr}:${secStr}`;
+      }
+      return `${mins}:${secStr}`;
+    }
+
+    // Normalize slides array with parsed timestamps & runtime state
+    const normalizedSlides = SLIDES.map((slide, index) => {
+      const atSeconds = parseTimestamp(slide.at);
+      const untilSeconds = slide.until ? parseTimestamp(slide.until) : null;
+      const isStopping = untilSeconds === null;
+      const duration = isStopping ? null : Math.max(1, untilSeconds - atSeconds);
+
+      return {
+        ...slide,
+        index,
+        atSeconds,
+        untilSeconds,
+        isStopping,
+        duration,
+        // Runtime tracking flags
+        passed: false
+      };
+    });
+
+    /* ==========================================================================
+       DOM ELEMENTS
+       ========================================================================== */
+    const pauseToggle = document.getElementById('pause-toggle');
+    const timeDisplay = document.getElementById('time-display');
+    const segmentsList = document.getElementById('segments-list');
+
+    // Stopping slide elements
+    const stoppingSlideLayer = document.getElementById('stopping-slide');
+    const stoppingLabel = document.getElementById('stopping-label');
+    const stoppingTitle = document.getElementById('stopping-title');
+    const stoppingBullets = document.getElementById('stopping-bullets');
+    const continueBtn = document.getElementById('continue-btn');
+    const slideHint = document.getElementById('slide-hint');
+
+    // Timed panel elements
+    const timedPanelLayer = document.getElementById('timed-panel');
+    const timedLabel = document.getElementById('timed-label');
+    const timedTitle = document.getElementById('timed-title');
+    const timedBullets = document.getElementById('timed-bullets');
+
+    // State
+    let activeStoppingSlide = null;
+    let stoppingBulletIndex = 0;
+    let activeTimedSlide = null;
+    let lastKnownTime = 0;
+
+    /* Apply optional custom background if provided */
+    if (SLIDE_BG && SLIDE_BG.trim() !== "") {
+      stoppingSlideLayer.style.backgroundImage = `url('${SLIDE_BG}')`;
+    }
+
+    /* ==========================================================================
+       SEGMENTS LIST RENDERING
+       ========================================================================== */
+    function renderSegmentsList() {
+      segmentsList.innerHTML = '';
+      normalizedSlides.forEach((slide) => {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.className = 'segment-button';
+        btn.id = `segment-btn-${slide.index}`;
+        btn.setAttribute('type', 'button');
+        btn.setAttribute('aria-label', `Seek to ${slide.title} at ${slide.at}`);
+
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'segment-timestamp';
+        timeSpan.textContent = slide.at;
+
+        const contentWrapper = document.createElement('div');
+        contentWrapper.className = 'segment-content-wrapper';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'segment-name';
+        nameSpan.textContent = slide.title;
+
+        const noteSpan = document.createElement('span');
+        noteSpan.className = 'segment-note';
+        if (slide.isStopping) {
+          noteSpan.textContent = 'stops the video';
+        } else {
+          noteSpan.textContent = `shown for ${Math.round(slide.duration)}s, no stop`;
+        }
+
+        contentWrapper.appendChild(nameSpan);
+        contentWrapper.appendChild(noteSpan);
+        btn.appendChild(timeSpan);
+        btn.appendChild(contentWrapper);
+
+        btn.addEventListener('click', () => {
+          // If a stopping slide was open, close it
+          if (activeStoppingSlide) {
+            closeStoppingSlide(false);
+          }
+          playerSeekTo(slide.atSeconds);
+          playerPlay();
+        });
+
+        li.appendChild(btn);
+        segmentsList.appendChild(li);
+      });
+    }
+
+    renderSegmentsList();
+
+    /* ==========================================================================
+       SLIDE OPEN / CLOSE FUNCTIONS
+       Handles stopping slides (interactive bullet stepping) and timed side panels.
+       ========================================================================== */
+
+    /**
+     * Open full-frame stopping slide: pauses video, reveals title and prepares bullets.
+     */
+    function openStoppingSlide(slide) {
+      activeStoppingSlide = slide;
+      stoppingBulletIndex = 0;
+
+      // Set label and heading
+      stoppingLabel.textContent = slide.kind === 'takehome' ? 'Take-home lessons' : (slide.kind === 'overview' ? 'Overview' : (slide.kind || 'Overview'));
+      stoppingTitle.textContent = slide.title;
+
+      // Populate bullets list
+      stoppingBullets.innerHTML = '';
+      if (Array.isArray(slide.bullets)) {
+        slide.bullets.forEach((bulletText) => {
+          const li = document.createElement('li');
+          li.textContent = bulletText;
+          stoppingBullets.appendChild(li);
+        });
+      }
+
+      // Reset Continue button
+      continueBtn.disabled = true;
+      continueBtn.classList.remove('ready');
+
+      // Update hint text
+      if (!slide.bullets || slide.bullets.length === 0) {
+        continueBtn.disabled = false;
+        continueBtn.classList.add('ready');
+        slideHint.textContent = 'Press Enter, Escape, or Continue';
+      } else {
+        slideHint.textContent = 'Click or press Space for next point';
+      }
+
+      // Reveal first bullet immediately if desired, or let user click
+      advanceStoppingBullet();
+
+      // Show overlay layer & focus
+      stoppingSlideLayer.classList.add('active');
+      stoppingSlideLayer.setAttribute('aria-hidden', 'false');
+      stoppingSlideLayer.focus();
+    }
+
+    /**
+     * Advance to reveal the next bullet on the stopping slide.
+     */
+    function advanceStoppingBullet() {
+      if (!activeStoppingSlide) return;
+      const bulletElements = stoppingBullets.querySelectorAll('li');
+      
+      if (stoppingBulletIndex < bulletElements.length) {
+        bulletElements[stoppingBulletIndex].classList.add('revealed');
+        stoppingBulletIndex++;
+      }
+
+      // If all bullets are shown, enable Continue button
+      if (stoppingBulletIndex >= bulletElements.length) {
+        continueBtn.disabled = false;
+        continueBtn.classList.add('ready');
+        slideHint.textContent = 'Press Enter, Escape, or Continue';
+      }
+    }
+
+    /**
+     * Close stopping slide and resume video playback if resumePlayback is true.
+     */
+    function closeStoppingSlide(resumePlayback = true) {
+      if (!activeStoppingSlide) return;
+      stoppingSlideLayer.classList.remove('active');
+      stoppingSlideLayer.setAttribute('aria-hidden', 'true');
+      activeStoppingSlide = null;
+      stoppingBulletIndex = 0;
+
+      if (resumePlayback) {
+        playerPlay();
+      }
+    }
+
+    /**
+     * Open timed side panel: fades in over left side without pausing video.
+     */
+    function openTimedPanel(slide) {
+      activeTimedSlide = slide;
+
+      timedLabel.textContent = slide.kind === 'takehome' ? 'Take-home lessons' : (slide.kind === 'overview' ? 'Overview' : (slide.kind || 'Note'));
+      timedTitle.textContent = slide.title;
+
+      timedBullets.innerHTML = '';
+      if (Array.isArray(slide.bullets)) {
+        slide.bullets.forEach((bulletText) => {
+          const li = document.createElement('li');
+          li.textContent = bulletText;
+          timedBullets.appendChild(li);
+        });
+      }
+
+      timedPanelLayer.classList.add('active');
+      timedPanelLayer.setAttribute('aria-hidden', 'false');
+    }
+
+    /**
+     * Update timed panel bullets progressive reveal based on elapsed time window.
+     */
+    function updateTimedPanelProgress(currentTime) {
+      if (!activeTimedSlide) return;
+      const bulletElements = timedBullets.querySelectorAll('li');
+      const totalBullets = bulletElements.length;
+      if (totalBullets === 0) return;
+
+      const elapsed = currentTime - activeTimedSlide.atSeconds;
+      const totalDuration = activeTimedSlide.duration;
+      const progressRatio = Math.max(0, Math.min(1, elapsed / totalDuration));
+
+      // Distribute bullet appearances evenly across duration
+      const bulletsToShow = Math.min(totalBullets, Math.floor(progressRatio * totalBullets) + 1);
+
+      bulletElements.forEach((el, idx) => {
+        if (idx < bulletsToShow) {
+          el.classList.add('revealed');
+        } else {
+          el.classList.remove('revealed');
+        }
+      });
+    }
+
+    /**
+     * Close timed side panel.
+     */
+    function closeTimedPanel() {
+      if (!activeTimedSlide) return;
+      timedPanelLayer.classList.remove('active');
+      timedPanelLayer.setAttribute('aria-hidden', 'true');
+      activeTimedSlide = null;
+    }
+
+    /* ==========================================================================
+       EVENT LISTENERS FOR SLIDE INTERACTION
+       ========================================================================== */
+    // Click on stopping slide triggers next bullet
+    stoppingSlideLayer.addEventListener('click', (e) => {
+      // If click was on the Continue button, handle continue
+      if (e.target.closest('#continue-btn')) {
+        if (!continueBtn.disabled) {
+          closeStoppingSlide(true);
+        }
+        return;
+      }
+
+      // If more bullets remain, show next bullet
+      const bulletElements = stoppingBullets.querySelectorAll('li');
+      if (stoppingBulletIndex < bulletElements.length) {
+        advanceStoppingBullet();
+      } else {
+        // If all bullets already revealed, clicking slide also continues
+        closeStoppingSlide(true);
+      }
+    });
+
+    // Continue button click
+    continueBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!continueBtn.disabled) {
+        closeStoppingSlide(true);
+      }
+    });
+
+    // Keyboard shortcuts (Space to advance bullets, Enter/Escape to continue)
+    window.addEventListener('keydown', (e) => {
+      if (!activeStoppingSlide) return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        const bulletElements = stoppingBullets.querySelectorAll('li');
+        if (stoppingBulletIndex < bulletElements.length) {
+          advanceStoppingBullet();
+        } else {
+          closeStoppingSlide(true);
+        }
+      } else if (e.code === 'Enter' || e.code === 'Escape') {
+        e.preventDefault();
+        // Enter / Escape continues
+        closeStoppingSlide(true);
+      }
+    });
+
+    /* ==========================================================================
+       TIMESTAMP-WATCHING LOOP
+       Polls player time at high frequency (~100ms) to trigger slides and re-arm.
+       ========================================================================== */
+    function checkPlaybackTime() {
+      const currentTime = playerGetCurrentTime();
+      const duration = playerGetDuration();
+
+      // Update control bar timestamp
+      timeDisplay.textContent = `${formatTime(currentTime)} / ${formatTime(duration)}`;
+
+      // 1. RE-ARMING ON REWIND: If user rewinds backwards before a slide timestamp, reset its passed state
+      if (currentTime < lastKnownTime - 0.5) {
+        normalizedSlides.forEach((slide) => {
+          if (currentTime < slide.atSeconds - 0.2) {
+            slide.passed = false;
+          }
+        });
+        // If rewound out of timed slide range, close timed panel
+        if (activeTimedSlide && (currentTime < activeTimedSlide.atSeconds || currentTime > activeTimedSlide.untilSeconds)) {
+          closeTimedPanel();
+        }
+      }
+      lastKnownTime = currentTime;
+
+      // 2. ACTIVE SEGMENT HIGHLIGHT in segment list
+      let activeIndex = -1;
+      for (let i = 0; i < normalizedSlides.length; i++) {
+        if (currentTime >= normalizedSlides[i].atSeconds) {
+          activeIndex = i;
+        }
+      }
+      normalizedSlides.forEach((slide) => {
+        const btn = document.getElementById(`segment-btn-${slide.index}`);
+        if (btn) {
+          if (slide.index === activeIndex) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        }
+      });
+
+      // 3. SLIDE TRIGGER DETECTION
+      const pauseEnabled = pauseToggle.checked;
+
+      normalizedSlides.forEach((slide) => {
+        // Trigger condition: current time reached marker and slide hasn't fired yet
+        if (!slide.passed && currentTime >= slide.atSeconds && currentTime < slide.atSeconds + 2.0) {
+          if (slide.isStopping) {
+            if (pauseEnabled) {
+              slide.passed = true;
+              playerPause();
+              openStoppingSlide(slide);
+            } else {
+              // Pause skipped because user unchecked the toggle
+              slide.passed = true;
+            }
+          } else {
+            // Timed side panel slide
+            slide.passed = true;
+            openTimedPanel(slide);
+          }
+        }
+      });
+
+      // 4. TIMED PANEL UPDATE & DISMISSAL
+      if (activeTimedSlide) {
+        if (currentTime >= activeTimedSlide.untilSeconds || currentTime < activeTimedSlide.atSeconds) {
+          closeTimedPanel();
+        } else {
+          updateTimedPanelProgress(currentTime);
+        }
+      }
+    }
+
+    // Run timestamp check loop every 100ms
+    setInterval(checkPlaybackTime, 100);
+
+    /* ==========================================================================
+       YOUTUBE IFRAME API INITIALIZATION
+       ========================================================================== */
+    // Load YouTube IFrame API script asynchronously
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    window.onYouTubeIframeAPIReady = function() {
+      ytPlayerInstance = new YT.Player('yt-player', {
+        videoId: VIDEO_ID,
+        playerVars: {
+          playsinline: 1,
+          rel: 0,
+          modestbranding: 1,
+          fs: 1
+        },
+        events: {
+          onReady: function(event) {
+            isPlayerReady = true;
+          },
+          onStateChange: function(event) {
+            // Re-arm slides if video is re-played from start
+            if (event.data === YT.PlayerState.PLAYING) {
+              const cur = playerGetCurrentTime();
+              if (cur < 1.0) {
+                normalizedSlides.forEach(s => s.passed = false);
+              }
+            }
+          }
+        }
+      });
+    };
+  </script>
+</body>
+</html>
