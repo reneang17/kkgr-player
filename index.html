@@ -734,6 +734,13 @@
         buttonText: "Continue lesson"
       }),
 
+      // Announcement banner at 00:03:17
+      announcement(
+        "Overview of Gampopa's Life & Work",
+        "",
+        { at: "00:03:17", duration: 8 }
+      ),
+
       { 
         at: "11:40", 
         until: "11:55", 
@@ -792,13 +799,15 @@
     /* ==========================================================================
        UTILITIES & DATA NORMALIZATION
        ========================================================================== */
-    // Parse "m:ss", "mm:ss", "h:mm:ss", with optional milliseconds into float seconds
+    // Parse "m:ss", "mm:ss", "h:mm:ss", "h:mm:ss:ms/frames" with optional decimals into float seconds
     function parseTimestamp(timeStr) {
       if (typeof timeStr === 'number') return timeStr;
       if (!timeStr || typeof timeStr !== 'string') return 0;
       const parts = timeStr.trim().split(':').map(Number);
       if (parts.some(isNaN)) return 0;
-      if (parts.length === 3) {
+      if (parts.length === 4) {
+        return parts[0] * 3600 + parts[1] * 60 + parts[2] + (parts[3] / 100);
+      } else if (parts.length === 3) {
         return parts[0] * 3600 + parts[1] * 60 + parts[2];
       } else if (parts.length === 2) {
         return parts[0] * 60 + parts[1];
