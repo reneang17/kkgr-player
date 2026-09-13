@@ -833,15 +833,57 @@
       return `${mins}:${secStr}`;
     }
 
-    // Normalize segments array for the video table of contents / chapters
-    const normalizedSegments = SEGMENTS.map((seg, index) => {
-      const atSeconds = parseTimestamp(seg.at);
-      return {
+    // Build combined segments list from explicit SEGMENTS and all announcement slides
+    function buildSegmentsList() {
+      const merged = [];
+      const seenTimes = new Map();
+
+      // 1. Add explicit segments
+      (SEGMENTS || []).forEach(seg => {
+        const atSeconds = parseTimestamp(seg.at);
+        const item = {
+          at: seg.at,
+          atSeconds,
+          title: seg.title,
+          note: seg.note || ''
+        };
+        merged.push(item);
+        seenTimes.set(Math.round(atSeconds * 10), item);
+      });
+
+      // 2. Automatically include announcements as segments unless explicitly set { segment: false }
+      (SLIDES || []).forEach(slide => {
+        if (slide.kind === 'announcement' && slide.segment !== false) {
+          const atSeconds = parseTimestamp(slide.at);
+          const key = Math.round(atSeconds * 10);
+          if (seenTimes.has(key)) {
+            const existing = seenTimes.get(key);
+            if (!existing.title) existing.title = slide.primaryText || slide.title;
+            if (!existing.note && slide.secondaryText) existing.note = slide.secondaryText;
+          } else {
+            const item = {
+              at: slide.at,
+              atSeconds,
+              title: slide.primaryText || slide.title,
+              note: slide.secondaryText || slide.note || ''
+            };
+            merged.push(item);
+            seenTimes.set(key, item);
+          }
+        }
+      });
+
+      // 3. Sort chronologically by timestamp
+      merged.sort((a, b) => a.atSeconds - b.atSeconds);
+
+      // 4. Assign sequential index
+      return merged.map((seg, index) => ({
         ...seg,
-        index,
-        atSeconds
-      };
-    });
+        index
+      }));
+    }
+
+    const normalizedSegments = buildSegmentsList();
 
     // Normalize slides array with parsed timestamps & runtime state
     const normalizedSlides = SLIDES.map((slide, index) => {
