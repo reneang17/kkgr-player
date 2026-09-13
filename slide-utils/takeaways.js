@@ -47,6 +47,8 @@
       bg: config.bg || "slides/takeaways-bg.png",
       font: config.font || "'Crimson Pro', 'Lora', Georgia, serif",
       boxBg: config.boxBg || "rgba(96, 145, 149, 0.50)",
+      boxPadding: config.boxPadding || null,
+      boxMaxWidth: config.boxMaxWidth || null,
       buttonText: config.buttonText || "Continue lesson",
       titleSize: config.titleSize || "clamp(1.5rem, 5.2cqw, 3.1rem)",
       bulletSize: config.bulletSize || "clamp(0.95rem, 2.6cqw, 1.55rem)",

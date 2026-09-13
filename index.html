@@ -331,7 +331,7 @@
 
     /* "Some takeaways" specific slide styling */
     .stopping-slide-layer.takeaways-mode {
-      padding: clamp(1.2rem, 3.8cqw, 2.75rem) clamp(1.8rem, 5cqw, 4rem);
+      padding: clamp(1rem, 3.2cqw, 2.2rem) clamp(1.8rem, 5cqw, 4rem);
       justify-content: space-between;
     }
 
@@ -342,7 +342,7 @@
     .stopping-slide-layer.takeaways-mode .stopping-slide-content {
       max-width: 92%;
       width: 100%;
-      margin: 0 auto;
+      margin: auto auto; /* Optical vertical centering of title and dynamic box */
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -354,18 +354,22 @@
       font-weight: 600;
       color: #ffffff;
       text-align: center;
-      margin-bottom: clamp(0.7rem, 2cqw, 1.5rem);
+      margin-bottom: clamp(0.65rem, 1.8cqw, 1.35rem);
       letter-spacing: -0.01em;
     }
 
     .stopping-slide-layer.takeaways-mode .slide-bullets-box {
       background: rgba(96, 145, 149, 0.50);
       border-radius: clamp(3px, 0.8cqw, 6px);
-      padding: clamp(1.1rem, 3cqw, 2.25rem) clamp(1.4rem, 3.8cqw, 2.8rem);
+      padding: clamp(0.9rem, 2.4cqw, 1.9rem) clamp(1.4rem, 3.8cqw, 2.8rem);
       width: 100%;
       max-width: 86%;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      height: auto;
+      min-height: fit-content;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
       backdrop-filter: blur(1px);
+      box-sizing: border-box;
+      transition: all 0.25s ease;
     }
 
     .stopping-slide-layer.takeaways-mode .slide-bullets {
@@ -374,8 +378,11 @@
       font-weight: 600;
       color: #ffffff;
       line-height: 1.45;
-      gap: clamp(0.6rem, 1.8cqw, 1.25rem);
+      gap: clamp(0.55rem, 1.6cqw, 1.15rem);
       width: 100%;
+      margin: 0;
+      padding: 0;
+      list-style: none;
     }
 
     .stopping-slide-layer.takeaways-mode .slide-bullets li {
@@ -1112,7 +1119,7 @@
         stoppingLabel.textContent = slide.kind === 'takehome' ? 'Take-home lessons' : (slide.kind === 'overview' ? 'Overview' : (slide.kind || 'Overview'));
       }
 
-      // Box background if custom
+      // Box background and dimensions if custom
       if (stoppingBulletsBox) {
         if (slide.boxBg) {
           stoppingBulletsBox.style.backgroundColor = slide.boxBg;
@@ -1120,6 +1127,18 @@
           stoppingBulletsBox.style.backgroundColor = 'transparent';
         } else {
           stoppingBulletsBox.style.backgroundColor = '';
+        }
+
+        if (slide.boxPadding) {
+          stoppingBulletsBox.style.padding = slide.boxPadding;
+        } else {
+          stoppingBulletsBox.style.padding = '';
+        }
+
+        if (slide.boxMaxWidth) {
+          stoppingBulletsBox.style.maxWidth = slide.boxMaxWidth;
+        } else {
+          stoppingBulletsBox.style.maxWidth = '';
         }
       }
 
