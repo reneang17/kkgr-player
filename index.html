@@ -574,14 +574,15 @@
        Edit video ID, background image, and slide markers here without touching logic.
        ========================================================================== */
     const VIDEO_ID = "OYxOe_v7ZL0";
-    const SLIDE_BG = "";   // optional 1920x1080 background image for stopping slides
+    const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
 
     const SLIDES = [
       { 
         at: "2:14", 
         kind: "overview", 
         title: "Overview",
-        bullets: ["line one", "line two", "line three"] 
+        bullets: ["line one", "line two", "line three"],
+        bg: "slides/slide-1.png"
       },
       { 
         at: "11:40", 
@@ -788,6 +789,14 @@
     function openStoppingSlide(slide) {
       activeStoppingSlide = slide;
       stoppingBulletIndex = 0;
+
+      // Set background image
+      const bgImage = slide.bg || SLIDE_BG;
+      if (bgImage && bgImage.trim() !== '') {
+        stoppingSlideLayer.style.backgroundImage = `url('${bgImage}')`;
+      } else {
+        stoppingSlideLayer.style.backgroundImage = 'none';
+      }
 
       // Set label and heading
       stoppingLabel.textContent = slide.kind === 'takehome' ? 'Take-home lessons' : (slide.kind === 'overview' ? 'Overview' : (slide.kind || 'Overview'));
