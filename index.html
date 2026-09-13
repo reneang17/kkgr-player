@@ -691,11 +691,21 @@
 
     /* ==========================================================================
        CONFIGURATION
-       Edit video ID, background image, and slide markers here without touching logic.
+       Edit video ID, background image, video segments, and slide overlays here.
        ========================================================================== */
     const VIDEO_ID = "OYxOe_v7ZL0";
     const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
 
+    // 1. VIDEO SEGMENTS (Chapters / Lecture parts shown in the "Segments" list)
+    const SEGMENTS = [
+      { at: "0:00", title: "Introduction & Homage", note: "Opening remarks" },
+      { at: "0:29", title: "Essence of the Jewel Ornament of Liberation", note: "Title & context" },
+      { at: "2:14", title: "Overview of the Four Thoughts", note: "Teaching overview" },
+      { at: "5:30", title: "The Primary Cause", note: "Core topic" },
+      { at: "11:40", title: "Key Reflections & Summary", note: "Closing reflection" }
+    ];
+
+    // 2. SLIDES & OVERLAYS (Interactive stopping slides, timed side panels, announcements)
     const SLIDES = [
       // Announcement banner at 00:29
       announcement(
@@ -800,6 +810,16 @@
       return `${mins}:${secStr}`;
     }
 
+    // Normalize segments array for the video table of contents / chapters
+    const normalizedSegments = SEGMENTS.map((seg, index) => {
+      const atSeconds = parseTimestamp(seg.at);
+      return {
+        ...seg,
+        index,
+        atSeconds
+      };
+    });
+
     // Normalize slides array with parsed timestamps & runtime state
     const normalizedSlides = SLIDES.map((slide, index) => {
       const atSeconds = parseTimestamp(slide.at);
@@ -864,39 +884,37 @@
     }
 
     /* ==========================================================================
-       SEGMENTS LIST RENDERING
+       SEGMENTS LIST RENDERING (Renders Video Segments / Chapters)
        ========================================================================== */
     function renderSegmentsList() {
       segmentsList.innerHTML = '';
-      normalizedSlides.forEach((slide) => {
+      normalizedSegments.forEach((seg) => {
         const li = document.createElement('li');
         const btn = document.createElement('button');
         btn.className = 'segment-button';
-        btn.id = `segment-btn-${slide.index}`;
+        btn.id = `segment-btn-${seg.index}`;
         btn.setAttribute('type', 'button');
-        btn.setAttribute('aria-label', `Seek to ${slide.title} at ${slide.at}`);
+        btn.setAttribute('aria-label', `Seek to ${seg.title} at ${seg.at}`);
 
         const timeSpan = document.createElement('span');
         timeSpan.className = 'segment-timestamp';
-        timeSpan.textContent = slide.at;
+        timeSpan.textContent = seg.at;
 
         const contentWrapper = document.createElement('div');
         contentWrapper.className = 'segment-content-wrapper';
 
         const nameSpan = document.createElement('span');
         nameSpan.className = 'segment-name';
-        nameSpan.textContent = slide.title;
+        nameSpan.textContent = seg.title;
+        contentWrapper.appendChild(nameSpan);
 
-        const noteSpan = document.createElement('span');
-        noteSpan.className = 'segment-note';
-        if (slide.isStopping) {
-          noteSpan.textContent = 'stops the video';
-        } else {
-          noteSpan.textContent = `shown for ${Math.round(slide.duration)}s, no stop`;
+        if (seg.note && seg.note.trim() !== '') {
+          const noteSpan = document.createElement('span');
+          noteSpan.className = 'segment-note';
+          noteSpan.textContent = seg.note;
+          contentWrapper.appendChild(noteSpan);
         }
 
-        contentWrapper.appendChild(nameSpan);
-        contentWrapper.appendChild(noteSpan);
         btn.appendChild(timeSpan);
         btn.appendChild(contentWrapper);
 
@@ -908,7 +926,7 @@
           if (activeAnnouncement) {
             closeAnnouncement();
           }
-          playerSeekTo(slide.atSeconds);
+          playerSeekTo(seg.atSeconds);
           playerPlay();
         });
 
@@ -1183,15 +1201,15 @@
 
       // 2. ACTIVE SEGMENT HIGHLIGHT in segment list
       let activeIndex = -1;
-      for (let i = 0; i < normalizedSlides.length; i++) {
-        if (currentTime >= normalizedSlides[i].atSeconds) {
+      for (let i = 0; i < normalizedSegments.length; i++) {
+        if (currentTime >= normalizedSegments[i].atSeconds) {
           activeIndex = i;
         }
       }
-      normalizedSlides.forEach((slide) => {
-        const btn = document.getElementById(`segment-btn-${slide.index}`);
+      normalizedSegments.forEach((seg) => {
+        const btn = document.getElementById(`segment-btn-${seg.index}`);
         if (btn) {
-          if (slide.index === activeIndex) {
+          if (seg.index === activeIndex) {
             btn.classList.add('active');
           } else {
             btn.classList.remove('active');
