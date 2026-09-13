@@ -335,20 +335,21 @@
     .announcement-banner {
       width: 100%;
       position: absolute;
-      bottom: clamp(6px, 2.2cqw, 18px);
+      bottom: 5.38%;
+      height: 14.41%;
       left: 0;
       right: 0;
       background: linear-gradient(
         to right,
         rgba(230, 235, 235, 0) 0%,
-        rgba(215, 222, 222, 0.72) 12%,
+        rgba(215, 222, 222, 0.75) 12%,
         rgba(225, 230, 232, 0.90) 25%,
         rgba(228, 232, 234, 0.93) 50%,
         rgba(225, 230, 232, 0.90) 75%,
-        rgba(215, 222, 222, 0.72) 88%,
+        rgba(215, 222, 222, 0.75) 88%,
         rgba(230, 235, 235, 0) 100%
       );
-      padding: clamp(0.35rem, 1.1cqw, 0.7rem) clamp(1rem, 3cqw, 2.5rem);
+      padding: 0 clamp(1rem, 3cqw, 2.5rem);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -641,57 +642,14 @@
     </section>
   </div>
 
+  <!-- Load modular slide utilities from slide-utils folder -->
+  <script src="slide-utils/index.js"></script>
+
   <script>
-    /* ==========================================================================
-       REUSABLE FACTORY UTILITIES
-       Recyclable helper functions to easily create announcements, overlays, and slides.
-       ========================================================================== */
-
-    /**
-     * Creates a lower-third Announcement banner.
-     * Displays a semi-transparent lower-third bar with two-line text in Gill Sans.
-     * 
-     * @param {string} redText - Main heading in red (e.g. "Essence of the Jewel Ornament of Liberation")
-     * @param {string} blackText - Subtitle in black (e.g. "Introduction written by Gampopa")
-     * @param {Object} [options] - Optional configurations:
-     *   - at: start timestamp string (default: "0:29")
-     *   - until: end timestamp string (optional)
-     *   - duration: duration in seconds (default: 8)
-     *   - redSize: font size for red text (default: 'clamp(0.95rem, 2.85cqw, 1.6rem)')
-     *   - blackSize: font size for black text (default: 'clamp(0.75rem, 2.05cqw, 1.15rem)')
-     *   - redColor: color for red text (default: '#881434')
-     *   - blackColor: color for black text (default: '#1a1a1a')
-     *   - font: font family (default: Gill Sans with fallbacks)
-     *   - pause: whether to pause the video (default: false)
-     * @returns {Object} Announcement slide configuration object
-     */
-    function announcement(redText, blackText, options = {}) {
-      const atTime = options.at || "0:29";
-      const duration = typeof options.duration === 'number' ? options.duration : 8;
-      
-      return {
-        kind: "announcement",
-        at: atTime,
-        until: options.until || null,
-        duration: duration,
-        title: redText,
-        primaryText: redText,
-        secondaryText: blackText,
-        pause: options.pause || false,
-        redSize: options.redSize || "clamp(0.95rem, 2.85cqw, 1.6rem)",
-        blackSize: options.blackSize || "clamp(0.75rem, 2.05cqw, 1.15rem)",
-        redColor: options.redColor || "#881434",
-        blackColor: options.blackColor || "#1a1a1a",
-        font: options.font || "'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"
-      };
-    }
-
-    // Alias
-    const makeAnnouncement = announcement;
-
     /* ==========================================================================
        CONFIGURATION
        Edit video ID, background image, video segments, and slide overlays here.
+       Utilities (announcement, stoppingSlide, timedPanel, segment) are loaded from slide-utils/
        ========================================================================== */
     const VIDEO_ID = "OYxOe_v7ZL0";
     const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
