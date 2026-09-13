@@ -6,7 +6,7 @@
   <title>Khenchen Rinpoche</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   
   <style>
     /* ==========================================================================
@@ -278,6 +278,55 @@
     .continue-btn:focus-visible {
       outline: 2px solid var(--accent-celadon);
       outline-offset: 2px;
+    }
+
+    /* "Coming up" specific slide styling */
+    .stopping-slide-layer.coming-up-mode {
+      padding: clamp(1.5rem, 4.5cqw, 3.25rem) clamp(2rem, 6cqw, 5rem);
+      justify-content: space-between;
+    }
+
+    .stopping-slide-layer.coming-up-mode::before,
+    .stopping-slide-layer.no-scrim::before {
+      display: none;
+    }
+
+    .stopping-slide-layer.coming-up-mode .stopping-slide-content {
+      max-width: 86%;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stopping-slide-layer.coming-up-mode .slide-heading {
+      font-family: 'Crimson Pro', 'Lora', Georgia, serif;
+      font-size: clamp(1.6rem, 5.3cqw, 3.2rem);
+      font-weight: 500;
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: clamp(0.9rem, 2.7cqw, 2rem);
+      letter-spacing: -0.01em;
+    }
+
+    .stopping-slide-layer.coming-up-mode .slide-bullets {
+      font-family: 'Crimson Pro', 'Lora', Georgia, serif;
+      font-size: clamp(0.95rem, 2.6cqw, 1.55rem);
+      color: #ffffff;
+      line-height: 1.45;
+      gap: clamp(0.55rem, 1.8cqw, 1.2rem);
+      width: 100%;
+    }
+
+    .stopping-slide-layer.coming-up-mode .slide-bullets li {
+      padding-left: clamp(1.1rem, 2.2cqw, 1.5rem);
+      color: #ffffff;
+    }
+
+    .stopping-slide-layer.coming-up-mode .slide-bullets li::before {
+      color: #ffffff;
+      font-size: 1.1em;
     }
 
     /* B. Timed Panel Layer (Left side gradient, speaker visible on right) */
@@ -598,7 +647,7 @@
         <div class="stopping-slide-footer">
           <span class="slide-tip" id="slide-hint">Click or press Space for next point</span>
           <button class="continue-btn" id="continue-btn" disabled>
-            <span>Continue</span>
+            <span id="continue-btn-text">Continue lesson</span>
             <span aria-hidden="true">&rarr;</span>
           </button>
         </div>
@@ -626,7 +675,7 @@
     <div class="control-bar">
       <label class="toggle-container" for="pause-toggle">
         <input type="checkbox" id="pause-toggle" checked>
-        <span class="toggle-label-text">Pause at each slide</span>
+        <span class="toggle-label-text">Pause and show Keypoints slides</span>
       </label>
       <div class="time-display" id="time-display">0:00 / 0:00</div>
     </div>
@@ -671,13 +720,20 @@
         "Introduction written by Gampopa",
         { at: "0:29", duration: 8 }
       ),
-      { 
-        at: "2:14", 
-        kind: "overview", 
-        title: "Overview",
-        bullets: ["line one", "line two", "line three"],
-        bg: "slides/slide-1.png"
-      },
+
+      // "Coming up" keypoints stopping slide at 00:03:17.433
+      comingUp([
+        "Gampopa's book lays out the whole path to buddahood.",
+        "Study and understand — then practice; without practice we can't digest the teachings.",
+        "The noble Dharma is not outside us, not hidden — it is within the mind.",
+        "The world's wars, famines, climate problems all manifest from our own confusion."
+      ], {
+        at: "00:03:17.433",
+        title: "Coming up",
+        duration: 24,
+        buttonText: "Continue lesson"
+      }),
+
       { 
         at: "11:40", 
         until: "11:55", 
@@ -736,7 +792,7 @@
     /* ==========================================================================
        UTILITIES & DATA NORMALIZATION
        ========================================================================== */
-    // Parse "m:ss", "mm:ss", "h:mm:ss" or number of seconds into float seconds
+    // Parse "m:ss", "mm:ss", "h:mm:ss", with optional milliseconds into float seconds
     function parseTimestamp(timeStr) {
       if (typeof timeStr === 'number') return timeStr;
       if (!timeStr || typeof timeStr !== 'string') return 0;
@@ -788,8 +844,8 @@
         untilSeconds = atSeconds + (slide.duration || 8);
       }
 
-      const isStopping = slide.kind === 'announcement' ? (slide.pause === true) : (untilSeconds === null);
-      const duration = (untilSeconds !== null) ? Math.max(1, untilSeconds - atSeconds) : null;
+      const isStopping = slide.kind === 'coming-up' ? true : (slide.kind === 'announcement' ? (slide.pause === true) : (untilSeconds === null));
+      const duration = (untilSeconds !== null) ? Math.max(1, untilSeconds - atSeconds) : (slide.duration || null);
 
       return {
         ...slide,
@@ -816,6 +872,7 @@
     const stoppingTitle = document.getElementById('stopping-title');
     const stoppingBullets = document.getElementById('stopping-bullets');
     const continueBtn = document.getElementById('continue-btn');
+    const continueBtnText = document.getElementById('continue-btn-text');
     const slideHint = document.getElementById('slide-hint');
 
     // Timed panel elements
@@ -832,6 +889,7 @@
     // State
     let activeStoppingSlide = null;
     let stoppingBulletIndex = 0;
+    let stoppingTimer = null;
     let activeTimedSlide = null;
     let activeAnnouncement = null;
     let lastKnownTime = 0;
@@ -907,6 +965,15 @@
       activeStoppingSlide = slide;
       stoppingBulletIndex = 0;
 
+      if (stoppingTimer) {
+        clearTimeout(stoppingTimer);
+        stoppingTimer = null;
+      }
+
+      // Check if coming-up mode
+      const isComingUp = slide.kind === 'coming-up';
+      stoppingSlideLayer.classList.toggle('coming-up-mode', isComingUp);
+
       // Set background image
       const bgImage = slide.bg || SLIDE_BG;
       if (bgImage && bgImage.trim() !== '') {
@@ -915,12 +982,24 @@
         stoppingSlideLayer.style.backgroundImage = 'none';
       }
 
-      // Set label and heading
-      stoppingLabel.textContent = slide.kind === 'takehome' ? 'Take-home lessons' : (slide.kind === 'overview' ? 'Overview' : (slide.kind || 'Overview'));
+      // Category label (hide for coming-up)
+      if (isComingUp) {
+        stoppingLabel.style.display = 'none';
+      } else {
+        stoppingLabel.style.display = 'inline-block';
+        stoppingLabel.textContent = slide.kind === 'takehome' ? 'Take-home lessons' : (slide.kind === 'overview' ? 'Overview' : (slide.kind || 'Overview'));
+      }
+
+      // Set heading text & font styling
       stoppingTitle.textContent = slide.title;
+      stoppingTitle.style.fontFamily = slide.font || '';
+      stoppingTitle.style.fontSize = slide.titleSize || '';
 
       // Populate bullets list
       stoppingBullets.innerHTML = '';
+      stoppingBullets.style.fontFamily = slide.font || '';
+      stoppingBullets.style.fontSize = slide.bulletSize || '';
+
       if (Array.isArray(slide.bullets)) {
         slide.bullets.forEach((bulletText) => {
           const li = document.createElement('li');
@@ -929,21 +1008,32 @@
         });
       }
 
-      // Reset Continue button
-      continueBtn.disabled = true;
-      continueBtn.classList.remove('ready');
-
-      // Update hint text
-      if (!slide.bullets || slide.bullets.length === 0) {
-        continueBtn.disabled = false;
-        continueBtn.classList.add('ready');
-        slideHint.textContent = 'Press Enter, Escape, or Continue';
-      } else {
-        slideHint.textContent = 'Click or press Space for next point';
+      // Update Continue button label
+      if (continueBtnText) {
+        continueBtnText.textContent = slide.buttonText || (isComingUp ? 'Continue lesson' : 'Continue');
       }
 
-      // Reveal first bullet immediately if desired, or let user click
-      advanceStoppingBullet();
+      // Configure Continue button & bullets visibility
+      if (slide.revealAll || isComingUp || !slide.bullets || slide.bullets.length === 0) {
+        const bulletElements = stoppingBullets.querySelectorAll('li');
+        bulletElements.forEach(el => el.classList.add('revealed'));
+        stoppingBulletIndex = bulletElements.length;
+        continueBtn.disabled = false;
+        continueBtn.classList.add('ready');
+        slideHint.textContent = 'Press Enter, Escape, or Continue lesson';
+      } else {
+        continueBtn.disabled = true;
+        continueBtn.classList.remove('ready');
+        slideHint.textContent = 'Click or press Space for next point';
+        advanceStoppingBullet();
+      }
+
+      // If duration is specified (e.g. 24s default for comingUp), set auto-resume timer
+      if (typeof slide.duration === 'number' && slide.duration > 0) {
+        stoppingTimer = setTimeout(() => {
+          closeStoppingSlide(true);
+        }, slide.duration * 1000);
+      }
 
       // Show overlay layer & focus
       stoppingSlideLayer.classList.add('active');
@@ -967,7 +1057,7 @@
       if (stoppingBulletIndex >= bulletElements.length) {
         continueBtn.disabled = false;
         continueBtn.classList.add('ready');
-        slideHint.textContent = 'Press Enter, Escape, or Continue';
+        slideHint.textContent = 'Press Enter, Escape, or Continue lesson';
       }
     }
 
@@ -976,7 +1066,12 @@
      */
     function closeStoppingSlide(resumePlayback = true) {
       if (!activeStoppingSlide) return;
+      if (stoppingTimer) {
+        clearTimeout(stoppingTimer);
+        stoppingTimer = null;
+      }
       stoppingSlideLayer.classList.remove('active');
+      stoppingSlideLayer.classList.remove('coming-up-mode');
       stoppingSlideLayer.setAttribute('aria-hidden', 'true');
       activeStoppingSlide = null;
       stoppingBulletIndex = 0;

@@ -71,12 +71,57 @@
     };
   }
 
+  /**
+   * Creates a "Coming up" keypoints stopping slide configuration.
+   */
+  function comingUp(bullets, options = {}, extraOptions = {}) {
+    let title = "Coming up";
+    let bulletList = [];
+    let config = {};
+
+    if (typeof bullets === 'string') {
+      title = bullets;
+      bulletList = Array.isArray(options) ? options : [];
+      config = extraOptions || {};
+    } else if (Array.isArray(bullets)) {
+      bulletList = bullets;
+      config = options || {};
+      if (config.title) title = config.title;
+    } else if (typeof bullets === 'object' && bullets !== null) {
+      config = bullets;
+      title = config.title || "Coming up";
+      bulletList = config.bullets || [];
+    }
+
+    const atTime = config.at || "00:03:17.433";
+    const duration = typeof config.duration === 'number' ? config.duration : 24;
+
+    return {
+      kind: "coming-up",
+      at: atTime,
+      title: title,
+      bullets: bulletList,
+      duration: duration,
+      bg: config.bg || "slides/coming-up-bg.png",
+      font: config.font || "'Crimson Pro', 'Lora', Georgia, serif",
+      buttonText: config.buttonText || "Continue lesson",
+      titleSize: config.titleSize || "clamp(1.4rem, 4.8cqw, 2.75rem)",
+      bulletSize: config.bulletSize || "clamp(0.95rem, 2.6cqw, 1.55rem)",
+      revealAll: config.revealAll !== undefined ? config.revealAll : true,
+      pause: true,
+      align: config.align || "center"
+    };
+  }
+
   // Aliases
   const makeAnnouncement = announcement;
+  const makeComingUp = comingUp;
 
   // Expose globally
   global.announcement = announcement;
   global.makeAnnouncement = makeAnnouncement;
+  global.comingUp = comingUp;
+  global.makeComingUp = makeComingUp;
   global.stoppingSlide = stoppingSlide;
   global.timedPanel = timedPanel;
   global.segment = segment;
@@ -86,6 +131,8 @@
     module.exports = {
       announcement,
       makeAnnouncement,
+      comingUp,
+      makeComingUp,
       stoppingSlide,
       timedPanel,
       segment
