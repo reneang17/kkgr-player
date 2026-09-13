@@ -113,15 +113,63 @@
     };
   }
 
+  /**
+   * Creates a "Some takeaways" keypoints stopping slide configuration.
+   */
+  function takeaways(bullets, options = {}, extraOptions = {}) {
+    let title = "Some takeaways";
+    let bulletList = [];
+    let config = {};
+
+    if (typeof bullets === 'string') {
+      title = bullets;
+      bulletList = Array.isArray(options) ? options : [];
+      config = extraOptions || {};
+    } else if (Array.isArray(bullets)) {
+      bulletList = bullets;
+      config = options || {};
+      if (config.title) title = config.title;
+    } else if (typeof bullets === 'object' && bullets !== null) {
+      config = bullets;
+      title = config.title || "Some takeaways";
+      bulletList = config.bullets || [];
+    }
+
+    const atTime = config.at || "00:18:02.333";
+    const duration = typeof config.duration === 'number' ? config.duration : 24;
+
+    return {
+      kind: "takeaways",
+      at: atTime,
+      title: title,
+      bullets: bulletList,
+      duration: duration,
+      bg: config.bg || "slides/takeaways-bg.png",
+      font: config.font || "'Crimson Pro', 'Lora', Georgia, serif",
+      boxBg: config.boxBg || "rgba(96, 145, 149, 0.50)",
+      buttonText: config.buttonText || "Continue lesson",
+      titleSize: config.titleSize || "clamp(1.5rem, 5.2cqw, 3.1rem)",
+      bulletSize: config.bulletSize || "clamp(0.95rem, 2.6cqw, 1.55rem)",
+      revealAll: config.revealAll !== undefined ? config.revealAll : true,
+      pause: true,
+      align: "center"
+    };
+  }
+
   // Aliases
   const makeAnnouncement = announcement;
   const makeComingUp = comingUp;
+  const someTakeaways = takeaways;
+  const makeTakeaways = takeaways;
 
   // Expose globally
   global.announcement = announcement;
   global.makeAnnouncement = makeAnnouncement;
   global.comingUp = comingUp;
   global.makeComingUp = makeComingUp;
+  global.takeaways = takeaways;
+  global.someTakeaways = someTakeaways;
+  global.makeTakeaways = makeTakeaways;
   global.stoppingSlide = stoppingSlide;
   global.timedPanel = timedPanel;
   global.segment = segment;
@@ -133,6 +181,9 @@
       makeAnnouncement,
       comingUp,
       makeComingUp,
+      takeaways,
+      someTakeaways,
+      makeTakeaways,
       stoppingSlide,
       timedPanel,
       segment

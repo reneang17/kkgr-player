@@ -329,6 +329,65 @@
       font-size: 1.1em;
     }
 
+    /* "Some takeaways" specific slide styling */
+    .stopping-slide-layer.takeaways-mode {
+      padding: clamp(1.2rem, 3.8cqw, 2.75rem) clamp(1.8rem, 5cqw, 4rem);
+      justify-content: space-between;
+    }
+
+    .stopping-slide-layer.takeaways-mode::before {
+      display: none;
+    }
+
+    .stopping-slide-layer.takeaways-mode .stopping-slide-content {
+      max-width: 92%;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stopping-slide-layer.takeaways-mode .slide-heading {
+      font-family: 'Crimson Pro', 'Lora', Georgia, serif;
+      font-size: clamp(1.5rem, 5cqw, 3rem);
+      font-weight: 600;
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: clamp(0.7rem, 2cqw, 1.5rem);
+      letter-spacing: -0.01em;
+    }
+
+    .stopping-slide-layer.takeaways-mode .slide-bullets-box {
+      background: rgba(96, 145, 149, 0.50);
+      border-radius: clamp(3px, 0.8cqw, 6px);
+      padding: clamp(1.1rem, 3cqw, 2.25rem) clamp(1.4rem, 3.8cqw, 2.8rem);
+      width: 100%;
+      max-width: 86%;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(1px);
+    }
+
+    .stopping-slide-layer.takeaways-mode .slide-bullets {
+      font-family: 'Crimson Pro', 'Lora', Georgia, serif;
+      font-size: clamp(0.95rem, 2.6cqw, 1.55rem);
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.45;
+      gap: clamp(0.6rem, 1.8cqw, 1.25rem);
+      width: 100%;
+    }
+
+    .stopping-slide-layer.takeaways-mode .slide-bullets li {
+      padding-left: clamp(1.1rem, 2.2cqw, 1.5rem);
+      color: #ffffff;
+    }
+
+    .stopping-slide-layer.takeaways-mode .slide-bullets li::before {
+      color: #ffffff;
+      font-size: 1.1em;
+    }
+
     /* B. Timed Panel Layer (Left side gradient, speaker visible on right) */
     .timed-panel-layer {
       position: absolute;
@@ -642,7 +701,9 @@
         <div class="stopping-slide-content">
           <span class="slide-label" id="stopping-label">Overview</span>
           <h2 class="slide-heading" id="stopping-title">Slide Title</h2>
-          <ul class="slide-bullets" id="stopping-bullets"></ul>
+          <div class="slide-bullets-box" id="stopping-bullets-box">
+            <ul class="slide-bullets" id="stopping-bullets"></ul>
+          </div>
         </div>
         <div class="stopping-slide-footer">
           <span class="slide-tip" id="slide-hint">Click or press Space for next point</span>
@@ -742,7 +803,19 @@
         "The Meaning of the Title",
         "The Noble Teachings Like a Wish-fulfilling Gem",
         { at: "00:09:17.333", duration: 8 }
-      )
+      ),
+
+      // "Some takeaways" keypoints stopping slide at 00:18:02.333
+      takeaways([
+        "Resolving the problem within the mind — that is what Dharma practice means.",
+        "Calm abiding and special insight give us the opportunity to uproot mental confusion.",
+        "One who studies, understands and practices is rich, not in wealth, but in wisdom and contentment."
+      ], {
+        at: "00:18:02.333",
+        title: "Some takeaways",
+        duration: 24,
+        buttonText: "Continue lesson"
+      })
     ];
 
     /* ==========================================================================
@@ -916,6 +989,7 @@
     const stoppingSlideLayer = document.getElementById('stopping-slide');
     const stoppingLabel = document.getElementById('stopping-label');
     const stoppingTitle = document.getElementById('stopping-title');
+    const stoppingBulletsBox = document.getElementById('stopping-bullets-box');
     const stoppingBullets = document.getElementById('stopping-bullets');
     const continueBtn = document.getElementById('continue-btn');
     const continueBtnText = document.getElementById('continue-btn-text');
@@ -1016,9 +1090,11 @@
         stoppingTimer = null;
       }
 
-      // Check if coming-up mode
+      // Check modes
       const isComingUp = slide.kind === 'coming-up';
+      const isTakeaways = slide.kind === 'takeaways';
       stoppingSlideLayer.classList.toggle('coming-up-mode', isComingUp);
+      stoppingSlideLayer.classList.toggle('takeaways-mode', isTakeaways);
 
       // Set background image
       const bgImage = slide.bg || SLIDE_BG;
@@ -1028,12 +1104,23 @@
         stoppingSlideLayer.style.backgroundImage = 'none';
       }
 
-      // Category label (hide for coming-up)
-      if (isComingUp) {
+      // Category label (hide for coming-up and takeaways)
+      if (isComingUp || isTakeaways) {
         stoppingLabel.style.display = 'none';
       } else {
         stoppingLabel.style.display = 'inline-block';
         stoppingLabel.textContent = slide.kind === 'takehome' ? 'Take-home lessons' : (slide.kind === 'overview' ? 'Overview' : (slide.kind || 'Overview'));
+      }
+
+      // Box background if custom
+      if (stoppingBulletsBox) {
+        if (slide.boxBg) {
+          stoppingBulletsBox.style.backgroundColor = slide.boxBg;
+        } else if (!isTakeaways) {
+          stoppingBulletsBox.style.backgroundColor = 'transparent';
+        } else {
+          stoppingBulletsBox.style.backgroundColor = '';
+        }
       }
 
       // Set heading text & font styling
@@ -1056,11 +1143,11 @@
 
       // Update Continue button label
       if (continueBtnText) {
-        continueBtnText.textContent = slide.buttonText || (isComingUp ? 'Continue lesson' : 'Continue');
+        continueBtnText.textContent = slide.buttonText || (isComingUp || isTakeaways ? 'Continue lesson' : 'Continue');
       }
 
       // Configure Continue button & bullets visibility
-      if (slide.revealAll || isComingUp || !slide.bullets || slide.bullets.length === 0) {
+      if (slide.revealAll || isComingUp || isTakeaways || !slide.bullets || slide.bullets.length === 0) {
         const bulletElements = stoppingBullets.querySelectorAll('li');
         bulletElements.forEach(el => el.classList.add('revealed'));
         stoppingBulletIndex = bulletElements.length;
@@ -1074,7 +1161,7 @@
         advanceStoppingBullet();
       }
 
-      // If duration is specified (e.g. 24s default for comingUp), set auto-resume timer
+      // If duration is specified (e.g. 24s default for comingUp/takeaways), set auto-resume timer
       if (typeof slide.duration === 'number' && slide.duration > 0) {
         stoppingTimer = setTimeout(() => {
           closeStoppingSlide(true);
@@ -1118,6 +1205,7 @@
       }
       stoppingSlideLayer.classList.remove('active');
       stoppingSlideLayer.classList.remove('coming-up-mode');
+      stoppingSlideLayer.classList.remove('takeaways-mode');
       stoppingSlideLayer.setAttribute('aria-hidden', 'true');
       activeStoppingSlide = null;
       stoppingBulletIndex = 0;
