@@ -312,6 +312,71 @@
       max-width: 88%;
     }
 
+    /* C. Announcement Layer (Lower-third banner bar) */
+    .announcement-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 9;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+
+    .announcement-layer.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .announcement-banner {
+      width: 100%;
+      position: absolute;
+      bottom: clamp(6px, 2.2cqw, 18px);
+      left: 0;
+      right: 0;
+      background: linear-gradient(
+        to right,
+        rgba(230, 235, 235, 0) 0%,
+        rgba(215, 222, 222, 0.72) 12%,
+        rgba(225, 230, 232, 0.90) 25%,
+        rgba(228, 232, 234, 0.93) 50%,
+        rgba(225, 230, 232, 0.90) 75%,
+        rgba(215, 222, 222, 0.72) 88%,
+        rgba(230, 235, 235, 0) 100%
+      );
+      padding: clamp(0.35rem, 1.1cqw, 0.7rem) clamp(1rem, 3cqw, 2.5rem);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+      backdrop-filter: blur(2px);
+    }
+
+    .announcement-primary {
+      font-family: 'Gill Sans', 'Gill Sans MT', 'Calibri', 'Trebuchet MS', sans-serif;
+      font-weight: 700;
+      color: #881434;
+      line-height: 1.15;
+      letter-spacing: 0.01em;
+      font-size: clamp(0.95rem, 2.85cqw, 1.6rem);
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+    }
+
+    .announcement-secondary {
+      font-family: 'Gill Sans', 'Gill Sans MT', 'Calibri', 'Trebuchet MS', sans-serif;
+      font-weight: 400;
+      color: #1a1a1a;
+      line-height: 1.25;
+      margin-top: clamp(0.1rem, 0.4cqw, 0.35rem);
+      font-size: clamp(0.75rem, 2.05cqw, 1.15rem);
+    }
+
     /* ==========================================================================
        3. THIN CONTROL BAR
        ========================================================================== */
@@ -546,6 +611,14 @@
           <ul class="slide-bullets" id="timed-bullets"></ul>
         </div>
       </div>
+
+      <!-- Announcement Lower-Third Overlay Layer -->
+      <div class="announcement-layer" id="announcement-layer" aria-hidden="true">
+        <div class="announcement-banner" id="announcement-banner">
+          <div class="announcement-primary" id="announcement-primary"></div>
+          <div class="announcement-secondary" id="announcement-secondary"></div>
+        </div>
+      </div>
     </div>
 
     <!-- 3. Thin Control Bar directly under the player -->
@@ -570,6 +643,53 @@
 
   <script>
     /* ==========================================================================
+       REUSABLE FACTORY UTILITIES
+       Recyclable helper functions to easily create announcements, overlays, and slides.
+       ========================================================================== */
+
+    /**
+     * Creates a lower-third Announcement banner.
+     * Displays a semi-transparent lower-third bar with two-line text in Gill Sans.
+     * 
+     * @param {string} redText - Main heading in red (e.g. "Essence of the Jewel Ornament of Liberation")
+     * @param {string} blackText - Subtitle in black (e.g. "Introduction written by Gampopa")
+     * @param {Object} [options] - Optional configurations:
+     *   - at: start timestamp string (default: "0:29")
+     *   - until: end timestamp string (optional)
+     *   - duration: duration in seconds (default: 8)
+     *   - redSize: font size for red text (default: 'clamp(0.95rem, 2.85cqw, 1.6rem)')
+     *   - blackSize: font size for black text (default: 'clamp(0.75rem, 2.05cqw, 1.15rem)')
+     *   - redColor: color for red text (default: '#881434')
+     *   - blackColor: color for black text (default: '#1a1a1a')
+     *   - font: font family (default: Gill Sans with fallbacks)
+     *   - pause: whether to pause the video (default: false)
+     * @returns {Object} Announcement slide configuration object
+     */
+    function announcement(redText, blackText, options = {}) {
+      const atTime = options.at || "0:29";
+      const duration = typeof options.duration === 'number' ? options.duration : 8;
+      
+      return {
+        kind: "announcement",
+        at: atTime,
+        until: options.until || null,
+        duration: duration,
+        title: redText,
+        primaryText: redText,
+        secondaryText: blackText,
+        pause: options.pause || false,
+        redSize: options.redSize || "clamp(0.95rem, 2.85cqw, 1.6rem)",
+        blackSize: options.blackSize || "clamp(0.75rem, 2.05cqw, 1.15rem)",
+        redColor: options.redColor || "#881434",
+        blackColor: options.blackColor || "#1a1a1a",
+        font: options.font || "'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"
+      };
+    }
+
+    // Alias
+    const makeAnnouncement = announcement;
+
+    /* ==========================================================================
        CONFIGURATION
        Edit video ID, background image, and slide markers here without touching logic.
        ========================================================================== */
@@ -577,6 +697,12 @@
     const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
 
     const SLIDES = [
+      // Announcement banner at 00:29
+      announcement(
+        "Essence of the Jewel Ornament of Liberation",
+        "Introduction written by Gampopa",
+        { at: "0:29", duration: 8 }
+      ),
       { 
         at: "2:14", 
         kind: "overview", 
@@ -677,9 +803,15 @@
     // Normalize slides array with parsed timestamps & runtime state
     const normalizedSlides = SLIDES.map((slide, index) => {
       const atSeconds = parseTimestamp(slide.at);
-      const untilSeconds = slide.until ? parseTimestamp(slide.until) : null;
-      const isStopping = untilSeconds === null;
-      const duration = isStopping ? null : Math.max(1, untilSeconds - atSeconds);
+      let untilSeconds = slide.until ? parseTimestamp(slide.until) : null;
+      
+      // If announcement without explicit 'until', calculate based on duration
+      if (slide.kind === 'announcement' && untilSeconds === null) {
+        untilSeconds = atSeconds + (slide.duration || 8);
+      }
+
+      const isStopping = slide.kind === 'announcement' ? (slide.pause === true) : (untilSeconds === null);
+      const duration = (untilSeconds !== null) ? Math.max(1, untilSeconds - atSeconds) : null;
 
       return {
         ...slide,
@@ -714,10 +846,16 @@
     const timedTitle = document.getElementById('timed-title');
     const timedBullets = document.getElementById('timed-bullets');
 
+    // Announcement elements
+    const announcementLayer = document.getElementById('announcement-layer');
+    const announcementPrimary = document.getElementById('announcement-primary');
+    const announcementSecondary = document.getElementById('announcement-secondary');
+
     // State
     let activeStoppingSlide = null;
     let stoppingBulletIndex = 0;
     let activeTimedSlide = null;
+    let activeAnnouncement = null;
     let lastKnownTime = 0;
 
     /* Apply optional custom background if provided */
@@ -767,6 +905,9 @@
           if (activeStoppingSlide) {
             closeStoppingSlide(false);
           }
+          if (activeAnnouncement) {
+            closeAnnouncement();
+          }
           playerSeekTo(slide.atSeconds);
           playerPlay();
         });
@@ -779,8 +920,8 @@
     renderSegmentsList();
 
     /* ==========================================================================
-       SLIDE OPEN / CLOSE FUNCTIONS
-       Handles stopping slides (interactive bullet stepping) and timed side panels.
+       SLIDE & ANNOUNCEMENT OPEN / CLOSE FUNCTIONS
+       Handles stopping slides, timed side panels, and lower-third announcements.
        ========================================================================== */
 
     /**
@@ -926,6 +1067,41 @@
       activeTimedSlide = null;
     }
 
+    /**
+     * Open lower-third Announcement banner.
+     */
+    function openAnnouncement(slide) {
+      activeAnnouncement = slide;
+
+      announcementPrimary.textContent = slide.primaryText || slide.title;
+      if (slide.redSize) announcementPrimary.style.fontSize = slide.redSize;
+      if (slide.redColor) announcementPrimary.style.color = slide.redColor;
+      if (slide.font) announcementPrimary.style.fontFamily = slide.font;
+
+      if (slide.secondaryText && slide.secondaryText.trim() !== '') {
+        announcementSecondary.textContent = slide.secondaryText;
+        if (slide.blackSize) announcementSecondary.style.fontSize = slide.blackSize;
+        if (slide.blackColor) announcementSecondary.style.color = slide.blackColor;
+        if (slide.font) announcementSecondary.style.fontFamily = slide.font;
+        announcementSecondary.style.display = 'block';
+      } else {
+        announcementSecondary.style.display = 'none';
+      }
+
+      announcementLayer.classList.add('active');
+      announcementLayer.setAttribute('aria-hidden', 'false');
+    }
+
+    /**
+     * Close lower-third Announcement banner.
+     */
+    function closeAnnouncement() {
+      if (!activeAnnouncement) return;
+      announcementLayer.classList.remove('active');
+      announcementLayer.setAttribute('aria-hidden', 'true');
+      activeAnnouncement = null;
+    }
+
     /* ==========================================================================
        EVENT LISTENERS FOR SLIDE INTERACTION
        ========================================================================== */
@@ -998,6 +1174,10 @@
         if (activeTimedSlide && (currentTime < activeTimedSlide.atSeconds || currentTime > activeTimedSlide.untilSeconds)) {
           closeTimedPanel();
         }
+        // If rewound out of announcement range, close announcement
+        if (activeAnnouncement && (currentTime < activeAnnouncement.atSeconds || currentTime > activeAnnouncement.untilSeconds)) {
+          closeAnnouncement();
+        }
       }
       lastKnownTime = currentTime;
 
@@ -1019,35 +1199,43 @@
         }
       });
 
-      // 3. SLIDE TRIGGER DETECTION
+      // 3. SLIDE & ANNOUNCEMENT TRIGGER DETECTION
       const pauseEnabled = pauseToggle.checked;
 
       normalizedSlides.forEach((slide) => {
         // Trigger condition: current time reached marker and slide hasn't fired yet
         if (!slide.passed && currentTime >= slide.atSeconds && currentTime < slide.atSeconds + 2.0) {
-          if (slide.isStopping) {
+          slide.passed = true;
+
+          if (slide.kind === 'announcement') {
+            if (slide.pause && pauseEnabled) {
+              playerPause();
+            }
+            openAnnouncement(slide);
+          } else if (slide.isStopping) {
             if (pauseEnabled) {
-              slide.passed = true;
               playerPause();
               openStoppingSlide(slide);
-            } else {
-              // Pause skipped because user unchecked the toggle
-              slide.passed = true;
             }
           } else {
             // Timed side panel slide
-            slide.passed = true;
             openTimedPanel(slide);
           }
         }
       });
 
-      // 4. TIMED PANEL UPDATE & DISMISSAL
+      // 4. TIMED PANEL & ANNOUNCEMENT UPDATE & DISMISSAL
       if (activeTimedSlide) {
         if (currentTime >= activeTimedSlide.untilSeconds || currentTime < activeTimedSlide.atSeconds) {
           closeTimedPanel();
         } else {
           updateTimedPanelProgress(currentTime);
+        }
+      }
+
+      if (activeAnnouncement) {
+        if (currentTime >= activeAnnouncement.untilSeconds || currentTime < activeAnnouncement.atSeconds) {
+          closeAnnouncement();
         }
       }
     }
