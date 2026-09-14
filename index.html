@@ -280,73 +280,127 @@
       outline-offset: 2px;
     }
 
-    /* ==========================================================================
-       STOPPING SLIDES: "Coming up" & "Some takeaways" Modes + Responsive Density
-       ========================================================================== */
-    .stopping-slide-layer.coming-up-mode,
+    /* "Coming up" specific slide styling */
+    .stopping-slide-layer.coming-up-mode {
+      padding: clamp(1.5rem, 4.5cqw, 3.25rem) clamp(2rem, 6cqw, 5rem);
+      justify-content: space-between;
+    }
+
+    .stopping-slide-layer.coming-up-mode::before,
+    .stopping-slide-layer.no-scrim::before {
+      display: none;
+    }
+
+    .stopping-slide-layer.coming-up-mode .stopping-slide-content {
+      max-width: 88%;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stopping-slide-layer.coming-up-mode .slide-heading {
+      font-family: 'Crimson Pro', 'Lora', Georgia, serif;
+      font-size: clamp(1.6rem, 5.3cqw, 3.2rem);
+      font-weight: 500;
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: clamp(0.9rem, 2.7cqw, 2rem);
+      letter-spacing: -0.01em;
+    }
+
+    .stopping-slide-layer.coming-up-mode .slide-bullets {
+      font-family: 'Crimson Pro', 'Lora', Georgia, serif;
+      font-size: clamp(0.95rem, 2.6cqw, 1.55rem);
+      color: #ffffff;
+      line-height: 1.45;
+      gap: clamp(0.55rem, 1.8cqw, 1.2rem);
+      width: 100%;
+    }
+
+    .stopping-slide-layer.coming-up-mode .slide-bullets li {
+      padding-left: clamp(1.1rem, 2.2cqw, 1.5rem);
+      color: #ffffff;
+    }
+
+    .stopping-slide-layer.coming-up-mode .slide-bullets li::before {
+      color: #ffffff;
+      font-size: 1.1em;
+    }
+
+    /* "Coming up" dense/compact layout when text is long or bullet count is 4+ */
+    .stopping-slide-layer.coming-up-mode.is-dense {
+      padding: clamp(0.6rem, 1.8cqw, 1.25rem) clamp(1.2rem, 3.5cqw, 2.8rem);
+    }
+
+    .stopping-slide-layer.coming-up-mode.is-dense .stopping-slide-content {
+      max-width: 96%;
+      margin: auto 0;
+    }
+
+    .stopping-slide-layer.coming-up-mode.is-dense .slide-heading {
+      font-size: clamp(1.3rem, 3.8cqw, 2.1rem);
+      margin-bottom: clamp(0.3rem, 1cqw, 0.65rem);
+    }
+
+    .stopping-slide-layer.coming-up-mode.is-dense .slide-bullets {
+      font-size: clamp(0.95rem, 2.6cqw, 1.55rem);
+      line-height: 1.34;
+      gap: clamp(0.25rem, 0.8cqw, 0.55rem);
+    }
+
+    .stopping-slide-layer.coming-up-mode.is-dense .slide-bullets li {
+      padding-left: clamp(1rem, 2cqw, 1.4rem);
+    }
+
+    /* "Some takeaways" specific slide styling */
     .stopping-slide-layer.takeaways-mode {
       padding: clamp(1rem, 3.2cqw, 2.2rem) clamp(1.8rem, 5cqw, 4rem);
       justify-content: space-between;
     }
 
-    .stopping-slide-layer.coming-up-mode::before,
-    .stopping-slide-layer.takeaways-mode::before,
-    .stopping-slide-layer.no-scrim::before {
+    .stopping-slide-layer.takeaways-mode::before {
       display: none;
-    }
-
-    /* Content wrapper */
-    .stopping-slide-layer.coming-up-mode .stopping-slide-content,
-    .stopping-slide-layer.takeaways-mode .stopping-slide-content {
-      width: 100%;
-      margin: auto auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      max-height: calc(100% - 2.5rem);
-    }
-
-    .stopping-slide-layer.coming-up-mode .stopping-slide-content {
-      max-width: 86%;
     }
 
     .stopping-slide-layer.takeaways-mode .stopping-slide-content {
       max-width: 92%;
+      width: 100%;
+      margin: auto auto; /* Optical vertical centering of title and dynamic box */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    /* Headings */
-    .stopping-slide-layer.coming-up-mode .slide-heading,
     .stopping-slide-layer.takeaways-mode .slide-heading {
       font-family: 'Crimson Pro', 'Lora', Georgia, serif;
+      font-size: clamp(1.5rem, 5cqw, 3rem);
       font-weight: 600;
       color: #ffffff;
       text-align: center;
-      letter-spacing: -0.01em;
       margin-bottom: clamp(0.65rem, 1.8cqw, 1.35rem);
-      font-size: clamp(1.4rem, 4.8cqw, 2.75rem);
+      letter-spacing: -0.01em;
     }
 
-    /* Takeaways translucent container box */
     .stopping-slide-layer.takeaways-mode .slide-bullets-box {
       background: rgba(96, 145, 149, 0.50);
       border-radius: clamp(3px, 0.8cqw, 6px);
       padding: clamp(0.9rem, 2.4cqw, 1.9rem) clamp(1.4rem, 3.8cqw, 2.8rem);
       width: 100%;
-      max-width: 86%;
+      max-width: 88%;
       height: auto;
       min-height: fit-content;
-      max-height: 100%;
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
       backdrop-filter: blur(1px);
       box-sizing: border-box;
       transition: all 0.25s ease;
     }
 
-    /* Bullets list */
-    .stopping-slide-layer.coming-up-mode .slide-bullets,
     .stopping-slide-layer.takeaways-mode .slide-bullets {
       font-family: 'Crimson Pro', 'Lora', Georgia, serif;
-      font-weight: 500;
+      font-size: clamp(0.95rem, 2.6cqw, 1.55rem);
+      font-weight: 600;
       color: #ffffff;
       line-height: 1.45;
       gap: clamp(0.55rem, 1.6cqw, 1.15rem);
@@ -354,94 +408,50 @@
       margin: 0;
       padding: 0;
       list-style: none;
-      font-size: clamp(0.95rem, 2.5cqw, 1.5rem);
     }
 
-    .stopping-slide-layer.takeaways-mode .slide-bullets {
-      font-weight: 600;
-    }
-
-    .stopping-slide-layer.coming-up-mode .slide-bullets li,
     .stopping-slide-layer.takeaways-mode .slide-bullets li {
       padding-left: clamp(1.1rem, 2.2cqw, 1.5rem);
       color: #ffffff;
     }
 
-    .stopping-slide-layer.coming-up-mode .slide-bullets li::before,
     .stopping-slide-layer.takeaways-mode .slide-bullets li::before {
       color: #ffffff;
       font-size: 1.1em;
     }
 
-    /* --- Medium Density (3-4 bullets or 220-380 chars) --- */
-    .stopping-slide-layer.density-medium {
-      padding: clamp(0.8rem, 2.5cqw, 1.6rem) clamp(1.5rem, 4cqw, 3.2rem);
+    /* "Some takeaways" dense/compact layout when text is long or bullet count is 4+ */
+    .stopping-slide-layer.takeaways-mode.is-dense {
+      padding: clamp(0.5rem, 1.5cqw, 1.1rem) clamp(1.2rem, 3.2cqw, 2.5rem);
     }
 
-    .stopping-slide-layer.coming-up-mode.density-medium .stopping-slide-content {
-      max-width: 90%;
+    .stopping-slide-layer.takeaways-mode.is-dense .stopping-slide-content {
+      max-width: 97%;
+      margin: auto auto;
     }
 
-    .stopping-slide-layer.takeaways-mode.density-medium .stopping-slide-content {
-      max-width: 92%;
+    .stopping-slide-layer.takeaways-mode.is-dense .slide-heading {
+      font-size: clamp(1.3rem, 3.8cqw, 2.1rem);
+      margin-bottom: clamp(0.3rem, 0.9cqw, 0.6rem);
     }
 
-    .stopping-slide-layer.coming-up-mode.density-medium .slide-heading,
-    .stopping-slide-layer.takeaways-mode.density-medium .slide-heading {
-      font-size: clamp(1.2rem, 3.8cqw, 2.2rem);
-      margin-bottom: clamp(0.45rem, 1.2cqw, 0.9rem);
+    .stopping-slide-layer.takeaways-mode.is-dense .slide-bullets-box {
+      max-width: 98%;
+      padding: clamp(0.45rem, 1.3cqw, 0.95rem) clamp(1.2rem, 2.8cqw, 2rem);
     }
 
-    .stopping-slide-layer.takeaways-mode.density-medium .slide-bullets-box {
-      max-width: 90%;
-      padding: clamp(0.7rem, 1.8cqw, 1.4rem) clamp(1.2rem, 3.2cqw, 2.2rem);
+    .stopping-slide-layer.takeaways-mode.is-dense .slide-bullets {
+      font-size: clamp(0.95rem, 2.6cqw, 1.55rem);
+      line-height: 1.34;
+      gap: clamp(0.25rem, 0.8cqw, 0.55rem);
     }
 
-    .stopping-slide-layer.coming-up-mode.density-medium .slide-bullets,
-    .stopping-slide-layer.takeaways-mode.density-medium .slide-bullets {
-      font-size: clamp(0.84rem, 2.1cqw, 1.22rem);
-      line-height: 1.38;
-      gap: clamp(0.35rem, 1.1cqw, 0.75rem);
+    .stopping-slide-layer.takeaways-mode.is-dense .slide-bullets li {
+      padding-left: clamp(1rem, 2cqw, 1.4rem);
     }
 
-    /* --- Compact Density (5+ bullets or > 380 chars) --- */
-    .stopping-slide-layer.density-compact {
-      padding: clamp(0.5rem, 1.6cqw, 1.1rem) clamp(1.2rem, 3cqw, 2.4rem);
-    }
-
-    .stopping-slide-layer.coming-up-mode.density-compact .stopping-slide-content {
-      max-width: 94%;
-    }
-
-    .stopping-slide-layer.takeaways-mode.density-compact .stopping-slide-content {
-      max-width: 95%;
-    }
-
-    .stopping-slide-layer.coming-up-mode.density-compact .slide-heading,
-    .stopping-slide-layer.takeaways-mode.density-compact .slide-heading {
-      font-size: clamp(1.05rem, 2.8cqw, 1.7rem);
-      margin-bottom: clamp(0.25rem, 0.75cqw, 0.55rem);
-    }
-
-    .stopping-slide-layer.takeaways-mode.density-compact .slide-bullets-box {
-      max-width: 95%;
-      padding: clamp(0.5rem, 1.35cqw, 1.05rem) clamp(1rem, 2.6cqw, 1.9rem);
-    }
-
-    .stopping-slide-layer.coming-up-mode.density-compact .slide-bullets,
-    .stopping-slide-layer.takeaways-mode.density-compact .slide-bullets {
-      font-size: clamp(0.72rem, 1.65cqw, 0.98rem);
-      line-height: 1.32;
-      gap: clamp(0.22rem, 0.7cqw, 0.45rem);
-    }
-
-    .stopping-slide-layer.coming-up-mode.density-compact .slide-bullets li,
-    .stopping-slide-layer.takeaways-mode.density-compact .slide-bullets li {
-      padding-left: clamp(0.85rem, 1.7cqw, 1.15rem);
-    }
-
-    .stopping-slide-layer.density-compact .stopping-slide-footer {
-      margin-top: clamp(0.2rem, 0.6cqw, 0.45rem);
+    .stopping-slide-layer.is-dense .stopping-slide-footer {
+      margin-top: clamp(0.25rem, 0.8cqw, 0.5rem);
     }
 
     /* B. Timed Panel Layer (Left side gradient, speaker visible on right) */
@@ -1246,25 +1256,11 @@
       stoppingSlideLayer.classList.toggle('coming-up-mode', isComingUp);
       stoppingSlideLayer.classList.toggle('takeaways-mode', isTakeaways);
 
-      // Automatic content volume & density calculation
-      const bullets = Array.isArray(slide.bullets) ? slide.bullets : [];
-      const totalChars = bullets.reduce((sum, b) => sum + (b ? b.length : 0), 0);
-      const bulletCount = bullets.length;
-
-      let density = slide.density;
-      if (!density) {
-        if (bulletCount >= 5 || totalChars > 380) {
-          density = 'compact';
-        } else if (bulletCount >= 4 || totalChars > 220) {
-          density = 'medium';
-        } else {
-          density = 'default';
-        }
-      }
-
-      stoppingSlideLayer.classList.toggle('density-compact', density === 'compact');
-      stoppingSlideLayer.classList.toggle('density-medium', density === 'medium');
-      stoppingSlideLayer.classList.toggle('density-default', density === 'default');
+      // Automatic density detection: if 4+ bullets or 200+ characters, apply dense mode (slimmer padding/gap, wider text area, font size unchanged)
+      const totalChars = Array.isArray(slide.bullets) ? slide.bullets.reduce((acc, b) => acc + (b ? b.length : 0), 0) : 0;
+      const bulletCount = Array.isArray(slide.bullets) ? slide.bullets.length : 0;
+      const isDense = slide.density === 'compact' || slide.density === 'dense' || (slide.density !== 'spacious' && (bulletCount >= 4 || totalChars >= 200));
+      stoppingSlideLayer.classList.toggle('is-dense', isDense);
 
       // Set background image
       const bgImage = slide.bg || SLIDE_BG;
@@ -1388,9 +1384,7 @@
       stoppingSlideLayer.classList.remove('active');
       stoppingSlideLayer.classList.remove('coming-up-mode');
       stoppingSlideLayer.classList.remove('takeaways-mode');
-      stoppingSlideLayer.classList.remove('density-compact');
-      stoppingSlideLayer.classList.remove('density-medium');
-      stoppingSlideLayer.classList.remove('density-default');
+      stoppingSlideLayer.classList.remove('is-dense');
       stoppingSlideLayer.setAttribute('aria-hidden', 'true');
       activeStoppingSlide = null;
       stoppingBulletIndex = 0;
