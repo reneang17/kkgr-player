@@ -977,12 +977,14 @@
     // 1. takeaways (shown first)
     // 2. coming-up (shown second)
     // 3. other stopping slides
-    // 4. non-stopping / timed slides
+    // 4. announcements (shown after stopping slides when video resumes)
+    // 5. timed side panels
     function getSlidePriority(slide) {
       if (slide.kind === 'takeaways') return 1;
       if (slide.kind === 'coming-up') return 2;
       if (slide.isStopping) return 3;
-      return 4;
+      if (slide.kind === 'announcement') return 4;
+      return 5;
     }
 
     // Normalize slides array with parsed timestamps & runtime state
@@ -1010,7 +1012,7 @@
       };
     });
 
-    // Sort slides chronologically; if timestamps match (< 0.2s apart), takeaways comes before coming-up
+    // Sort slides chronologically; if timestamps match (< 0.2s apart), follow priority: takeaways -> coming-up -> announcements
     normalizedSlides.sort((a, b) => {
       if (Math.abs(a.atSeconds - b.atSeconds) < 0.2) {
         const pA = getSlidePriority(a);
@@ -1056,6 +1058,7 @@
     // State
     let activeStoppingSlide = null;
     let stoppingQueue = [];
+    let pendingAnnouncements = [];
     let stoppingBulletIndex = 0;
     let stoppingTimer = null;
     let activeTimedSlide = null;
@@ -1105,6 +1108,7 @@
         btn.addEventListener('click', () => {
           // If a stopping slide was open or queued, clear and close
           stoppingQueue = [];
+          pendingAnnouncements = [];
           if (activeStoppingSlide) {
             closeStoppingSlide(false);
           }
@@ -1280,6 +1284,14 @@
 
       if (resumePlayback) {
         playerPlay();
+
+        if (pendingAnnouncements.length > 0) {
+          const ann = pendingAnnouncements.shift();
+          const resumeTime = playerGetCurrentTime();
+          ann.atSeconds = resumeTime;
+          ann.untilSeconds = resumeTime + (ann.duration || 8);
+          openAnnouncement(ann);
+        }
       }
     }
 
@@ -1480,6 +1492,7 @@
       // 3. SLIDE & ANNOUNCEMENT TRIGGER DETECTION
       const pauseEnabled = pauseToggle.checked;
       const triggeredStoppingSlides = [];
+      const triggeredAnnouncements = [];
 
       normalizedSlides.forEach((slide) => {
         // Trigger condition: current time reached marker and slide hasn't fired yet
@@ -1488,9 +1501,10 @@
 
           if (slide.kind === 'announcement') {
             if (slide.pause && pauseEnabled) {
-              playerPause();
+              triggeredStoppingSlides.push(slide);
+            } else {
+              triggeredAnnouncements.push(slide);
             }
-            openAnnouncement(slide);
           } else if (slide.isStopping) {
             if (pauseEnabled) {
               triggeredStoppingSlides.push(slide);
@@ -1512,6 +1526,16 @@
           openStoppingSlide(firstSlide);
         } else {
           stoppingQueue.push(...triggeredStoppingSlides);
+        }
+      }
+
+      // Handle triggered announcements
+      if (triggeredAnnouncements.length > 0) {
+        if (activeStoppingSlide || stoppingQueue.length > 0 || triggeredStoppingSlides.length > 0) {
+          // Defer announcement until stopping slides finish and video resumes
+          pendingAnnouncements.push(...triggeredAnnouncements);
+        } else {
+          openAnnouncement(triggeredAnnouncements[0]);
         }
       }
 
