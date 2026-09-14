@@ -6,7 +6,7 @@
 (function (global) {
   'use strict';
 
-  const DEFAULT_WPM = 180;
+  const DEFAULT_WPM = 130;
 
   function countWords(str) {
     if (!str || typeof str !== 'string') return 0;

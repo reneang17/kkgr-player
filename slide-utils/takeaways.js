@@ -6,7 +6,7 @@
 (function (global) {
   'use strict';
 
-  const DEFAULT_WPM = 180;
+  const DEFAULT_WPM = 130;
 
   function countWords(str) {
     if (!str || typeof str !== 'string') return 0;
@@ -27,7 +27,7 @@
   /**
    * Creates a "Some takeaways" keypoints stopping slide configuration.
    * Pauses the video and displays bullet points inside a translucent (#609195 at 50%) container
-   * over the landscape background for duration determined by reading speed (180 wpm) or until "Continue lesson" is clicked.
+   * over the landscape background with duration determined by word count at 130 WPM (or until "Continue lesson" is clicked).
    *
    * @param {Array<string>|string|Object} bullets - Array of bullet points, or title if passing (title, bullets), or config object
    * @param {Object|Array<string>} [options] - Configuration options or bullets array

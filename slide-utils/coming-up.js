@@ -6,7 +6,7 @@
 (function (global) {
   'use strict';
 
-  const DEFAULT_WPM = 180;
+  const DEFAULT_WPM = 130;
 
   function countWords(str) {
     if (!str || typeof str !== 'string') return 0;
@@ -27,7 +27,7 @@
   /**
    * Creates a "Coming up" keypoints stopping slide configuration.
    * Pauses the video and presents bullets in Crimson Pro over the blue background
-   * for duration determined by reading speed (180 wpm) or until user clicks "Continue lesson".
+   * with duration determined by word count at 130 WPM (or until user clicks "Continue lesson").
    *
    * @param {Array<string>|string|Object} bullets - Array of bullet points, or title if passing (title, bullets), or config object
    * @param {Object|Array<string>} [options] - Configuration options or bullets array

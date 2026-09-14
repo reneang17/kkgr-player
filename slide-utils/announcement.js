@@ -6,7 +6,7 @@
 (function (global) {
   'use strict';
 
-  const DEFAULT_WPM = 180;
+  const DEFAULT_WPM = 130;
 
   function countWords(str) {
     if (!str || typeof str !== 'string') return 0;
@@ -14,7 +14,7 @@
   }
 
   function calculateReadingDuration(primary, secondary, wpm = DEFAULT_WPM, minSeconds = 6) {
-    let words = countWords(primary) + countWords(secondary);
+    const words = countWords(primary) + countWords(secondary);
     const seconds = Math.ceil((words / wpm) * 60);
     return Math.max(minSeconds, seconds);
   }
@@ -28,9 +28,10 @@
    * @param {Object} [options] - Optional configurations:
    *   @param {string} [options.at="0:29"] - Start timestamp ("m:ss" or "h:mm:ss")
    *   @param {string} [options.until] - End timestamp (optional)
-   *   @param {number} [options.duration] - Duration in seconds (defaults to 180 wpm calculation)
-   *   @param {string} [options.redSize] - Font size for red text
-   *   @param {string} [options.blackSize] - Font size for black text
+   *   @param {number} [options.duration] - Duration in seconds (defaults to 130 WPM word-count calculation)
+   *   @param {number} [options.wpm=130] - Words per minute reading rate
+   *   @param {string} [options.redSize] - Font size for red text (default: 'clamp(0.95rem, 2.85cqw, 1.6rem)')
+   *   @param {string} [options.blackSize] - Font size for black text (default: 'clamp(0.75rem, 2.05cqw, 1.15rem)')
    *   @param {string} [options.redColor="#881434"] - Color for red text
    *   @param {string} [options.blackColor="#1a1a1a"] - Color for black text
    *   @param {string} [options.font] - Font family (default: Gill Sans with fallbacks)
