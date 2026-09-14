@@ -6,18 +6,40 @@
 (function (global) {
   'use strict';
 
+  const DEFAULT_WPM = 180;
+
+  function countWords(str) {
+    if (!str || typeof str !== 'string') return 0;
+    return str.trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  function calculateReadingDuration(title, bullets, wpm = DEFAULT_WPM, minSeconds = 8) {
+    let words = countWords(title);
+    if (Array.isArray(bullets)) {
+      bullets.forEach(b => { words += countWords(b); });
+    } else if (typeof bullets === 'string') {
+      words += countWords(bullets);
+    }
+    const seconds = Math.ceil((words / wpm) * 60);
+    return Math.max(minSeconds, seconds);
+  }
+
   /**
    * Creates a lower-third Announcement banner configuration.
    */
   function announcement(redText, blackText, options = {}) {
     const atTime = options.at || "0:29";
-    const duration = typeof options.duration === 'number' ? options.duration : 8;
+    const wpm = typeof options.wpm === 'number' ? options.wpm : DEFAULT_WPM;
+    const duration = typeof options.duration === 'number'
+      ? options.duration
+      : calculateReadingDuration(redText, blackText, wpm, 6);
 
     return {
       kind: "announcement",
       at: atTime,
       until: options.until || null,
       duration: duration,
+      wpm: wpm,
       title: redText,
       primaryText: redText,
       secondaryText: blackText,
@@ -35,11 +57,18 @@
    * Pauses the video and reveals bullet points interactively.
    */
   function stoppingSlide(at, title, bullets = [], options = {}) {
+    const wpm = typeof options.wpm === 'number' ? options.wpm : DEFAULT_WPM;
+    const duration = typeof options.duration === 'number'
+      ? options.duration
+      : calculateReadingDuration(title, bullets, wpm, 8);
+
     return {
       at,
       kind: options.kind || "overview",
       title,
       bullets,
+      duration,
+      wpm,
       bg: options.bg || "slides/slide-1.png",
       ...options
     };
@@ -50,12 +79,19 @@
    * Shows a left-side panel while video continues playing.
    */
   function timedPanel(at, until, title, bullets = [], options = {}) {
+    const wpm = typeof options.wpm === 'number' ? options.wpm : DEFAULT_WPM;
+    const duration = typeof options.duration === 'number'
+      ? options.duration
+      : calculateReadingDuration(title, bullets, wpm, 8);
+
     return {
       at,
       until,
       kind: options.kind || "takehome",
       title,
       bullets,
+      duration,
+      wpm,
       ...options
     };
   }
@@ -94,7 +130,10 @@
     }
 
     const atTime = config.at || "00:03:05.433";
-    const duration = typeof config.duration === 'number' ? config.duration : 24;
+    const wpm = typeof config.wpm === 'number' ? config.wpm : DEFAULT_WPM;
+    const duration = typeof config.duration === 'number'
+      ? config.duration
+      : calculateReadingDuration(title, bulletList, wpm, 8);
 
     return {
       kind: "coming-up",
@@ -102,6 +141,7 @@
       title: title,
       bullets: bulletList,
       duration: duration,
+      wpm: wpm,
       bg: config.bg || "slides/coming-up-bg.png",
       font: config.font || "'Crimson Pro', 'Lora', Georgia, serif",
       buttonText: config.buttonText || "Continue lesson",
@@ -137,7 +177,10 @@
     }
 
     const atTime = config.at || "00:18:02.333";
-    const duration = typeof config.duration === 'number' ? config.duration : 24;
+    const wpm = typeof config.wpm === 'number' ? config.wpm : DEFAULT_WPM;
+    const duration = typeof config.duration === 'number'
+      ? config.duration
+      : calculateReadingDuration(title, bulletList, wpm, 8);
 
     return {
       kind: "takeaways",
@@ -145,6 +188,7 @@
       title: title,
       bullets: bulletList,
       duration: duration,
+      wpm: wpm,
       bg: config.bg || "slides/takeaways-bg.png",
       font: config.font || "'Crimson Pro', 'Lora', Georgia, serif",
       boxBg: config.boxBg || "rgba(96, 145, 149, 0.50)",

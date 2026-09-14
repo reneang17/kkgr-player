@@ -6,10 +6,28 @@
 (function (global) {
   'use strict';
 
+  const DEFAULT_WPM = 180;
+
+  function countWords(str) {
+    if (!str || typeof str !== 'string') return 0;
+    return str.trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  function calculateReadingDuration(title, bullets, wpm = DEFAULT_WPM, minSeconds = 8) {
+    let words = countWords(title);
+    if (Array.isArray(bullets)) {
+      bullets.forEach(b => { words += countWords(b); });
+    } else if (typeof bullets === 'string') {
+      words += countWords(bullets);
+    }
+    const seconds = Math.ceil((words / wpm) * 60);
+    return Math.max(minSeconds, seconds);
+  }
+
   /**
    * Creates a "Some takeaways" keypoints stopping slide configuration.
    * Pauses the video and displays bullet points inside a translucent (#609195 at 50%) container
-   * over the landscape background for 24 seconds (configurable) or until "Continue lesson" is clicked.
+   * over the landscape background for duration determined by reading speed (180 wpm) or until "Continue lesson" is clicked.
    *
    * @param {Array<string>|string|Object} bullets - Array of bullet points, or title if passing (title, bullets), or config object
    * @param {Object|Array<string>} [options] - Configuration options or bullets array
@@ -36,7 +54,10 @@
     }
 
     const atTime = config.at || "00:18:02.333";
-    const duration = typeof config.duration === 'number' ? config.duration : 24;
+    const wpm = typeof config.wpm === 'number' ? config.wpm : DEFAULT_WPM;
+    const duration = typeof config.duration === 'number'
+      ? config.duration
+      : calculateReadingDuration(title, bulletList, wpm, 8);
 
     return {
       kind: "takeaways",
@@ -44,6 +65,7 @@
       title: title,
       bullets: bulletList,
       duration: duration,
+      wpm: wpm,
       bg: config.bg || "slides/takeaways-bg.png",
       font: config.font || "'Crimson Pro', 'Lora', Georgia, serif",
       boxBg: config.boxBg || "rgba(96, 145, 149, 0.50)",
