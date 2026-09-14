@@ -960,6 +960,18 @@
 
     const normalizedSegments = buildSegmentsList();
 
+    // Priority ordering for slides triggered at identical timestamps:
+    // 1. takeaways (shown first)
+    // 2. coming-up (shown second)
+    // 3. other stopping slides
+    // 4. non-stopping / timed slides
+    function getSlidePriority(slide) {
+      if (slide.kind === 'takeaways') return 1;
+      if (slide.kind === 'coming-up') return 2;
+      if (slide.isStopping) return 3;
+      return 4;
+    }
+
     // Normalize slides array with parsed timestamps & runtime state
     const normalizedSlides = SLIDES.map((slide, index) => {
       const atSeconds = parseTimestamp(slide.at);
@@ -970,12 +982,12 @@
         untilSeconds = atSeconds + (slide.duration || 8);
       }
 
-      const isStopping = slide.kind === 'coming-up' ? true : (slide.kind === 'announcement' ? (slide.pause === true) : (untilSeconds === null));
+      const isStopping = (slide.kind === 'coming-up' || slide.kind === 'takeaways') ? true : (slide.kind === 'announcement' ? (slide.pause === true) : (untilSeconds === null));
       const duration = (untilSeconds !== null) ? Math.max(1, untilSeconds - atSeconds) : (slide.duration || null);
 
       return {
         ...slide,
-        index,
+        originalIndex: index,
         atSeconds,
         untilSeconds,
         isStopping,
@@ -983,6 +995,21 @@
         // Runtime tracking flags
         passed: false
       };
+    });
+
+    // Sort slides chronologically; if timestamps match (< 0.2s apart), takeaways comes before coming-up
+    normalizedSlides.sort((a, b) => {
+      if (Math.abs(a.atSeconds - b.atSeconds) < 0.2) {
+        const pA = getSlidePriority(a);
+        const pB = getSlidePriority(b);
+        if (pA !== pB) return pA - pB;
+        return a.originalIndex - b.originalIndex;
+      }
+      return a.atSeconds - b.atSeconds;
+    });
+
+    normalizedSlides.forEach((slide, idx) => {
+      slide.index = idx;
     });
 
     /* ==========================================================================
@@ -1015,6 +1042,7 @@
 
     // State
     let activeStoppingSlide = null;
+    let stoppingQueue = [];
     let stoppingBulletIndex = 0;
     let stoppingTimer = null;
     let activeTimedSlide = null;
@@ -1062,7 +1090,8 @@
         btn.appendChild(contentWrapper);
 
         btn.addEventListener('click', () => {
-          // If a stopping slide was open, close it
+          // If a stopping slide was open or queued, clear and close
+          stoppingQueue = [];
           if (activeStoppingSlide) {
             closeStoppingSlide(false);
           }
@@ -1214,7 +1243,7 @@
     }
 
     /**
-     * Close stopping slide and resume video playback if resumePlayback is true.
+     * Close stopping slide and resume video playback or advance to next queued stopping slide.
      */
     function closeStoppingSlide(resumePlayback = true) {
       if (!activeStoppingSlide) return;
@@ -1228,6 +1257,13 @@
       stoppingSlideLayer.setAttribute('aria-hidden', 'true');
       activeStoppingSlide = null;
       stoppingBulletIndex = 0;
+
+      // If more stopping slides are queued (e.g. Coming Up after Some Takeaways), advance to next slide!
+      if (stoppingQueue.length > 0) {
+        const nextSlide = stoppingQueue.shift();
+        openStoppingSlide(nextSlide);
+        return;
+      }
 
       if (resumePlayback) {
         playerPlay();
@@ -1394,6 +1430,11 @@
             slide.passed = false;
           }
         });
+        // If rewound out of active stopping slide range, clear queue and close
+        if (activeStoppingSlide && currentTime < activeStoppingSlide.atSeconds - 0.2) {
+          stoppingQueue = [];
+          closeStoppingSlide(false);
+        }
         // If rewound out of timed slide range, close timed panel
         if (activeTimedSlide && (currentTime < activeTimedSlide.atSeconds || currentTime > activeTimedSlide.untilSeconds)) {
           closeTimedPanel();
@@ -1425,6 +1466,7 @@
 
       // 3. SLIDE & ANNOUNCEMENT TRIGGER DETECTION
       const pauseEnabled = pauseToggle.checked;
+      const triggeredStoppingSlides = [];
 
       normalizedSlides.forEach((slide) => {
         // Trigger condition: current time reached marker and slide hasn't fired yet
@@ -1438,8 +1480,7 @@
             openAnnouncement(slide);
           } else if (slide.isStopping) {
             if (pauseEnabled) {
-              playerPause();
-              openStoppingSlide(slide);
+              triggeredStoppingSlides.push(slide);
             }
           } else {
             // Timed side panel slide
@@ -1447,6 +1488,19 @@
           }
         }
       });
+
+      // If one or more stopping slides were triggered
+      if (triggeredStoppingSlides.length > 0) {
+        triggeredStoppingSlides.sort((a, b) => getSlidePriority(a) - getSlidePriority(b));
+        if (!activeStoppingSlide) {
+          playerPause();
+          const firstSlide = triggeredStoppingSlides.shift();
+          stoppingQueue.push(...triggeredStoppingSlides);
+          openStoppingSlide(firstSlide);
+        } else {
+          stoppingQueue.push(...triggeredStoppingSlides);
+        }
+      }
 
       // 4. TIMED PANEL & ANNOUNCEMENT UPDATE & DISMISSAL
       if (activeTimedSlide) {
