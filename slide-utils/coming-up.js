@@ -49,6 +49,7 @@
       buttonText: config.buttonText || "Continue lesson",
       titleSize: config.titleSize || null,
       bulletSize: config.bulletSize || null,
+      density: config.density || null,
       revealAll: config.revealAll !== undefined ? config.revealAll : true,
       pause: true,
       align: config.align || "center"
