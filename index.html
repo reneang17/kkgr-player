@@ -422,38 +422,52 @@
 
     /* "Some takeaways" dense/compact layout when text is long or bullet count is 4+ */
     .stopping-slide-layer.takeaways-mode.is-dense {
-      padding: clamp(0.4rem, 1.2cqw, 0.8rem) clamp(0.6rem, 1.8cqw, 1.2rem);
+      padding: clamp(0.35rem, 1cqw, 0.65rem) clamp(0.6rem, 1.8cqw, 1.2rem) clamp(0.65rem, 1.8cqw, 1.15rem);
     }
 
     .stopping-slide-layer.takeaways-mode.is-dense .stopping-slide-content {
       max-width: 98%;
       width: 98%;
-      margin: auto auto;
+      margin: 0 auto;
+      flex-shrink: 1;
+      min-height: 0;
     }
 
     .stopping-slide-layer.takeaways-mode.is-dense .slide-heading {
-      font-size: clamp(1.3rem, 3.8cqw, 2.1rem);
-      margin-bottom: clamp(0.25rem, 0.8cqw, 0.5rem);
+      font-size: clamp(1.15rem, 3.2cqw, 1.75rem);
+      margin-bottom: clamp(0.15rem, 0.45cqw, 0.3rem);
     }
 
     .stopping-slide-layer.takeaways-mode.is-dense .slide-bullets-box {
       max-width: 100%;
       width: 100%;
-      padding: clamp(0.45rem, 1.2cqw, 0.85rem) clamp(1rem, 2.2cqw, 1.6rem);
+      padding: clamp(0.35rem, 0.9cqw, 0.65rem) clamp(1rem, 2.2cqw, 1.6rem);
     }
 
     .stopping-slide-layer.takeaways-mode.is-dense .slide-bullets {
       font-size: clamp(0.95rem, 2.6cqw, 1.55rem);
-      line-height: 1.34;
-      gap: clamp(0.2rem, 0.6cqw, 0.42rem);
+      line-height: 1.28;
+      gap: clamp(0.12rem, 0.4cqw, 0.3rem);
     }
 
     .stopping-slide-layer.takeaways-mode.is-dense .slide-bullets li {
-      padding-left: clamp(1rem, 2cqw, 1.4rem);
+      padding-left: clamp(1rem, 2cqw, 1.35rem);
     }
 
     .stopping-slide-layer.is-dense .stopping-slide-footer {
-      margin-top: clamp(0.25rem, 0.8cqw, 0.5rem);
+      margin-top: auto;
+      padding-top: clamp(0.2rem, 0.5cqw, 0.4rem);
+      flex-shrink: 0;
+    }
+
+    .stopping-slide-layer.is-dense .slide-tip {
+      color: rgba(255, 255, 255, 0.78);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    }
+
+    .stopping-slide-layer.is-dense .continue-btn {
+      padding: clamp(0.3rem, 0.9cqw, 0.5rem) clamp(0.75rem, 1.8cqw, 1.2rem);
+      font-size: clamp(0.72rem, 1.6cqw, 0.9rem);
     }
 
     /* B. Timed Panel Layer (Left side gradient, speaker visible on right) */
