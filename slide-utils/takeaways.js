@@ -50,8 +50,8 @@
       boxPadding: config.boxPadding || null,
       boxMaxWidth: config.boxMaxWidth || null,
       buttonText: config.buttonText || "Continue lesson",
-      titleSize: config.titleSize || "clamp(1.5rem, 5.2cqw, 3.1rem)",
-      bulletSize: config.bulletSize || "clamp(0.95rem, 2.6cqw, 1.55rem)",
+      titleSize: config.titleSize || null,
+      bulletSize: config.bulletSize || null,
       revealAll: config.revealAll !== undefined ? config.revealAll : true,
       pause: true,
       align: "center"

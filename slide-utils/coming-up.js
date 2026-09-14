@@ -47,8 +47,8 @@
       bg: config.bg || "slides/coming-up-bg.png",
       font: config.font || "'Crimson Pro', 'Lora', Georgia, serif",
       buttonText: config.buttonText || "Continue lesson",
-      titleSize: config.titleSize || "clamp(1.4rem, 4.8cqw, 2.75rem)",
-      bulletSize: config.bulletSize || "clamp(0.95rem, 2.6cqw, 1.55rem)",
+      titleSize: config.titleSize || null,
+      bulletSize: config.bulletSize || null,
       revealAll: config.revealAll !== undefined ? config.revealAll : true,
       pause: true,
       align: config.align || "center"
