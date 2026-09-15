@@ -204,11 +204,53 @@
     };
   }
 
+  /**
+   * Creates a final closing stopping slide configuration.
+   *
+   * @param {string|Object} [titleOrConfig="Thanks for watching!"] - Slide title or config object
+   * @param {Object} [options={}] - Configuration options
+   * @returns {Object} Final slide configuration object
+   */
+  function finalSlide(titleOrConfig = "Thanks for watching!", options = {}) {
+    let title = "Thanks for watching!";
+    let config = {};
+
+    if (typeof titleOrConfig === 'string') {
+      title = titleOrConfig;
+      config = options || {};
+    } else if (typeof titleOrConfig === 'object' && titleOrConfig !== null) {
+      config = titleOrConfig;
+      title = config.title || "Thanks for watching!";
+    }
+
+    const atTime = config.at || "00:53:47.033";
+    const duration = typeof config.duration === 'number' ? config.duration : 12;
+
+    return {
+      kind: "final",
+      at: atTime,
+      title: title,
+      bullets: config.bullets || [],
+      duration: duration,
+      bg: config.bg || "slides/coming-up-bg.png",
+      font: config.font || "'Crimson Pro', 'Lora', Georgia, serif",
+      buttonText: config.buttonText || "Finish lesson",
+      titleSize: config.titleSize || "clamp(2rem, 6.5cqw, 4.2rem)",
+      align: "center",
+      pause: true,
+      revealAll: true,
+      ...config
+    };
+  }
+
   // Aliases
   const makeAnnouncement = announcement;
   const makeComingUp = comingUp;
   const someTakeaways = takeaways;
   const makeTakeaways = takeaways;
+  const makeFinalSlide = finalSlide;
+  const closingSlide = finalSlide;
+  const thanksSlide = finalSlide;
 
   // Expose globally
   global.announcement = announcement;
@@ -218,6 +260,10 @@
   global.takeaways = takeaways;
   global.someTakeaways = someTakeaways;
   global.makeTakeaways = makeTakeaways;
+  global.finalSlide = finalSlide;
+  global.makeFinalSlide = makeFinalSlide;
+  global.closingSlide = closingSlide;
+  global.thanksSlide = thanksSlide;
   global.stoppingSlide = stoppingSlide;
   global.timedPanel = timedPanel;
   global.segment = segment;
@@ -232,6 +278,10 @@
       takeaways,
       someTakeaways,
       makeTakeaways,
+      finalSlide,
+      makeFinalSlide,
+      closingSlide,
+      thanksSlide,
       stoppingSlide,
       timedPanel,
       segment

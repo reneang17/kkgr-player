@@ -495,6 +495,42 @@
       font-size: clamp(0.72rem, 1.6cqw, 0.9rem);
     }
 
+    /* "Final / Closing" slide styling */
+    .stopping-slide-layer.final-mode {
+      padding: clamp(1.5rem, 4.5cqw, 3.25rem) clamp(2rem, 6cqw, 5rem);
+      justify-content: space-between;
+    }
+
+    .stopping-slide-layer.final-mode::before {
+      display: none;
+    }
+
+    .stopping-slide-layer.final-mode .stopping-slide-content {
+      max-width: 100%;
+      width: 100%;
+      margin: auto auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .stopping-slide-layer.final-mode .slide-heading {
+      font-family: 'Crimson Pro', 'Lora', Georgia, serif;
+      font-size: clamp(2rem, 6.5cqw, 4.2rem);
+      font-weight: 500;
+      color: #ffffff;
+      text-align: center;
+      margin: auto 0;
+      letter-spacing: -0.01em;
+    }
+
+    .stopping-slide-layer.final-mode .slide-bullets-box {
+      display: none;
+    }
+
     /* B. Timed Panel Layer (Left side gradient, speaker visible on right) */
     .timed-panel-layer {
       position: absolute;
@@ -1074,6 +1110,11 @@
         at: "00:53:47.033",
         title: "Some takeaways",
         buttonText: "Continue lesson"
+      }),
+
+      // Final closing stopping slide at 00:53:47.033
+      finalSlide("Thanks for watching!", {
+        at: "00:53:47.033"
       })
     ];
 
@@ -1215,15 +1256,17 @@
     // Priority ordering for slides triggered at identical timestamps:
     // 1. takeaways (shown first)
     // 2. coming-up (shown second)
-    // 3. other stopping slides
-    // 4. announcements (shown after stopping slides when video resumes)
-    // 5. timed side panels
+    // 3. final slide (shown after takeaways / coming-up)
+    // 4. other stopping slides
+    // 5. announcements (shown after stopping slides when video resumes)
+    // 6. timed side panels
     function getSlidePriority(slide) {
       if (slide.kind === 'takeaways') return 1;
       if (slide.kind === 'coming-up') return 2;
-      if (slide.isStopping) return 3;
-      if (slide.kind === 'announcement') return 4;
-      return 5;
+      if (slide.kind === 'final' || slide.kind === 'final-slide') return 3;
+      if (slide.isStopping) return 4;
+      if (slide.kind === 'announcement') return 5;
+      return 6;
     }
 
     // Normalize slides array with parsed timestamps & runtime state
@@ -1236,7 +1279,7 @@
         untilSeconds = atSeconds + (slide.duration || 8);
       }
 
-      const isStopping = (slide.kind === 'coming-up' || slide.kind === 'takeaways') ? true : (slide.kind === 'announcement' ? (slide.pause === true) : (untilSeconds === null));
+      const isStopping = (slide.kind === 'coming-up' || slide.kind === 'takeaways' || slide.kind === 'final' || slide.kind === 'final-slide') ? true : (slide.kind === 'announcement' ? (slide.pause === true) : (untilSeconds === null));
       const duration = (untilSeconds !== null) ? Math.max(1, untilSeconds - atSeconds) : (slide.duration || null);
 
       return {
@@ -1385,8 +1428,10 @@
       // Check modes
       const isComingUp = slide.kind === 'coming-up';
       const isTakeaways = slide.kind === 'takeaways';
+      const isFinal = slide.kind === 'final' || slide.kind === 'final-slide';
       stoppingSlideLayer.classList.toggle('coming-up-mode', isComingUp);
       stoppingSlideLayer.classList.toggle('takeaways-mode', isTakeaways);
+      stoppingSlideLayer.classList.toggle('final-mode', isFinal);
 
       // Automatic density detection: if 5+ bullets or 340+ characters, apply dense mode (slimmer padding/gap, side-wide text area, font size unchanged)
       const totalChars = Array.isArray(slide.bullets) ? slide.bullets.reduce((acc, b) => acc + (b ? b.length : 0), 0) : 0;
@@ -1402,8 +1447,8 @@
         stoppingSlideLayer.style.backgroundImage = 'none';
       }
 
-      // Category label (hide for coming-up and takeaways)
-      if (isComingUp || isTakeaways) {
+      // Category label (hide for coming-up, takeaways, and final)
+      if (isComingUp || isTakeaways || isFinal) {
         stoppingLabel.style.display = 'none';
       } else {
         stoppingLabel.style.display = 'inline-block';
@@ -1412,6 +1457,12 @@
 
       // Box background and dimensions if custom
       if (stoppingBulletsBox) {
+        if (isFinal && (!slide.bullets || slide.bullets.length === 0)) {
+          stoppingBulletsBox.style.display = 'none';
+        } else {
+          stoppingBulletsBox.style.display = '';
+        }
+
         if (slide.boxBg) {
           stoppingBulletsBox.style.backgroundColor = slide.boxBg;
         } else if (!isTakeaways) {
@@ -1453,17 +1504,17 @@
 
       // Update Continue button label
       if (continueBtnText) {
-        continueBtnText.textContent = slide.buttonText || (isComingUp || isTakeaways ? 'Continue lesson' : 'Continue');
+        continueBtnText.textContent = slide.buttonText || (isFinal ? 'Finish lesson' : (isComingUp || isTakeaways ? 'Continue lesson' : 'Continue'));
       }
 
       // Configure Continue button & bullets visibility
-      if (slide.revealAll || isComingUp || isTakeaways || !slide.bullets || slide.bullets.length === 0) {
+      if (slide.revealAll || isComingUp || isTakeaways || isFinal || !slide.bullets || slide.bullets.length === 0) {
         const bulletElements = stoppingBullets.querySelectorAll('li');
         bulletElements.forEach(el => el.classList.add('revealed'));
         stoppingBulletIndex = bulletElements.length;
         continueBtn.disabled = false;
         continueBtn.classList.add('ready');
-        slideHint.textContent = 'Press Enter, Escape, or Continue lesson';
+        slideHint.textContent = isFinal ? 'Lesson complete' : 'Press Enter, Escape, or Continue lesson';
       } else {
         continueBtn.disabled = true;
         continueBtn.classList.remove('ready');
@@ -1516,7 +1567,11 @@
       stoppingSlideLayer.classList.remove('active');
       stoppingSlideLayer.classList.remove('coming-up-mode');
       stoppingSlideLayer.classList.remove('takeaways-mode');
+      stoppingSlideLayer.classList.remove('final-mode');
       stoppingSlideLayer.classList.remove('is-dense');
+      if (stoppingBulletsBox) {
+        stoppingBulletsBox.style.display = '';
+      }
       stoppingSlideLayer.setAttribute('aria-hidden', 'true');
       activeStoppingSlide = null;
       stoppingBulletIndex = 0;
