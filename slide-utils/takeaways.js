@@ -53,7 +53,7 @@
       bulletList = config.bullets || [];
     }
 
-    const atTime = config.at || "00:18:02.333";
+    const atTime = config.at || "00:17:48.233";
     const wpm = typeof config.wpm === 'number' ? config.wpm : DEFAULT_WPM;
     const duration = typeof config.duration === 'number'
       ? config.duration

@@ -26,7 +26,7 @@
       title = config.title || "Thanks for watching!";
     }
 
-    const atTime = config.at || "00:53:47.033";
+    const atTime = config.at || "00:53:32.933";
     const duration = typeof config.duration === 'number' ? config.duration : 12;
 
     return {
