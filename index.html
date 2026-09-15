@@ -909,7 +909,8 @@
 
     // 1. VIDEO SEGMENTS (Chapters / Lecture parts shown in the "Segments" list)
     const SEGMENTS = [
-      { at: "0:00", title: "Start of the Video", note: "Opening remarks" }
+      { at: "0:00", title: "Start of the Video", note: "Opening remarks" },
+      { at: "00:53:32.933", title: "End of the Video", note: "Final takeaways & conclusion" }
     ];
 
     // 2. SLIDES & OVERLAYS (Interactive stopping slides, timed side panels, announcements)
@@ -1397,6 +1398,15 @@
           if (activeAnnouncement) {
             closeAnnouncement();
           }
+
+          // Reset passed state for slides at or after this timestamp so stopping slides fire
+          normalizedSlides.forEach((slide) => {
+            if (slide.atSeconds >= seg.atSeconds - 0.5) {
+              slide.passed = false;
+            }
+          });
+          lastKnownTime = seg.atSeconds;
+
           playerSeekTo(seg.atSeconds);
           playerPlay();
         });
