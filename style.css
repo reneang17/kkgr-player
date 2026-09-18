@@ -346,7 +346,7 @@ header.page-header p.subtitle {
 }
 
 .stopping-slide-layer.coming-up-mode.is-dense .slide-heading {
-  font-size: clamp(1.2rem, 3.4cqw, 1.9rem);
+  font-size: clamp(1.5rem, 4.8cqw, 3rem);
   margin-bottom: clamp(0.15rem, 0.45cqw, 0.3rem);
 }
 
@@ -445,7 +445,7 @@ header.page-header p.subtitle {
 }
 
 .stopping-slide-layer.takeaways-mode.is-dense .slide-heading {
-  font-size: clamp(1.15rem, 3.2cqw, 1.75rem);
+  font-size: clamp(1.5rem, 4.8cqw, 3rem);
   margin-top: 0;
   margin-bottom: clamp(0.15rem, 0.45cqw, 0.3rem);
   flex-shrink: 0;
@@ -481,7 +481,7 @@ header.page-header p.subtitle {
 
 .stopping-slide-layer.is-dense .continue-btn {
   padding: clamp(0.3rem, 0.9cqw, 0.5rem) clamp(0.75rem, 1.8cqw, 1.2rem);
-  font-size: clamp(0.72rem, 1.6cqw, 0.9rem);
+  font-size: clamp(0.75rem, 1.8cqw, 0.95rem);
 }
 
 /* "Final / Closing" slide styling */
