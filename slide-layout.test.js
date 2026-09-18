@@ -117,6 +117,35 @@ const gapDrop = 1 - num(floor, '--slide-bullet-gap') / L.TOKENS.bulletGap;
 check('spacing compresses faster than type', gapDrop > bodyDrop,
   `gap -${(gapDrop * 100).toFixed(0)}% vs type -${(bodyDrop * 100).toFixed(0)}%`);
 
+/* ---- Heading fit ----
+   A long title is shrunk to stay on one line inside the title-safe width, rather
+   than wrapping and stealing the bullets' vertical space. */
+check('heading fit floor stays above the body size (hierarchy is not inverted)',
+  L.TOKENS.headingSize * L.HEADING_FIT_MIN * L.FIT_MIN > L.TOKENS.bodySize * L.FIT_MIN,
+  `heading ${(L.TOKENS.headingSize * L.HEADING_FIT_MIN).toFixed(1)} vs body ${L.TOKENS.bodySize}`);
+check('heading fit never enlarges the title', L.HEADING_FIT_MAX === 1);
+check('heading fit grid index 0 is the floor',
+  Math.abs(L.headingFitAt(0) - L.HEADING_FIT_MIN) < 1e-9);
+check('heading fit top grid index is full size',
+  Math.abs(L.headingFitAt(L.HEADING_STEP_COUNT) - L.HEADING_FIT_MAX) < 1e-9);
+check('heading fit bisection terminates quickly',
+  Math.ceil(Math.log2(L.HEADING_STEP_COUNT + 1)) <= 5,
+  `${Math.ceil(Math.log2(L.HEADING_STEP_COUNT + 1))} measurements`);
+
+/* ---- Title-safe area ----
+   Slide artwork may carry a mark in a top corner (coming-up-bg.png has the
+   lineage logo at ~0.90 of its width). The heading is inset symmetrically so a
+   centred title cannot run underneath it. */
+const logoLeftEdge = 0.9033 * L.DESIGN.width;                       // measured from the artwork
+const headingHalfWidth = (L.DESIGN.width - 2 * L.TOKENS.padX) / 2 - L.TOKENS.headingSafeInset;
+const headingRightEdge = L.DESIGN.width / 2 + headingHalfWidth;
+check('title-safe inset keeps a centred heading clear of the artwork logo',
+  headingRightEdge < logoLeftEdge,
+  `heading reaches ${headingRightEdge.toFixed(0)}, logo starts at ${logoLeftEdge.toFixed(0)}`);
+check('title-safe inset is not so large it cramps the heading',
+  headingHalfWidth * 2 > (L.DESIGN.width - 2 * L.TOKENS.padX) * 0.8,
+  `${(headingHalfWidth * 2).toFixed(0)} of ${(L.DESIGN.width - 2 * L.TOKENS.padX).toFixed(0)}`);
+
 /* ---- Search grid ---- */
 check('grid index 0 is the readability floor', Math.abs(L.fitAt(0) - L.FIT_MIN) < 1e-9);
 check('top grid index is the preferred step', Math.abs(L.fitAt(L.STEP_COUNT) - L.FIT_MAX) < 1e-9);

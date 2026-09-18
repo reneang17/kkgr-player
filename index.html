@@ -80,9 +80,14 @@
 
         <!-- Announcement Lower-Third Overlay Layer -->
         <div class="announcement-layer" id="announcement-layer" aria-hidden="true">
-          <div class="announcement-banner" id="announcement-banner">
-            <div class="announcement-primary" id="announcement-primary"></div>
-            <div class="announcement-secondary" id="announcement-secondary"></div>
+          <!-- Same logical 1600x900 canvas as the stopping slides, scaled by the
+               shared --slide-scale, so the banner behaves like a lower-third
+               burnt into the video frame. -->
+          <div class="announcement-canvas" id="announcement-canvas">
+            <div class="announcement-banner" id="announcement-banner">
+              <div class="announcement-primary" id="announcement-primary"></div>
+              <div class="announcement-secondary" id="announcement-secondary"></div>
+            </div>
           </div>
         </div>
 
@@ -158,16 +163,12 @@
     </section>
   </div>
 
-  <!-- 1. Load modular slide utilities -->
-  <script type="module" src="slide-utils/index.js"></script>
-
-  <!-- 1b. Load slide layout model (content fitting + uniform viewport scaling) -->
+  <!-- Slide layout model: typography fitting + uniform viewport scaling.
+       Loaded before the engine because the engine installs a controller from it. -->
   <script type="module" src="slide-layout.js"></script>
 
-  <!-- 2. Load active lesson slides & configuration -->
-  <script type="module" src="slides-data.js"></script>
-
-  <!-- 3. Load player engine & overlay manager -->
+  <!-- Player engine. It imports its lesson from lessons/index.js, chosen by the
+       ?lesson= query parameter, so this page is the template for every video. -->
   <script type="module" src="player.js"></script>
 
 

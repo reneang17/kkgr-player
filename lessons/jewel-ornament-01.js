@@ -1,20 +1,17 @@
 /**
- * slides-data.js
- * Active lesson content, video configuration, chapter segments, and interactive slide overlays.
+ * lessons/jewel-ornament-01.js
+ * Lesson content: Khenchen Rinpoche — Jewel Ornament of Liberation, Part 1.
  *
- * Slide utilities available:
- * - announcement(redText, blackText, options)
- * - comingUp(bullets, options)
- * - takeaways(bullets, options)
- * - finalSlide(title, options)
- * - stoppingSlide(at, title, bullets, options)
- * - timedPanel(at, until, title, bullets, options)
+ * This file is PURE DATA. It contains no DOM access, no player calls and no
+ * styling: only the video id, the chapter markers and the slide timeline. Every
+ * lesson is a file like this one, and adding a video means adding a file here
+ * and registering it in lessons/index.js — nothing in the engine changes.
+ *
+ * See docs/AUTHORING-LESSONS.md for the full authoring guide.
  */
 
-/* ==========================================================================
-   CONFIGURATION
-   Edit video ID, background image, video segments, and slide overlays here.
-   ========================================================================== */
+import { announcement, comingUp, takeaways, finalSlide } from '../slide-utils/index.js';
+
 const VIDEO_ID = "j8WneixXOV4";
 const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
 
@@ -41,14 +38,14 @@ const SLIDES = [
     "The world's wars, famines, climate problems all manifest from our own confusion."
   ], {
     at: "00:03:05.000",
-    title: "Coming up",
+    title: "Coming Up, Overview",
     buttonText: "Continue lesson"
   }),
 
   // Announcement banner at 00:03:05.000
   announcement(
-    "Overview of Gampopa's Life & Work",
-    "",
+    "Overview",
+    "Gampopa's Life & Work",
     { at: "00:03:05.000" }
   ),
 
@@ -66,7 +63,7 @@ const SLIDES = [
     "One who studies, understands and practices is rich, not in wealth, but in wisdom and contentment."
   ], {
     at: "00:17:48.233",
-    title: "Some takeaways",
+    title: "Overview, Takeaways",
     buttonText: "Continue lesson"
   }),
 
@@ -78,7 +75,7 @@ const SLIDES = [
     "Gampopa wrote this book out of his teachers' kindness, for our benefit."
   ], {
     at: "00:17:48.233",
-    title: "Coming up",
+    title: "Coming Up, Paying Homage",
     buttonText: "Continue lesson"
   }),
 
@@ -97,7 +94,7 @@ const SLIDES = [
     "Gampopa wrote this book depending on the kindness of Milarepa and Atisha, for our benefit."
   ], {
     at: "00:25:15.300",
-    title: "Some takeaways",
+    title: "Paying Homage, Takeaways",
     buttonText: "Continue lesson"
   }),
 
@@ -110,7 +107,7 @@ const SLIDES = [
     "Nirvana is all confused projections exhausted and dissipated: freedom from all suffering."
   ], {
     at: "00:25:15.300",
-    title: "Coming up",
+    title: "Coming Up, Introduction — Written by Gampopa",
     buttonText: "Continue lesson"
   }),
 
@@ -130,7 +127,7 @@ const SLIDES = [
     "Our interest is to be free from suffering and to achieve peace and happiness. This is the why we practice."
   ], {
     at: "00:36:14.900",
-    title: "Some takeaways",
+    title: "Introduction — Written by Gampopa, Takeaways",
     buttonText: "Continue lesson"
   }),
 
@@ -141,7 +138,7 @@ const SLIDES = [
     "For example, I grasp at this body of mine as one whole, complete, independent thing, so attached to it that I do everything just to feed this ego-attachment."
   ], {
     at: "00:36:14.900",
-    title: "Coming up",
+    title: "Coming Up, Some Clarifications about Confusion",
     buttonText: "Continue lesson"
   }),
 
@@ -159,7 +156,7 @@ const SLIDES = [
     "Our study and practice is so important to purify our ignorance."
   ], {
     at: "00:42:01.900",
-    title: "Some takeaways",
+    title: "Some Clarifications about Confusion, Takeaways",
     buttonText: "Continue lesson"
   }),
 
@@ -171,7 +168,7 @@ const SLIDES = [
     "Even in the human realm we can have all six of these experiences: hell-realm suffering, hungry-ghost suffering, animal suffering, human birth-and-death suffering, and the suffering of the demigods and gods."
   ], {
     at: "00:42:01.900",
-    title: "Coming up",
+    title: "Coming Up, How Does Confusion Operate?",
     buttonText: "Continue lesson"
   }),
 
@@ -189,7 +186,7 @@ const SLIDES = [
     "When did this confusion originate? This confusion originated in beginningless samsara — there is no beginning and no end; it is a complete cycle. Like space, like the universe, it has no beginning."
   ], {
     at: "00:47:22.900",
-    title: "Some takeaways",
+    title: "How Does Confusion Operate?, Takeaways",
     buttonText: "Continue lesson"
   }),
 
@@ -201,7 +198,7 @@ const SLIDES = [
     "We are not making samsara something bad. Samsara is beautiful. But we have to understand its reality nature."
   ], {
     at: "00:47:22.900",
-    title: "Coming up",
+    title: "Coming Up, The Error of Confusion",
     buttonText: "Continue lesson"
   }),
 
@@ -220,7 +217,7 @@ const SLIDES = [
     "For this we need to study and practice the Dharma."
   ], {
     at: "00:53:32.933",
-    title: "Some takeaways",
+    title: "The Error of Confusion, Takeaways",
     buttonText: "Continue lesson"
   }),
 
@@ -230,18 +227,16 @@ const SLIDES = [
   })
 ];
 
-// Expose globally on window for full compatibility across modules & classic scripts
-if (typeof window !== 'undefined') {
-  window.VIDEO_ID = VIDEO_ID;
-  window.SLIDE_BG = SLIDE_BG;
-  window.SEGMENTS = SEGMENTS;
-  window.SLIDES = SLIDES;
-  window.LESSON_DATA = {
-    videoId: VIDEO_ID,
-    slideBg: SLIDE_BG,
-    segments: SEGMENTS,
-    slides: SLIDES
-  };
-}
+/** The lesson descriptor consumed by the player engine. */
+export const lesson = {
+  id: 'jewel-ornament-01',
+  title: 'Khenchen Rinpoche',
+  subtitle: 'Teachings on the Jewel Ornament of Liberation',
+  videoId: VIDEO_ID,
+  slideBg: SLIDE_BG,
+  segments: SEGMENTS,
+  slides: SLIDES
+};
 
-
+export default lesson;
+export { VIDEO_ID, SLIDE_BG, SEGMENTS, SLIDES };
