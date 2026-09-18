@@ -36,7 +36,12 @@ is in [docs/CHANGELOG.md](docs/CHANGELOG.md).
    the slide and chooses these; anything set elsewhere overrides it and breaks
    every viewport except the one it was eyeballed at.
    *This was the original defect: inline `clamp(…rem, …cqw, …rem)` sizes from the
-   factories silently beat the whole stylesheet.*
+   factories silently beat the whole stylesheet. It recurred in the announcement
+   banner via `redSize` / `blackSize`, so check the factories too — any default
+   carrying a `rem` unit is a bug waiting to happen.*
+
+   The same applies to the announcement banner, which shares the logical canvas
+   and the `--slide-scale` written on `.player-stage`.
 
 2. **Lesson files are pure data.** No DOM access, no player imports, no styling.
 
@@ -75,7 +80,7 @@ is in [docs/CHANGELOG.md](docs/CHANGELOG.md).
 ## Checks
 
 ```bash
-npm test        # layout model constraints, 22 checks, no framework needed
+npm test        # layout model constraints, 29 checks, no framework needed
 npm run build   # Vite production build
 npm run dev     # dev server
 ```

@@ -106,6 +106,64 @@ can never cover slide text at any player size.
 
 ---
 
+### 1b-ii. Title Fitting and the Title-Safe Area
+
+Slide titles vary far more in **length** than in line count — compare
+`"Coming up"` with `"Coming Up, Introduction — Written by Gampopa"`. So the title
+gets its own narrow fit, separate from the body fit:
+
+```
+title at the slide's typographic step
+       ↓  measure: does it fit on ONE line inside the title-safe width?
+shrink the title only (HEADING_FIT_MAX 1.00 → HEADING_FIT_MIN 0.62)
+       ↓  still too long?
+allow it to wrap
+```
+
+- The title fit **multiplies** the body fit rather than replacing it, so a heading
+  is never larger than the step the slide as a whole is using. The CSS is
+  `calc(var(--slide-heading-size) * var(--slide-heading-fit))`.
+- It is measured at the *preferred* body step. The body fit that runs afterwards
+  can only scale the heading down further, never up, so a title that fits at
+  measurement time still fits at the end.
+- The floor, `HEADING_FIT_MIN = 0.62`, is set so the title can never shrink below
+  the body text and invert the hierarchy. Past that point the title wraps instead.
+- Wrapping is the fallback, not the default, because a wrapped title eats vertical
+  space that the bullets need.
+
+**Title-safe area.** Slide artwork may carry a mark in a top corner —
+`coming-up-bg.png` has the lineage logo at roughly x 0.90–0.97 of its width — and
+a long centred title would otherwise run underneath it. `TOKENS.headingSafeInset`
+(90 logical px) is kept clear at **each** side of the heading, so the heading
+stays centred and its right edge cannot reach the logo. Measured from the
+artwork: the logo's left edge is at ~1445 logical px and the content box ends at
+1523, so 78px is the minimum; 90 leaves clearance.
+
+If you replace the artwork with a version that has no corner mark (or one in a
+different place), adjust that single token.
+
+---
+
+### 1c-ii. The Announcement Banner
+
+The lower-third announcement is composited on the **same logical 1600×900 canvas**
+as the stopping slides, scaled by the same shared `--slide-scale`, so it behaves
+like a lower-third burnt into the video frame: identical proportions at every
+player size.
+
+`--slide-scale` is therefore written on `.player-stage`, not on an individual
+canvas. Custom properties inherit, so `.slide-canvas` and `.announcement-canvas`
+share one scale and stay in lockstep with the video.
+
+> The banner previously mixed container units in the stylesheet with
+> `clamp(0.95rem, 2.85cqw, 1.6rem)` inline sizes applied by the engine — the same
+> defect that once broke the slides. On a phone the text pinned to the `0.95rem`
+> floor and rendered roughly 50% oversized relative to the frame, wrapping and
+> overflowing the banner. Its sizes are now logical pixels on the canvas, and the
+> factory no longer emits `redSize` / `blackSize` defaults.
+
+---
+
 ### 1d. Fullscreen & Mobile Playback
 
 Fullscreen has two implementations behind one button, because the Fullscreen API

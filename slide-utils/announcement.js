@@ -35,8 +35,10 @@ export function announcement(redText, blackText, options = {}) {
     primaryText: redText,
     secondaryText: blackText,
     pause: options.pause || false,
-    redSize: options.redSize || 'clamp(0.95rem, 2.85cqw, 1.6rem)',
-    blackSize: options.blackSize || 'clamp(0.75rem, 2.05cqw, 1.15rem)',
+    // null = let the logical canvas size it (see style.css .announcement-*).
+    // A rem-clamped default here overrode the stylesheet and broke small players.
+    redSize: options.redSize || null,
+    blackSize: options.blackSize || null,
     redColor: options.redColor || '#881434',
     blackColor: options.blackColor || '#1a1a1a',
     font: options.font || "'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"

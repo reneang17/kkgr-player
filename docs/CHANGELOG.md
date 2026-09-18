@@ -72,7 +72,7 @@ Two consequences followed:
 
 ### Verified
 
-`npm test` (22 checks) and `npm run build` pass. Exercised in-browser across
+`npm test` (29 checks) and `npm run build` pass. Exercised in-browser across
 2 / 4 / 7 / 14 bullets, a single overlong bullet, all three slide archetypes,
 375px to 3840px, mobile portrait and landscape, pseudo fullscreen entry and exit,
 resizing while a keypoint is displayed, and the real playback flow including

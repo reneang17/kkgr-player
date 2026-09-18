@@ -73,7 +73,16 @@
     labelMarginBottom: 13,
 
     /* Vertical breathing room reserved between content and the footer UI */
-    footerGap: 16
+    footerGap: 16,
+
+    /* Title-safe inset, in logical px, kept clear at each side of the heading.
+       Slide artwork may carry a mark in a top corner — coming-up-bg.png has the
+       lineage logo at roughly x 0.90-0.97 of its width — and a long centred
+       heading would otherwise run underneath it. Measured from that artwork:
+       the logo's left edge sits at ~1445 logical px, the content box ends at
+       1523, so 78px is the minimum; 90 leaves a little clearance.
+       Applied symmetrically so the heading stays centred. */
+    headingSafeInset: 90
   };
 
   /* ======================================================================
@@ -109,6 +118,32 @@
 
   /** Number of discrete steps between the floor and the preferred typography. */
   const STEP_COUNT = Math.round((FIT_MAX - FIT_MIN) / FIT_STEP);
+
+  /* ----------------------------------------------------------------------
+     HEADING FIT
+
+     A separate, narrower search than the body fit. Slide titles vary far more
+     in length than in line count ("Coming Up" vs "Coming Up, Introduction —
+     Written by Gampopa"), so a long title is shrunk to keep it on ONE line
+     within the title-safe width, rather than being allowed to wrap and eat the
+     body's vertical space.
+
+     This multiplies the body fit rather than replacing it, so a heading is
+     never larger than the typographic step the slide as a whole is using.
+
+     If a title cannot fit on one line even at HEADING_FIT_MIN, it is allowed to
+     wrap instead — shrinking further would make the title smaller than the body
+     text and invert the hierarchy.
+     ---------------------------------------------------------------------- */
+  const HEADING_FIT_MAX = 1.00;
+  const HEADING_FIT_MIN = 0.62;
+  const HEADING_FIT_STEP = 0.02;
+  const HEADING_STEP_COUNT = Math.round((HEADING_FIT_MAX - HEADING_FIT_MIN) / HEADING_FIT_STEP);
+
+  /** Grid index (0 = smallest allowed heading, HEADING_STEP_COUNT = full size). */
+  function headingFitAt(index) {
+    return HEADING_FIT_MIN + (index * (HEADING_FIT_MAX - HEADING_FIT_MIN)) / HEADING_STEP_COUNT;
+  }
 
   /** Grid index (0 = readability floor, STEP_COUNT = preferred) -> fit parameter. */
   function fitAt(index) {
@@ -150,7 +185,8 @@
       '--slide-box-pad-y': px(TOKENS.boxPadY * spacing),
       '--slide-box-pad-x': px(TOKENS.boxPadX * f),
       '--slide-label-size': px(TOKENS.labelSize * f),
-      '--slide-label-margin': px(TOKENS.labelMarginBottom * spacing)
+      '--slide-label-margin': px(TOKENS.labelMarginBottom * spacing),
+      '--slide-heading-safe-inset': px(TOKENS.headingSafeInset)
     };
   }
 
@@ -173,16 +209,18 @@
    *   @param {HTMLElement} refs.stage    - the 16:9 player stage (the available area)
    *   @param {HTMLElement} refs.canvas   - the fixed logical canvas that gets scaled
    *   @param {HTMLElement} refs.content  - the region the content must fit inside
+   *   @param {HTMLElement} [refs.heading] - the slide title, fitted to one line
    *   @param {HTMLElement} [refs.footer] - player UI overlaying the bottom of the canvas
    */
   function createSlideLayout(refs) {
-    const { stage, canvas, content, footer } = refs;
+    const { stage, canvas, content, footer, heading } = refs;
 
     let currentScale = 1;
     let reservedFooterLogical = 0;
     let frame = null;
     let active = false;
     let lastFit = null;
+    let lastHeadingFit = null;
 
     /* ---------- 2. Uniform viewport scaling ---------- */
 
@@ -195,7 +233,11 @@
 
     function applyScale() {
       currentScale = measureScale();
-      canvas.style.setProperty('--slide-scale', String(currentScale));
+      // Written on the stage rather than the slide canvas: custom properties
+      // inherit, so every overlay that composites on the same logical canvas
+      // (the stopping slide, the announcement banner) shares one scale and
+      // stays in lockstep with the video frame.
+      stage.style.setProperty('--slide-scale', String(currentScale));
     }
 
     /**
@@ -232,6 +274,71 @@
     }
 
     /**
+     * True when the title cannot sit on one line inside the title-safe width.
+     * scrollWidth/clientWidth are untransformed layout values, so this is
+     * unaffected by the canvas scale.
+     */
+    function headingOverflows() {
+      return heading.scrollWidth > heading.clientWidth + 1;
+    }
+
+    /**
+     * Shrinks the title until it fits on one line within the title-safe width,
+     * so a long heading never runs under a mark in the artwork's top corner and
+     * never steals vertical space from the bullets by wrapping.
+     *
+     * Measured at the PREFERRED body step: the body fit that runs afterwards can
+     * only scale the heading down further, never up, so a title that fits here
+     * still fits at the end.
+     *
+     * @returns {{fit:number, wrapped:boolean}}
+     */
+    function fitHeading() {
+      if (!heading || !heading.textContent.trim()) {
+        canvas.style.setProperty('--slide-heading-fit', '1');
+        canvas.style.setProperty('--slide-heading-wrap', 'normal');
+        return { fit: 1, wrapped: false };
+      }
+
+      applyVars(canvas, typographyFor(FIT_MAX));
+      canvas.style.setProperty('--slide-heading-wrap', 'nowrap');
+      canvas.style.setProperty('--slide-heading-fit', '1');
+
+      if (!headingOverflows()) {
+        return { fit: HEADING_FIT_MAX, wrapped: false };
+      }
+
+      // Same integer-grid bisection as the body fit: terminates, and is
+      // reproducible rather than dependent on float noise.
+      let lo = 0;
+      let hi = HEADING_STEP_COUNT;   // known not to fit
+      let best = null;
+
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        canvas.style.setProperty('--slide-heading-fit', String(headingFitAt(mid)));
+        if (!headingOverflows()) {
+          best = mid;
+          lo = mid + 1;
+        } else {
+          hi = mid;
+        }
+      }
+
+      if (best === null) {
+        // Too long even at the floor: let it wrap rather than shrink the title
+        // below the body text and invert the hierarchy.
+        canvas.style.setProperty('--slide-heading-fit', String(HEADING_FIT_MIN));
+        canvas.style.setProperty('--slide-heading-wrap', 'normal');
+        return { fit: HEADING_FIT_MIN, wrapped: true };
+      }
+
+      const chosen = headingFitAt(best);
+      canvas.style.setProperty('--slide-heading-fit', String(chosen));
+      return { fit: chosen, wrapped: false };
+    }
+
+    /**
      * Chooses the largest typography step that fits.
      *
      * The search runs over an integer grid of STEP_COUNT steps between FIT_MIN and
@@ -244,6 +351,11 @@
      */
     function fitContent() {
       content.style.height = usableContentHeight() + 'px';
+
+      // The title is sized first. It does not depend on the body, and settling it
+      // up front means the body fit measures the heading's final height.
+      const headingResult = fitHeading();
+      lastHeadingFit = headingResult;
 
       let steps = 1;
       if (tryFit(FIT_MAX)) {
@@ -360,6 +472,8 @@
     function release() {
       active = false;
       content.style.height = '';
+      canvas.style.removeProperty('--slide-heading-fit');
+      canvas.style.removeProperty('--slide-heading-wrap');
       delete canvas.dataset.slideOverflow;
     }
 
@@ -385,7 +499,8 @@
       refresh: scheduleRefresh,
       release,
       getScale: () => currentScale,
-      getLastFit: () => lastFit
+      getLastFit: () => lastFit,
+      getLastHeadingFit: () => lastHeadingFit
     };
   }
 
@@ -444,6 +559,10 @@
     FIT_MAX,
     FIT_STEP,
     STEP_COUNT,
+    HEADING_FIT_MIN,
+    HEADING_FIT_MAX,
+    HEADING_STEP_COUNT,
+    headingFitAt,
     SPACING_MIN,
     fitAt,
     typographyFor,

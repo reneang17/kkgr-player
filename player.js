@@ -286,7 +286,8 @@ const slideLayout = (window.KKGRSlideLayout && playerStage && slideCanvas && sto
       stage: playerStage,
       canvas: slideCanvas,
       content: stoppingContent,
-      footer: stoppingFooter
+      footer: stoppingFooter,
+      heading: stoppingTitle
     })
   : null;
 
@@ -887,6 +888,10 @@ function closeTimedPanel() {
 function openAnnouncement(slide) {
   activeAnnouncement = slide;
 
+  // Font SIZE is owned by the logical canvas in style.css, exactly as it is for
+  // stopping slides. redSize / blackSize are honoured only when a slide author
+  // sets them explicitly — an escape hatch, not the normal path. Applying a
+  // rem-clamped size here is what made the banner render oversized on phones.
   announcementPrimary.textContent = slide.primaryText || slide.title;
   if (slide.redSize) announcementPrimary.style.fontSize = slide.redSize;
   if (slide.redColor) announcementPrimary.style.color = slide.redColor;

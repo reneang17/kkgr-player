@@ -98,7 +98,13 @@ header.page-header p.subtitle {
 
 /* 16:9 Vector Slide Canvas Stage: Strictly maintains 16:9 aspect ratio at all times,
    scaling text and background in exact lockstep like a PDF or Keynote presentation */
+/* --slide-scale is written here by slide-layout.js as
+   min(stageWidth / 1600, stageHeight / 900). It lives on the stage rather than on
+   a single canvas so every overlay composited on the logical canvas — the
+   stopping slide and the announcement banner — inherits one shared scale. */
 .player-stage {
+  --slide-scale: 1;
+
   position: relative;
   width: 100%;
   height: 100%;
@@ -159,8 +165,6 @@ header.page-header p.subtitle {
    min(stageWidth / 1600, stageHeight / 900). One transform composites the
    whole slide, so every proportion inside is preserved exactly. */
 .slide-canvas {
-  --slide-scale: 1;
-
   position: absolute;
   top: 50%;
   left: 50%;
@@ -228,11 +232,14 @@ header.page-header p.subtitle {
 
 .slide-heading {
   font-family: var(--font-serif);
-  font-size: var(--slide-heading-size, 77px);
+  /* Two multipliers: the slide-wide typographic step, and the per-title fit that
+     keeps a long heading on one line. Both are set by slide-layout.js. */
+  font-size: calc(var(--slide-heading-size, 77px) * var(--slide-heading-fit, 1));
   font-weight: 500;
   line-height: var(--slide-heading-line-height, 1.22);
   color: #ffffff;
   margin-bottom: var(--slide-heading-margin, 14px);
+  white-space: var(--slide-heading-wrap, normal);
   flex-shrink: 0;
 }
 
@@ -362,12 +369,19 @@ header.page-header p.subtitle {
 }
 
 .stopping-slide-layer.coming-up-mode .slide-heading,
-.stopping-slide-layer.takeaways-mode .slide-heading {
+.stopping-slide-layer.takeaways-mode .slide-heading,
+.stopping-slide-layer.final-mode .slide-heading {
   font-family: 'Crimson Pro', 'Lora', Georgia, serif;
   color: #ffffff;
   text-align: center;
   margin-top: 0;
   letter-spacing: -0.01em;
+  /* Title-safe width: keeps a centred heading clear of a mark in the artwork's
+     top corner (see TOKENS.headingSafeInset in slide-layout.js). Symmetric, so
+     the heading stays centred on the slide. */
+  max-width: calc(100% - 2 * var(--slide-heading-safe-inset, 90px));
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .stopping-slide-layer.takeaways-mode .slide-heading {
@@ -438,11 +452,11 @@ header.page-header p.subtitle {
   font-family: 'Crimson Pro', 'Lora', Georgia, serif;
   /* The closing slide is a single short line, so it is allowed a larger step
      than body slides (1.15x the heading token). */
-  font-size: calc(var(--slide-heading-size, 77px) * 1.15);
+  font-size: calc(var(--slide-heading-size, 77px) * var(--slide-heading-fit, 1) * 1.15);
   font-weight: 500;
   color: #ffffff;
   text-align: center;
-  margin: auto 0;
+  margin: auto;
   letter-spacing: -0.01em;
 }
 
@@ -481,19 +495,26 @@ header.page-header p.subtitle {
   max-width: 88%;
 }
 
-/* C. Announcement Layer (Lower-third banner bar) */
+/* C. Announcement Layer (Lower-third banner bar)
+   ------------------------------------------------------------------------
+   The banner is composited on the SAME logical 1600x900 canvas as the stopping
+   slides and scaled by the same shared --slide-scale, so it behaves like a
+   lower-third burnt into the video: identical proportions at every player size.
+
+   It previously mixed container units with rem-clamped inline sizes applied by
+   the engine, which pinned the text to a rem floor on a small player and made it
+   render far too large relative to the frame. Every value here is a logical
+   pixel on the canvas instead. See docs/SLIDE-LAYOUT.md.
+   ------------------------------------------------------------------------ */
 .announcement-layer {
   position: absolute;
   inset: 0;
   z-index: 9;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.4s ease, visibility 0.4s ease;
+  overflow: hidden;
 }
 
 .announcement-layer.active {
@@ -501,13 +522,24 @@ header.page-header p.subtitle {
   visibility: visible;
 }
 
-.announcement-banner {
-  width: 100%;
+/* The logical canvas, mirroring .slide-canvas. */
+.announcement-canvas {
   position: absolute;
-  bottom: 5.38%;
-  height: 14.41%;
+  top: 50%;
+  left: 50%;
+  width: 1600px;
+  height: 900px;
+  transform: translate(-50%, -50%) scale(var(--slide-scale));
+  transform-origin: center center;
+  pointer-events: none;
+}
+
+.announcement-banner {
+  position: absolute;
   left: 0;
   right: 0;
+  bottom: 48px;             /* was 5.38% of the frame */
+  min-height: 130px;        /* was 14.41% */
   background: linear-gradient(
     to right,
     rgba(230, 235, 235, 0) 0%,
@@ -518,14 +550,15 @@ header.page-header p.subtitle {
     rgba(215, 222, 222, 0.75) 88%,
     rgba(230, 235, 235, 0) 100%
   );
-  padding: 0 3.0cqw;
+  padding: 16px 48px;       /* was 0 3.0cqw */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  box-shadow: 0 0.4cqw 1.6cqw rgba(0, 0, 0, 0.18);
+  box-shadow: 0 6px 26px rgba(0, 0, 0, 0.18);
   backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 .announcement-primary {
@@ -534,7 +567,7 @@ header.page-header p.subtitle {
   color: #881434;
   line-height: 1.15;
   letter-spacing: 0.01em;
-  font-size: 2.85cqw;
+  font-size: 46px;          /* was 2.85cqw */
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
 }
 
@@ -543,8 +576,8 @@ header.page-header p.subtitle {
   font-weight: 400;
   color: #1a1a1a;
   line-height: 1.25;
-  margin-top: 0.4cqw;
-  font-size: 2.05cqw;
+  margin-top: 6px;          /* was 0.4cqw */
+  font-size: 33px;          /* was 2.05cqw */
 }
 
 /* D. Floating Top-Right Corner Chapters Menu Button (Mobile / Small Touch Screens Only) */

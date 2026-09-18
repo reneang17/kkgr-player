@@ -80,9 +80,14 @@
 
         <!-- Announcement Lower-Third Overlay Layer -->
         <div class="announcement-layer" id="announcement-layer" aria-hidden="true">
-          <div class="announcement-banner" id="announcement-banner">
-            <div class="announcement-primary" id="announcement-primary"></div>
-            <div class="announcement-secondary" id="announcement-secondary"></div>
+          <!-- Same logical 1600x900 canvas as the stopping slides, scaled by the
+               shared --slide-scale, so the banner behaves like a lower-third
+               burnt into the video frame. -->
+          <div class="announcement-canvas" id="announcement-canvas">
+            <div class="announcement-banner" id="announcement-banner">
+              <div class="announcement-primary" id="announcement-primary"></div>
+              <div class="announcement-secondary" id="announcement-secondary"></div>
+            </div>
           </div>
         </div>
 
