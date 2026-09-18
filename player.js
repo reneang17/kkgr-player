@@ -1,13 +1,17 @@
 /**
  * player.js
- * Video Player Adapter, Timeline Synchronization Loop, and Overlay Engine.
+ * Video player adapter, timeline synchronisation loop, and overlay engine.
  *
- * Consumes configuration and slide data defined in slides-data.js:
- * - VIDEO_ID
- * - SLIDE_BG
- * - SEGMENTS
- * - SLIDES
+ * This is the ENGINE. It contains no lesson content. It consumes one lesson
+ * descriptor, loaded from lessons/index.js:
+ *
+ *   { id, title, subtitle, videoId, slideBg, segments, slides }
+ *
+ * Slide appearance is not decided here either — that belongs to slide-layout.js.
+ * See docs/ARCHITECTURE.md for the layer boundaries.
  */
+
+import { loadLesson } from './lessons/index.js';
 
 /* ==========================================================================
    VIDEO PLAYER ADAPTER
@@ -55,11 +59,33 @@ function playerGetState() {
   return -1;
 }
 
-// Resolve lesson data from global scope or window object
-const currentVideoId = typeof VIDEO_ID !== 'undefined' ? VIDEO_ID : (typeof window !== 'undefined' && window.VIDEO_ID ? window.VIDEO_ID : "j8WneixXOV4");
-const currentSlideBg = typeof SLIDE_BG !== 'undefined' ? SLIDE_BG : (typeof window !== 'undefined' && window.SLIDE_BG ? window.SLIDE_BG : "slides/slide-1.png");
-const currentSegments = typeof SEGMENTS !== 'undefined' ? SEGMENTS : (typeof window !== 'undefined' && window.SEGMENTS ? window.SEGMENTS : []);
-const currentSlides = typeof SLIDES !== 'undefined' ? SLIDES : (typeof window !== 'undefined' && window.SLIDES ? window.SLIDES : []);
+/* ==========================================================================
+   LESSON CONTENT
+   The engine never hard-codes lesson content. It loads one lesson descriptor
+   from the registry (lessons/index.js), chosen by the ?lesson= query parameter.
+   Lookup is synchronous, so the rest of this module's setup keeps its original
+   top-to-bottom order (see the note in lessons/index.js on why).
+
+   A window global still wins if one is present, so a host page can inject a
+   lesson directly (for example when this player is embedded in a CMS-driven
+   site) without going through the registry. See docs/EMBEDDING.md.
+   ========================================================================== */
+const injectedLesson = (typeof window !== 'undefined' && window.KKGR_LESSON) || null;
+const activeLesson = injectedLesson || loadLesson();
+
+const currentVideoId = activeLesson.videoId;
+const currentSlideBg = activeLesson.slideBg || '';
+const currentSegments = activeLesson.segments || [];
+const currentSlides = activeLesson.slides || [];
+
+/* Let the page chrome follow the lesson, so one template serves every video. */
+if (typeof document !== 'undefined') {
+  const titleEl = document.querySelector('.page-header h1');
+  const subtitleEl = document.querySelector('.page-header p.subtitle');
+  if (titleEl && activeLesson.title) titleEl.textContent = activeLesson.title;
+  if (subtitleEl && activeLesson.subtitle) subtitleEl.textContent = activeLesson.subtitle;
+  if (activeLesson.title) document.title = activeLesson.title;
+}
 
 /* ==========================================================================
    UTILITIES & DATA NORMALIZATION
@@ -464,7 +490,16 @@ function updateTopCornerMenuVisibility() {
     return;
   }
 
-  // 3. Check YouTube player state: visible when paused (2), unstarted (-1), ended (0), cued (5)
+  // 3. In fullscreen the control bar beneath the player is not reachable, so the
+  //    corner button is the only route into the chapters drawer. Keep it visible
+  //    there even during playback. (Outside fullscreen the control bar is right
+  //    below the player, so the button stays out of the way while watching.)
+  if (isAnyFullscreen()) {
+    topCornerMenuBtn.classList.add('is-visible');
+    return;
+  }
+
+  // 4. Otherwise: visible when paused (2), unstarted (-1), ended (0), cued (5)
   const state = playerGetState();
   const isPlaying = (state === 1); // 1 = YT.PlayerState.PLAYING
 
@@ -574,6 +609,9 @@ function updateFullscreenState() {
   if (fullscreenBtn) {
     fullscreenBtn.classList.toggle('active', isFs);
   }
+  // Entering or leaving fullscreen changes whether the corner menu is the only
+  // way to reach the chapters drawer, so re-evaluate it here.
+  updateTopCornerMenuVisibility();
 }
 
 renderSegmentsList();

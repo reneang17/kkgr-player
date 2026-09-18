@@ -158,16 +158,12 @@
     </section>
   </div>
 
-  <!-- 1. Load modular slide utilities -->
-  <script type="module" src="slide-utils/index.js"></script>
-
-  <!-- 1b. Load slide layout model (content fitting + uniform viewport scaling) -->
+  <!-- Slide layout model: typography fitting + uniform viewport scaling.
+       Loaded before the engine because the engine installs a controller from it. -->
   <script type="module" src="slide-layout.js"></script>
 
-  <!-- 2. Load active lesson slides & configuration -->
-  <script type="module" src="slides-data.js"></script>
-
-  <!-- 3. Load player engine & overlay manager -->
+  <!-- Player engine. It imports its lesson from lessons/index.js, chosen by the
+       ?lesson= query parameter, so this page is the template for every video. -->
   <script type="module" src="player.js"></script>
 
 

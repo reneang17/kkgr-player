@@ -1,0 +1,86 @@
+# Changelog
+
+## Slide Layout Rework
+
+This section records what changed in the slide rendering rework and, more
+usefully, *why*, so the reasoning is not lost.
+
+### The original defect
+
+The design was authored in container query units (`cqw`), which was the right
+idea. But the slide factories in `slide-utils/` also emitted inline font sizes
+like `clamp(0.95rem, 2.6cqw, 1.55rem)`, and `openStoppingSlide()` applied them
+as **inline styles** — which override the stylesheet unconditionally.
+
+At the ~960px laptop width the design was tuned at, the `rem` bounds happen to
+land almost exactly on the `cqw` values (24.8px vs 24.5px), so that one size
+looked correct and every other size degraded. Measured body size as a share of
+player width, against a design intent of 2.55%:
+
+| Player width | Before | Symptom |
+| :--- | :--- | :--- |
+| 375px (mobile) | 4.05% | 1.6x oversized: bullets clipped, overlapping the Continue button |
+| 960px (laptop) | 2.58% | correct — the single tuned size |
+| 1920px (fullscreen) | 1.29% | pinned at the `rem` cap, half its intended size |
+
+Two consequences followed:
+
+1. The `.is-dense` rules were **dead code**. With 7 bullets the class was applied
+   and the stylesheet asked for 17.8px, but the inline style still won at 24.8px.
+   Even at the "good" 960px size the content overlapped the footer by 65px and was
+   clipped 19px outside the stage.
+2. Nothing ever measured height. `cqw` is width-only, density was guessed from
+   bullet and character counts, and `.slide-bullets-box` used `min-height: fit-content`
+   inside a `min-height: 0` flex parent, so overflow escaped instead of being constrained.
+
+### What replaced it
+
+- **`slide-layout.js` (new)** — the whole layout model: design tokens, the
+  typography fitting search, and the uniform viewport scaler. See sections 1, 1b
+  and 1c above.
+- **Typography is owned solely by the model.** The factories no longer emit
+  `titleSize` / `bulletSize` defaults (they are `null`). Setting either one
+  explicitly on a slide is still honoured, as a deliberate escape hatch that opts
+  that slide out of fitting.
+- **`.is-dense` was removed entirely**, from both the stylesheet and
+  `openStoppingSlide()`. Density is now measured, not guessed.
+- **The slide is one composited surface.** The background artwork moved from
+  `.stopping-slide-layer` onto `.slide-canvas`, so art and type scale in lockstep.
+  This is also required for correctness: `transform` on the canvas creates a new
+  **backdrop root**, and a `backdrop-filter` can only sample what is painted inside
+  its own root. With the artwork left on the layer, the frosted card had nothing to
+  sample and rendered as flat dark slate. The radial scrim moved with it, to
+  `.slide-canvas::before`.
+- **The footer became player UI.** It renders outside the scaled canvas so it stays
+  legible and tappable on small players; its measured height is converted back into
+  logical units and reserved out of the content area, which is what guarantees it
+  can never cover slide text.
+- **Fullscreen gained a fallback** so mobile works at all. See section 1d.
+- Added `-webkit-backdrop-filter` alongside every `backdrop-filter` for iOS Safari.
+
+### Bugs found and fixed while testing
+
+- **Infinite loop in the fit search.** Float rounding let the bisection midpoint
+  collide with a bound, so the loop never terminated. The search now runs over an
+  integer grid.
+- **Stale scale after a background resize.** The rescale was deferred to
+  `requestAnimationFrame`, which is suspended while the page is hidden, so a player
+  resized in a background tab came back at the wrong scale. The scale is now applied
+  synchronously (it is only a rect read and a custom property write); only the rare
+  re-fit stays deferred. A `visibilitychange` listener reconciles anything missed.
+- **Silently dead fullscreen button.** Covered in section 1d.
+
+### Verified
+
+`npm test` (22 checks) and `npm run build` pass. Exercised in-browser across
+2 / 4 / 7 / 14 bullets, a single overlong bullet, all three slide archetypes,
+375px to 3840px, mobile portrait and landscape, pseudo fullscreen entry and exit,
+resizing while a keypoint is displayed, and the real playback flow including
+pause-on-keypoint, focus handling, Enter/button resume and rewind re-arming.
+
+Not verified on hardware: native fullscreen could not be exercised in the
+available automation environments (both refused the Fullscreen API), and no iOS
+device or simulator was available. The desktop native path is unchanged from the
+previously working implementation.
+
+---

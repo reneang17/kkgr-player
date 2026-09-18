@@ -1,20 +1,17 @@
 /**
- * slides-data.js
- * Active lesson content, video configuration, chapter segments, and interactive slide overlays.
+ * lessons/jewel-ornament-01.js
+ * Lesson content: Khenchen Rinpoche — Jewel Ornament of Liberation, Part 1.
  *
- * Slide utilities available:
- * - announcement(redText, blackText, options)
- * - comingUp(bullets, options)
- * - takeaways(bullets, options)
- * - finalSlide(title, options)
- * - stoppingSlide(at, title, bullets, options)
- * - timedPanel(at, until, title, bullets, options)
+ * This file is PURE DATA. It contains no DOM access, no player calls and no
+ * styling: only the video id, the chapter markers and the slide timeline. Every
+ * lesson is a file like this one, and adding a video means adding a file here
+ * and registering it in lessons/index.js — nothing in the engine changes.
+ *
+ * See docs/AUTHORING-LESSONS.md for the full authoring guide.
  */
 
-/* ==========================================================================
-   CONFIGURATION
-   Edit video ID, background image, video segments, and slide overlays here.
-   ========================================================================== */
+import { announcement, comingUp, takeaways, finalSlide } from '../slide-utils/index.js';
+
 const VIDEO_ID = "j8WneixXOV4";
 const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
 
@@ -230,18 +227,16 @@ const SLIDES = [
   })
 ];
 
-// Expose globally on window for full compatibility across modules & classic scripts
-if (typeof window !== 'undefined') {
-  window.VIDEO_ID = VIDEO_ID;
-  window.SLIDE_BG = SLIDE_BG;
-  window.SEGMENTS = SEGMENTS;
-  window.SLIDES = SLIDES;
-  window.LESSON_DATA = {
-    videoId: VIDEO_ID,
-    slideBg: SLIDE_BG,
-    segments: SEGMENTS,
-    slides: SLIDES
-  };
-}
+/** The lesson descriptor consumed by the player engine. */
+export const lesson = {
+  id: 'jewel-ornament-01',
+  title: 'Khenchen Rinpoche',
+  subtitle: 'Teachings on the Jewel Ornament of Liberation',
+  videoId: VIDEO_ID,
+  slideBg: SLIDE_BG,
+  segments: SEGMENTS,
+  slides: SLIDES
+};
 
-
+export default lesson;
+export { VIDEO_ID, SLIDE_BG, SEGMENTS, SLIDES };
