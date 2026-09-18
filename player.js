@@ -223,6 +223,7 @@ const chaptersDrawerBackdrop = document.getElementById('chapters-drawer-backdrop
 const chaptersDrawerClose = document.getElementById('chapters-drawer-close');
 const chaptersDrawerList = document.getElementById('chapters-drawer-list');
 const fullscreenBtn = document.getElementById('fullscreen-btn');
+const pseudoFsExitBtn = document.getElementById('pseudo-fs-exit-btn');
 const fullscreenIconExpand = document.getElementById('fullscreen-icon-expand');
 const fullscreenIconCompress = document.getElementById('fullscreen-icon-compress');
 
@@ -475,13 +476,85 @@ function updateTopCornerMenuVisibility() {
 }
 
 /* Fullscreen Controller */
+/* The Fullscreen API is not available for ordinary elements on every device.
+   iOS Safari on iPhone in particular exposes fullscreen only on <video> (via
+   webkitEnterFullscreen); a <div> has neither requestFullscreen nor
+   webkitRequestFullscreen. Without a fallback the button silently did nothing
+   there, so the only way to go fullscreen was YouTube's own control inside the
+   iframe — and our slide overlay, chapters drawer and corner menu cannot render
+   over a natively fullscreened iframe. The result was a lesson that paused at a
+   keypoint without ever showing the slide.
+
+   When the native API is unavailable (or refuses), we fall back to a CSS
+   "pseudo fullscreen": the player box is pinned over the viewport with
+   position: fixed. Everything stays inside our own DOM, so overlays, the
+   chapters drawer and the corner menu keep working, and the slide layout model
+   rescales automatically through its ResizeObserver on the player stage. */
+
+function nativeFullscreenSupported() {
+  return !!(playerBox && (playerBox.requestFullscreen || playerBox.webkitRequestFullscreen));
+}
+
+function isNativeFullscreen() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement);
+}
+
+function isPseudoFullscreen() {
+  return !!(playerBox && playerBox.classList.contains('is-pseudo-fullscreen'));
+}
+
+function isAnyFullscreen() {
+  return isNativeFullscreen() || isPseudoFullscreen();
+}
+
+function enterPseudoFullscreen() {
+  if (!playerBox) return;
+  playerBox.classList.add('is-pseudo-fullscreen');
+  document.body.classList.add('has-pseudo-fullscreen');
+  updateFullscreenState();
+  // No fullscreenchange event fires for the pseudo mode, so nudge the layout
+  // model directly. (Its ResizeObserver also catches this on its own.)
+  if (slideLayout) slideLayout.refresh();
+}
+
+function exitPseudoFullscreen() {
+  if (!playerBox) return;
+  playerBox.classList.remove('is-pseudo-fullscreen');
+  document.body.classList.remove('has-pseudo-fullscreen');
+  updateFullscreenState();
+  if (slideLayout) slideLayout.refresh();
+}
+
 function toggleFullscreen() {
   if (!playerBox) return;
-  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-    if (playerBox.requestFullscreen) {
-      playerBox.requestFullscreen().catch(err => console.warn('Fullscreen request failed:', err));
-    } else if (playerBox.webkitRequestFullscreen) {
-      playerBox.webkitRequestFullscreen();
+
+  if (isPseudoFullscreen()) {
+    exitPseudoFullscreen();
+    return;
+  }
+
+  if (!isNativeFullscreen()) {
+    if (!nativeFullscreenSupported()) {
+      enterPseudoFullscreen();
+      return;
+    }
+    // A refusal can surface either way: Chrome throws TypeError synchronously
+    // when its permissions check fails (hidden tab, embedded context that
+    // disallows fullscreen), while other cases reject the returned promise.
+    // Both must fall back, otherwise the button is silently dead.
+    const onRefused = (err) => {
+      console.warn('Fullscreen request failed, using pseudo fullscreen:', err);
+      enterPseudoFullscreen();
+    };
+    try {
+      const request = playerBox.requestFullscreen
+        ? playerBox.requestFullscreen()
+        : playerBox.webkitRequestFullscreen();
+      if (request && typeof request.catch === 'function') {
+        request.catch(onRefused);
+      }
+    } catch (err) {
+      onRefused(err);
     }
   } else {
     if (document.exitFullscreen) {
@@ -493,7 +566,7 @@ function toggleFullscreen() {
 }
 
 function updateFullscreenState() {
-  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  const isFs = isAnyFullscreen();
   if (fullscreenIconExpand && fullscreenIconCompress) {
     fullscreenIconExpand.style.display = isFs ? 'none' : 'block';
     fullscreenIconCompress.style.display = isFs ? 'block' : 'none';
@@ -846,6 +919,13 @@ if (fullscreenBtn) {
   });
 }
 
+if (pseudoFsExitBtn) {
+  pseudoFsExitBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    exitPseudoFullscreen();
+  });
+}
+
 document.addEventListener('fullscreenchange', updateFullscreenState);
 document.addEventListener('webkitfullscreenchange', updateFullscreenState);
 
@@ -883,6 +963,14 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'Escape' && chaptersDrawerLayer && chaptersDrawerLayer.classList.contains('active')) {
     e.preventDefault();
     closeChaptersDrawer();
+    return;
+  }
+
+  // The browser exits native fullscreen on Escape by itself, but pseudo
+  // fullscreen is ours to close.
+  if (e.code === 'Escape' && !activeStoppingSlide && isPseudoFullscreen()) {
+    e.preventDefault();
+    exitPseudoFullscreen();
     return;
   }
 

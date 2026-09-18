@@ -125,6 +125,56 @@ can never cover slide text at any player size.
 
 ---
 
+### 1d. Fullscreen & Mobile Playback
+
+Fullscreen has two implementations behind one button, because the Fullscreen API
+is not universally available for ordinary elements.
+
+**Native fullscreen** (`requestFullscreen` / `webkitRequestFullscreen`) is used
+wherever the browser supports it — desktop Chrome, Safari, Firefox, Edge, and
+Android Chrome.
+
+**Pseudo fullscreen** is the fallback. `#player-box` gets the
+`.is-pseudo-fullscreen` class, which pins it over the viewport with
+`position: fixed; inset: 0`, and `<body>` gets `.has-pseudo-fullscreen` to stop
+the page scrolling underneath. It is entered when:
+
+- the native API is **absent** — most importantly **iOS Safari on iPhone**, where
+  fullscreen exists only on `<video>` (`webkitEnterFullscreen`) and a `<div>` has
+  neither `requestFullscreen` nor `webkitRequestFullscreen`; or
+- the native API is **refused** — the request can fail either by throwing
+  synchronously (Chrome's permissions check, e.g. a hidden tab or an embedded
+  context that disallows fullscreen) or by rejecting its promise. Both paths fall
+  back, so the button is never silently dead.
+
+**Why this matters for lessons.** Without the fallback, tapping fullscreen on an
+iPhone did nothing, so the only way to go fullscreen was YouTube's own control
+*inside the iframe*. A natively fullscreened iframe cannot be overlaid by our
+DOM, so the slide layer, chapters drawer and corner menu all disappeared: the
+lesson paused at a keypoint and simply showed a frozen video with no slide.
+Pseudo fullscreen keeps everything inside our own DOM, so overlays keep working.
+
+**Exiting.** Native fullscreen is dismissed by the browser (Escape, system UI).
+Pseudo fullscreen covers the control bar and phones have no Escape key, so the
+player renders its own exit button (`#pseudo-fs-exit-btn`) in the top-left of the
+stage whenever pseudo fullscreen is active. Escape also exits it on desktop.
+
+**Chapters in fullscreen.** The floating corner menu (`.top-corner-menu-btn`) is
+normally gated to narrow or touch viewports. In pseudo fullscreen it is shown at
+any width, because the control bar beneath the player is covered and it is then
+the only route into the chapters drawer.
+
+**Rescaling.** Pseudo fullscreen fires no `fullscreenchange` event, but the slide
+layout model observes the player stage with a `ResizeObserver`, so the slide
+rescales on entering and leaving either mode without any extra wiring.
+
+> **CSS note:** the native fullscreen rules are written as one rule per selector
+> rather than a selector list. A list containing a pseudo-class the browser does
+> not recognise (such as `:-webkit-full-screen` in Firefox) invalidates the
+> *entire* rule, which would silently drop fullscreen styling in that browser.
+
+---
+
 ### 2. Slide Visualization Archetypes
 
 The player provides distinct, specialized visualization templates tailored for pedagogical pacing:
@@ -169,7 +219,7 @@ kkgr-player/
 ├── slides-data.js          # Declarative lesson data (VIDEO_ID, SEGMENTS, SLIDES timeline)
 ├── player.js               # Playback engine: YouTube API sync, time loop, drawer & fullscreen
 ├── slide-layout.js         # Slide layout model: design tokens, typography fitting, uniform scaling
-├── slide-layout.test.js    # Focused checks on the typography constraints (node slide-layout.test.js)
+├── slide-layout.test.js    # Focused checks on the typography constraints (npm test)
 ├── slide-utils/            # Functional slide generator helpers
 │   ├── index.js            # Unified export hub for slide utilities
 │   ├── announcement.js     # Lower-third banner generator with duration & reading-time calculation
@@ -211,7 +261,13 @@ kkgr-player/
    - Step-by-step bullet point reveal via `Space`, mouse click, or tap.
    - Continue / Resume playback via `Enter`, `Escape`, or clicking the animated `Continue lesson ➔` button.
 
-6. **In-Player Chapters Drawer & Fullscreen Controller**:
+6. **Slide Layout Model (`slide-layout.js`)**:
+   - Fits each slide's typography on the logical 1600 x 900 canvas once, when it opens.
+   - Rescales that canvas uniformly on every resize / fullscreen / orientation change
+     via a `ResizeObserver` on `.player-stage`.
+   - Reports slides that exceed readable capacity instead of shrinking them further.
+
+7. **In-Player Chapters Drawer & Fullscreen Controller**:
    - Slide-in glassmorphism chapters panel accessible directly over the video in both windowed and fullscreen modes.
    - Fullscreen container expansion (`#player-box:fullscreen`) ensuring all overlays and interactive components remain functional in fullscreen mode.
 
@@ -291,6 +347,91 @@ To expand the codebase into a full multi-lecture platform:
 ### Pattern B: Headless JSON API / CMS Integration
 1. Host lesson data as JSON configurations with video IDs, chapter arrays, and slide definitions.
 2. Fetch and hydrate the player dynamically: `fetch('/api/lessons/' + id).then(r => r.json()).then(setupPlayer)`.
+
+---
+
+## 🗒️ Changelog — Slide Layout Rework
+
+This section records what changed in the slide rendering rework and, more
+usefully, *why*, so the reasoning is not lost.
+
+### The original defect
+
+The design was authored in container query units (`cqw`), which was the right
+idea. But the slide factories in `slide-utils/` also emitted inline font sizes
+like `clamp(0.95rem, 2.6cqw, 1.55rem)`, and `openStoppingSlide()` applied them
+as **inline styles** — which override the stylesheet unconditionally.
+
+At the ~960px laptop width the design was tuned at, the `rem` bounds happen to
+land almost exactly on the `cqw` values (24.8px vs 24.5px), so that one size
+looked correct and every other size degraded. Measured body size as a share of
+player width, against a design intent of 2.55%:
+
+| Player width | Before | Symptom |
+| :--- | :--- | :--- |
+| 375px (mobile) | 4.05% | 1.6x oversized: bullets clipped, overlapping the Continue button |
+| 960px (laptop) | 2.58% | correct — the single tuned size |
+| 1920px (fullscreen) | 1.29% | pinned at the `rem` cap, half its intended size |
+
+Two consequences followed:
+
+1. The `.is-dense` rules were **dead code**. With 7 bullets the class was applied
+   and the stylesheet asked for 17.8px, but the inline style still won at 24.8px.
+   Even at the "good" 960px size the content overlapped the footer by 65px and was
+   clipped 19px outside the stage.
+2. Nothing ever measured height. `cqw` is width-only, density was guessed from
+   bullet and character counts, and `.slide-bullets-box` used `min-height: fit-content`
+   inside a `min-height: 0` flex parent, so overflow escaped instead of being constrained.
+
+### What replaced it
+
+- **`slide-layout.js` (new)** — the whole layout model: design tokens, the
+  typography fitting search, and the uniform viewport scaler. See sections 1, 1b
+  and 1c above.
+- **Typography is owned solely by the model.** The factories no longer emit
+  `titleSize` / `bulletSize` defaults (they are `null`). Setting either one
+  explicitly on a slide is still honoured, as a deliberate escape hatch that opts
+  that slide out of fitting.
+- **`.is-dense` was removed entirely**, from both the stylesheet and
+  `openStoppingSlide()`. Density is now measured, not guessed.
+- **The slide is one composited surface.** The background artwork moved from
+  `.stopping-slide-layer` onto `.slide-canvas`, so art and type scale in lockstep.
+  This is also required for correctness: `transform` on the canvas creates a new
+  **backdrop root**, and a `backdrop-filter` can only sample what is painted inside
+  its own root. With the artwork left on the layer, the frosted card had nothing to
+  sample and rendered as flat dark slate. The radial scrim moved with it, to
+  `.slide-canvas::before`.
+- **The footer became player UI.** It renders outside the scaled canvas so it stays
+  legible and tappable on small players; its measured height is converted back into
+  logical units and reserved out of the content area, which is what guarantees it
+  can never cover slide text.
+- **Fullscreen gained a fallback** so mobile works at all. See section 1d.
+- Added `-webkit-backdrop-filter` alongside every `backdrop-filter` for iOS Safari.
+
+### Bugs found and fixed while testing
+
+- **Infinite loop in the fit search.** Float rounding let the bisection midpoint
+  collide with a bound, so the loop never terminated. The search now runs over an
+  integer grid.
+- **Stale scale after a background resize.** The rescale was deferred to
+  `requestAnimationFrame`, which is suspended while the page is hidden, so a player
+  resized in a background tab came back at the wrong scale. The scale is now applied
+  synchronously (it is only a rect read and a custom property write); only the rare
+  re-fit stays deferred. A `visibilitychange` listener reconciles anything missed.
+- **Silently dead fullscreen button.** Covered in section 1d.
+
+### Verified
+
+`npm test` (22 checks) and `npm run build` pass. Exercised in-browser across
+2 / 4 / 7 / 14 bullets, a single overlong bullet, all three slide archetypes,
+375px to 3840px, mobile portrait and landscape, pseudo fullscreen entry and exit,
+resizing while a keypoint is displayed, and the real playback flow including
+pause-on-keypoint, focus handling, Enter/button resume and rewind re-arming.
+
+Not verified on hardware: native fullscreen could not be exercised in the
+available automation environments (both refused the Fullscreen API), and no iOS
+device or simulator was available. The desktop native path is unchanged from the
+previously working implementation.
 
 ---
 

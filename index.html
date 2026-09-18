@@ -59,6 +59,16 @@
           </div>
         </div>
 
+        <!-- Exit button for pseudo fullscreen. In native fullscreen the browser
+             provides its own way out (Escape / system UI), but pseudo fullscreen
+             covers the control bar and phones have no Escape key, so without this
+             the viewer would be trapped. Shown only while pseudo fullscreen is on. -->
+        <button class="pseudo-fs-exit-btn" id="pseudo-fs-exit-btn" type="button" aria-label="Exit full screen" title="Exit full screen">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+          </svg>
+        </button>
+
         <!-- Floating Top-Right Chapters Menu Button (Accessible in standard and fullscreen mode) -->
         <button class="top-corner-menu-btn" id="top-corner-menu-btn" type="button" aria-label="Open chapters menu" aria-expanded="false" title="Chapters & Topics">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
