@@ -229,6 +229,10 @@ const fullscreenIconCompress = document.getElementById('fullscreen-icon-compress
 
 // Stopping slide elements
 const stoppingSlideLayer = document.getElementById('stopping-slide');
+const slideCanvas = document.getElementById('slide-canvas');
+const stoppingContent = document.getElementById('stopping-content');
+const stoppingFooter = document.getElementById('stopping-footer');
+const playerStage = document.getElementById('player-stage');
 const stoppingLabel = document.getElementById('stopping-label');
 const stoppingTitle = document.getElementById('stopping-title');
 const stoppingBulletsBox = document.getElementById('stopping-bullets-box');
@@ -248,6 +252,21 @@ const announcementLayer = document.getElementById('announcement-layer');
 const announcementPrimary = document.getElementById('announcement-primary');
 const announcementSecondary = document.getElementById('announcement-secondary');
 
+/* Slide layout controller: fits slide content on the logical 1600x900 canvas and
+   scales that canvas uniformly into the player. See slide-layout.js. */
+const slideLayout = (window.KKGRSlideLayout && playerStage && slideCanvas && stoppingContent)
+  ? window.KKGRSlideLayout.createSlideLayout({
+      stage: playerStage,
+      canvas: slideCanvas,
+      content: stoppingContent,
+      footer: stoppingFooter
+    })
+  : null;
+
+if (window.KKGRSlideLayout) {
+  window.KKGRSlideLayout.controller = slideLayout;
+}
+
 // State
 let activeStoppingSlide = null;
 let stoppingQueue = [];
@@ -258,9 +277,20 @@ let activeTimedSlide = null;
 let activeAnnouncement = null;
 let lastKnownTime = 0;
 
-/* Apply optional custom background if provided */
+/* Apply optional custom background if provided.
+   The artwork is painted on the scaled canvas, not on the layer, so it composites
+   as part of the presentation surface. See .slide-canvas in style.css. */
+function setSlideBackground(url) {
+  if (!slideCanvas) return;
+  if (url && url.trim() !== '') {
+    slideCanvas.style.setProperty('--slide-bg', `url('${url}')`);
+  } else {
+    slideCanvas.style.setProperty('--slide-bg', 'none');
+  }
+}
+
 if (currentSlideBg && currentSlideBg.trim() !== "") {
-  stoppingSlideLayer.style.backgroundImage = `url('${currentSlideBg}')`;
+  setSlideBackground(currentSlideBg);
 }
 
 /* ==========================================================================
@@ -504,20 +534,14 @@ function openStoppingSlide(slide) {
   stoppingSlideLayer.classList.toggle('takeaways-mode', isTakeaways);
   stoppingSlideLayer.classList.toggle('final-mode', isFinal);
 
-  // Automatic density detection: if 5+ bullets or 340+ characters, apply dense mode
-  const totalChars = Array.isArray(slide.bullets) ? slide.bullets.reduce((acc, b) => acc + (b ? b.length : 0), 0) : 0;
-  const bulletCount = Array.isArray(slide.bullets) ? slide.bullets.length : 0;
-  const isDense = slide.density === 'compact' || slide.density === 'dense' || (slide.density !== 'spacious' && (bulletCount >= 5 || totalChars >= 340));
-  stoppingSlideLayer.classList.toggle('is-dense', isDense);
+  // Density is no longer guessed from bullet/character counts. The layout model
+  // measures the rendered content and picks a typographic step for it; see the
+  // slideLayout.layout() call at the end of this function.
 
   // Set background image
   const bgImage = slide.bg || currentSlideBg;
 
-  if (bgImage && bgImage.trim() !== '') {
-    stoppingSlideLayer.style.backgroundImage = `url('${bgImage}')`;
-  } else {
-    stoppingSlideLayer.style.backgroundImage = 'none';
-  }
+  setSlideBackground(bgImage);
 
   // Category label (hide for coming-up, takeaways, and final)
   if (isComingUp || isTakeaways || isFinal) {
@@ -556,7 +580,11 @@ function openStoppingSlide(slide) {
     }
   }
 
-  // Set heading text & font styling
+  // Set heading text & font styling.
+  // Font SIZE is owned by the layout model and must not be set inline here: an
+  // inline size would override the fitted value. `titleSize` / `bulletSize` are
+  // honoured only when a slide author sets them explicitly, as a deliberate escape
+  // hatch that opts that slide out of fitting.
   stoppingTitle.textContent = slide.title;
   stoppingTitle.style.fontFamily = slide.font || '';
   stoppingTitle.style.fontSize = slide.titleSize || '';
@@ -604,6 +632,13 @@ function openStoppingSlide(slide) {
   // Show overlay layer & focus
   stoppingSlideLayer.classList.add('active');
   stoppingSlideLayer.setAttribute('aria-hidden', 'false');
+
+  // Fit the slide on the logical canvas and scale it to the player. Runs after the
+  // layer is visible so the content has real measurable geometry.
+  if (slideLayout) {
+    slideLayout.layout(slide);
+  }
+
   stoppingSlideLayer.focus();
 
   // Hide top-corner menu button during stopping slides
@@ -644,7 +679,9 @@ function closeStoppingSlide(resumePlayback = true) {
   stoppingSlideLayer.classList.remove('coming-up-mode');
   stoppingSlideLayer.classList.remove('takeaways-mode');
   stoppingSlideLayer.classList.remove('final-mode');
-  stoppingSlideLayer.classList.remove('is-dense');
+  if (slideLayout) {
+    slideLayout.release();
+  }
   if (stoppingBulletsBox) {
     stoppingBulletsBox.style.display = '';
   }

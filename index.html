@@ -20,75 +20,83 @@
 
     <!-- 2. Player with 16:9 Aspect Ratio Container -->
     <div class="player-aspect-box" id="player-box">
-      <!-- YouTube Video Container Layer -->
-      <div class="video-layer">
-        <div id="yt-player"></div>
-      </div>
-
-      <!-- Stopping Slide Overlay Layer -->
-      <div class="stopping-slide-layer" id="stopping-slide" role="dialog" aria-modal="true" aria-hidden="true" tabindex="0">
-        <div class="stopping-slide-content">
-          <span class="slide-label" id="stopping-label">Overview</span>
-          <h2 class="slide-heading" id="stopping-title">Slide Title</h2>
-          <div class="slide-bullets-box" id="stopping-bullets-box">
-            <ul class="slide-bullets" id="stopping-bullets"></ul>
-          </div>
+      <div class="player-stage" id="player-stage">
+        <!-- YouTube Video Container Layer -->
+        <div class="video-layer">
+          <div id="yt-player"></div>
         </div>
-        <div class="stopping-slide-footer">
-          <span class="slide-tip" id="slide-hint">Click or press Space for next point</span>
-          <button class="continue-btn" id="continue-btn" disabled>
-            <span id="continue-btn-text">Continue lesson</span>
-            <span aria-hidden="true">&rarr;</span>
-          </button>
-        </div>
-      </div>
 
-      <!-- Timed Side Panel Overlay Layer -->
-      <div class="timed-panel-layer" id="timed-panel" aria-hidden="true">
-        <div class="timed-panel-content">
-          <span class="slide-label" id="timed-label">Take-home</span>
-          <h2 class="slide-heading" id="timed-title">Slide Title</h2>
-          <ul class="slide-bullets" id="timed-bullets"></ul>
-        </div>
-      </div>
-
-      <!-- Floating Top-Right Chapters Menu Button (Accessible in standard and fullscreen mode) -->
-      <button class="top-corner-menu-btn" id="top-corner-menu-btn" type="button" aria-label="Open chapters menu" aria-expanded="false" title="Chapters & Topics">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="4" y1="6" x2="20" y2="6"></line>
-          <line x1="4" y1="12" x2="20" y2="12"></line>
-          <line x1="4" y1="18" x2="20" y2="18"></line>
-        </svg>
-      </button>
-
-      <!-- Announcement Lower-Third Overlay Layer -->
-      <div class="announcement-layer" id="announcement-layer" aria-hidden="true">
-        <div class="announcement-banner" id="announcement-banner">
-          <div class="announcement-primary" id="announcement-primary"></div>
-          <div class="announcement-secondary" id="announcement-secondary"></div>
-        </div>
-      </div>
-
-
-      <!-- In-Player Chapters Drawer Layer (Accessible in standard and fullscreen mode) -->
-      <div class="chapters-drawer-layer" id="chapters-drawer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Video Chapters">
-        <div class="chapters-drawer-backdrop" id="chapters-drawer-backdrop"></div>
-        <div class="chapters-drawer-panel">
-          <div class="chapters-drawer-header">
-            <div class="chapters-drawer-title-group">
-              <svg class="chapters-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-              </svg>
-              <span class="chapters-drawer-title">Chapters &amp; Topics</span>
+        <!-- Stopping Slide Overlay Layer -->
+        <div class="stopping-slide-layer" id="stopping-slide" role="dialog" aria-modal="true" aria-hidden="true" tabindex="0">
+          <!-- Logical presentation canvas (1600x900). Laid out at a fixed logical size,
+               then fitted to the player with a single uniform transform. -->
+          <div class="slide-canvas" id="slide-canvas">
+            <div class="stopping-slide-content" id="stopping-content">
+              <span class="slide-label" id="stopping-label">Overview</span>
+              <h2 class="slide-heading" id="stopping-title">Slide Title</h2>
+              <div class="slide-bullets-box" id="stopping-bullets-box">
+                <ul class="slide-bullets" id="stopping-bullets"></ul>
+              </div>
             </div>
-            <button class="chapters-drawer-close" id="chapters-drawer-close" type="button" aria-label="Close chapters menu">
-              &times;
+          </div>
+          <!-- Player UI: stays readable and tappable at any player size, and its
+               footprint is reserved out of the canvas so it cannot cover slide text. -->
+          <div class="stopping-slide-footer" id="stopping-footer">
+            <span class="slide-tip" id="slide-hint">Click or press Space for next point</span>
+            <button class="continue-btn" id="continue-btn" disabled>
+              <span id="continue-btn-text">Continue lesson</span>
+              <span aria-hidden="true">&rarr;</span>
             </button>
           </div>
-          <ul class="chapters-drawer-list" id="chapters-drawer-list">
-            <!-- Dynamically generated list items -->
-          </ul>
+        </div>
+
+        <!-- Timed Side Panel Overlay Layer -->
+        <div class="timed-panel-layer" id="timed-panel" aria-hidden="true">
+          <div class="timed-panel-content">
+            <span class="slide-label" id="timed-label">Take-home</span>
+            <h2 class="slide-heading" id="timed-title">Slide Title</h2>
+            <ul class="slide-bullets" id="timed-bullets"></ul>
+          </div>
+        </div>
+
+        <!-- Floating Top-Right Chapters Menu Button (Accessible in standard and fullscreen mode) -->
+        <button class="top-corner-menu-btn" id="top-corner-menu-btn" type="button" aria-label="Open chapters menu" aria-expanded="false" title="Chapters & Topics">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="18" x2="20" y2="18"></line>
+          </svg>
+        </button>
+
+        <!-- Announcement Lower-Third Overlay Layer -->
+        <div class="announcement-layer" id="announcement-layer" aria-hidden="true">
+          <div class="announcement-banner" id="announcement-banner">
+            <div class="announcement-primary" id="announcement-primary"></div>
+            <div class="announcement-secondary" id="announcement-secondary"></div>
+          </div>
+        </div>
+
+
+        <!-- In-Player Chapters Drawer Layer (Accessible in standard and fullscreen mode) -->
+        <div class="chapters-drawer-layer" id="chapters-drawer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Video Chapters">
+          <div class="chapters-drawer-backdrop" id="chapters-drawer-backdrop"></div>
+          <div class="chapters-drawer-panel">
+            <div class="chapters-drawer-header">
+              <div class="chapters-drawer-title-group">
+                <svg class="chapters-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                <span class="chapters-drawer-title">Chapters &amp; Topics</span>
+              </div>
+              <button class="chapters-drawer-close" id="chapters-drawer-close" type="button" aria-label="Close chapters menu">
+                &times;
+              </button>
+            </div>
+            <ul class="chapters-drawer-list" id="chapters-drawer-list">
+              <!-- Rendered dynamically by player.js -->
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -142,6 +150,9 @@
 
   <!-- 1. Load modular slide utilities -->
   <script type="module" src="slide-utils/index.js"></script>
+
+  <!-- 1b. Load slide layout model (content fitting + uniform viewport scaling) -->
+  <script type="module" src="slide-layout.js"></script>
 
   <!-- 2. Load active lesson slides & configuration -->
   <script type="module" src="slides-data.js"></script>

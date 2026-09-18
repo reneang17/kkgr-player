@@ -72,9 +72,8 @@
       boxPadding: config.boxPadding || null,
       boxMaxWidth: config.boxMaxWidth || null,
       buttonText: config.buttonText || "Continue lesson",
-      titleSize: config.titleSize || "clamp(1.5rem, 5.2cqw, 3.1rem)",
-      bulletSize: config.bulletSize || "clamp(0.95rem, 2.6cqw, 1.55rem)",
-      density: config.density || null,
+      titleSize: config.titleSize || null,   // null = let the layout model fit it
+      bulletSize: config.bulletSize || null, // null = let the layout model fit it
       revealAll: config.revealAll !== undefined ? config.revealAll : true,
       pause: true,
       align: "center"

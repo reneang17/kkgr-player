@@ -38,7 +38,7 @@
       bg: config.bg || "slides/coming-up-bg.png",
       font: config.font || "'Crimson Pro', 'Lora', Georgia, serif",
       buttonText: config.buttonText || "Finish lesson",
-      titleSize: config.titleSize || "clamp(2rem, 6.5cqw, 4.2rem)",
+      titleSize: config.titleSize || null,   // null = let the layout model fit it
       align: "center",
       pause: true,
       revealAll: true,
