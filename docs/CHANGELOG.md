@@ -32,6 +32,16 @@ Three decisions worth keeping:
   never begin — and needed a dedicated `once` flag to suppress. Segment-opened
   slides sidestep the timeline entirely, so that flag and its guards are gone.
 
+- **The dedication is offered as a segment too, without leaving the timeline.**
+  A viewer can go straight to it to dedicate or to learn the chant, and the
+  teaching still reaches it in its proper place at the end.
+
+  This required splitting one flag into two. `openFromSegment` had meant both
+  "list it as a segment" and "do not fire on the timeline", which is right for
+  the refuge slide and wrong for the dedication. Listing and timeline firing are
+  now independent: `openFromSegment` lists it, `onTimeline` (default true) says
+  whether the teaching reaches it.
+
   In the segments list an action segment shows a bullet instead of a timestamp,
   is described as "Open ..." rather than "Seek to ...", sorts before a position
   sharing its timestamp, and never lights up as the active chapter.

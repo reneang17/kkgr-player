@@ -236,8 +236,9 @@ const normalizedSlides = currentSlides.map((slide, index) => {
     untilSeconds,
     isStopping,
     duration,
-    // Gating flag (see slide-utils/image-slide.js)
+    // Gating flags (see slide-utils/image-slide.js)
     openFromSegment: slide.openFromSegment === true,
+    onTimeline: slide.onTimeline !== false,
     // Runtime tracking flags
     passed: false
   };
@@ -1267,9 +1268,10 @@ function checkPlaybackTime() {
   const triggeredAnnouncements = [];
 
   normalizedSlides.forEach((slide) => {
-    // Segment-opened slides are offered in the segments list and shown only when
-    // the viewer chooses them, so the timeline never fires them.
-    if (slide.openFromSegment) return;
+    // A slide may be listed in the segments panel and still be reached by the
+    // teaching (the dedication). Only skip the ones that are not on the timeline
+    // at all (the refuge slide).
+    if (!slide.onTimeline) return;
     // Trigger condition: current time reached marker and slide hasn't fired yet
     if (!slide.passed && currentTime >= slide.atSeconds && currentTime < slide.atSeconds + 2.0) {
       slide.passed = true;

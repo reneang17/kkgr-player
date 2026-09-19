@@ -19,9 +19,13 @@
  * @param {string} src - image path, e.g. 'slides/refuge.png' (16:9 recommended)
  * @param {Object} [options]
  *   @param {string}  [options.at]         - timestamp, as for any other slide
- *   @param {boolean} [options.openFromSegment] - do not fire on the timeline; list
- *                                           the slide as a segment the viewer can
- *                                           choose, and open it when they do
+ *   @param {boolean} [options.openFromSegment] - also list the slide in the
+ *                                           segments panel, so the viewer can
+ *                                           open it whenever they like
+ *   @param {boolean} [options.onTimeline=true] - whether the timeline fires it at
+ *                                           `at`. Independent of the segment
+ *                                           entry: the dedication does both, the
+ *                                           refuge slide only the segment
  *   @param {string}  [options.segmentTitle] - label for that segment entry
  *   @param {string}  [options.segmentNote]  - secondary line for that entry
  *   @param {'contain'|'cover'} [options.imageFit='contain']
@@ -43,9 +47,10 @@ export function imageSlide(src, options = {}) {
   return {
     kind: options.kind || 'image',
     at: options.at || '0:00',
-    // A segment-opened slide is never triggered by the timeline: it is offered in
-    // the segments list and shown only if the viewer asks for it.
+    // Two independent questions: may the viewer open this from the segments
+    // list, and does the timeline also reach it at `at`?
     openFromSegment,
+    onTimeline: options.onTimeline !== undefined ? options.onTimeline : true,
     segmentTitle: options.segmentTitle || options.title || '',
     segmentNote: options.segmentNote || '',
     title: options.title || '',
@@ -81,6 +86,9 @@ export function refuge(src, options = {}) {
     title: 'Refuge',
     buttonText: 'Begin lesson',
     openFromSegment: true,
+    // 0:00 is where it is listed, not a cue: the timeline must never fire it, or
+    // pressing play would show it whether or not the viewer asked for it.
+    onTimeline: false,
     segmentTitle: 'Refuge',
     segmentNote: 'Take refuge before the teaching begins',
     ...options
@@ -92,6 +100,10 @@ export function refuge(src, options = {}) {
  * timestamp as the closing slide: slide priority puts the dedication after the
  * final takeaways and before "Thanks for watching".
  *
+ * Unlike the refuge slide it does both: the teaching reaches it in its proper
+ * place, and it is also listed in the segments panel so a viewer can go to it
+ * directly — to dedicate without watching to the end, or to learn the chant.
+ *
  * @param {string} src
  * @param {Object} [options] - `at` is required in practice
  * @returns {Object} stopping slide descriptor
@@ -101,6 +113,9 @@ export function dedication(src, options = {}) {
     kind: 'dedication',
     title: 'Dedication',
     buttonText: 'Continue lesson',
+    openFromSegment: true,
+    segmentTitle: 'Dedication',
+    segmentNote: 'Dedicate the merit of the teaching',
     ...options
   });
 }

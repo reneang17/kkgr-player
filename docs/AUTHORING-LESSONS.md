@@ -95,7 +95,7 @@ other stopping slides → announcements.
 | `takeaways(bullets, opts)` | Yes | Consolidating points after a section. Frosted translucent card. |
 | `finalSlide(title, opts)` | Yes | Closing the lesson. One large centred line. |
 | `refuge(src, opts)` | Yes | Refuge prayer, offered as a segment before the video starts. |
-| `dedication(src, opts)` | Yes | Dedication, shown near the end before the closing slide. |
+| `dedication(src, opts)` | Yes | Dedication, shown near the end and also offered as a segment. |
 | `imageSlide(src, opts)` | Yes | Any other full-frame image slide. |
 | `timedPanel(at, until, …)` | No | Notes alongside continuing playback. |
 | `stoppingSlide(at, title, …)` | Yes | Anything the named archetypes do not cover. |
@@ -134,8 +134,20 @@ timestamp because it is an action and not a place in the video. Choosing it open
 the slide with the video still paused; continuing from it starts the teaching.
 A viewer who simply presses play goes straight into the lesson and never sees it.
 
-Any image slide can work this way — pass `openFromSegment: true` with a
-`segmentTitle` and optional `segmentNote`.
+**`dedication()` does both.** The teaching reaches it in its proper place at the
+end, *and* it is listed in the segments panel so a viewer can go straight to it —
+to dedicate without watching to the end, or to learn the chant.
+
+That is two independent options, not one:
+
+| Option | Meaning |
+| :--- | :--- |
+| `openFromSegment` | also list it in the segments panel as an action |
+| `onTimeline` | whether the teaching reaches it at `at` (default `true`) |
+
+`refuge()` sets `openFromSegment: true, onTimeline: false` — its `0:00` is where
+it is listed, not a cue, so the timeline must never fire it. `dedication()` sets
+`openFromSegment: true` and leaves `onTimeline` at its default.
 
 **The artwork is fitted with `contain`, not `cover`.** These images carry lesson
 text, and cropping would cut words off the slide (invariant 5). Supply 16:9 so

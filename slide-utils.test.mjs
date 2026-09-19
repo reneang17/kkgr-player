@@ -68,10 +68,16 @@ check('image slides have no auto-continue timer (no text to time)',
 check('refuge is opened from the segments list, not the timeline',
   ref.openFromSegment === true);
 check('refuge supplies a segment label', ref.segmentTitle === 'Refuge');
-check('dedication is gated on its timestamp',
-  ded.openFromSegment === false && ded.at === '00:53:32.933');
-check('a plain image slide is timeline-driven by default',
-  imageSlide('slides/x.png', { at: '1:00' }).openFromSegment === false);
+check('refuge is never fired by the timeline', ref.onTimeline === false);
+check('dedication is reached by the teaching at its timestamp',
+  ded.onTimeline === true && ded.at === '00:53:32.933');
+check('dedication is ALSO offered in the segments list',
+  ded.openFromSegment === true && ded.segmentTitle === 'Dedication');
+check('listing a slide as a segment does not remove it from the timeline',
+  imageSlide('slides/x.png', { at: '1:00', openFromSegment: true }).onTimeline === true);
+check('a plain image slide is timeline-driven and unlisted by default',
+  imageSlide('slides/x.png', { at: '1:00' }).openFromSegment === false &&
+  imageSlide('slides/x.png', { at: '1:00' }).onTimeline === true);
 check('segment label falls back to the slide title',
   imageSlide('slides/x.png', { openFromSegment: true, title: 'Praises' }).segmentTitle === 'Praises');
 check('the old atStart gating is gone',
