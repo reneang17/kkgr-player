@@ -17,16 +17,24 @@ Three decisions worth keeping:
   became `var(--slide-bg-fit, cover)` so image slides can override it while the
   decorative artwork behind the bullet archetypes keeps cropping to fill.
 
-- **The refuge slide is gated on playback, not on a timestamp.** It carries
-  `atStart: true` and opens when the player first reports PLAYING, pausing
-  immediately — so pressing play shows the prayer and the lesson begins when the
-  viewer continues.
+- **The refuge slide is offered, not imposed.** It carries
+  `openFromSegment: true`: it never fires on the timeline, and instead appears as
+  the first entry in the segments list, above "Start of the Video". Choosing it
+  opens the slide with the video still paused; continuing starts the teaching. A
+  viewer who simply presses play goes straight into the lesson.
 
-  It also carries `once: true`, and that flag is load-bearing. The engine resets
-  every slide's `passed` flag whenever playback starts below 1.0s, to re-arm
-  slides when a viewer replays from the beginning. A start-gated slide caught by
-  that reset would re-open the instant the viewer continued, and the lesson could
-  never start. Both re-arm paths now skip `once` slides.
+  An earlier iteration gated it on playback starting (`atStart`), so pressing
+  play always showed it. That was replaced because taking refuge should be an
+  invitation rather than a toll gate. The change also removed a subtle hazard:
+  the engine resets every slide's `passed` flag when playback starts below 1.0s
+  (to re-arm slides when a viewer replays from the beginning), which meant a
+  start-gated slide re-opened the instant the viewer continued — the lesson could
+  never begin — and needed a dedicated `once` flag to suppress. Segment-opened
+  slides sidestep the timeline entirely, so that flag and its guards are gone.
+
+  In the segments list an action segment shows a bullet instead of a timestamp,
+  is described as "Open ..." rather than "Seek to ...", sorts before a position
+  sharing its timestamp, and never lights up as the active chapter.
 
 - **No auto-continue timer.** The other archetypes derive one from their reading
   time; an image slide has no text to measure, so it waits for the viewer unless

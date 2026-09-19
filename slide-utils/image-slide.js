@@ -19,10 +19,11 @@
  * @param {string} src - image path, e.g. 'slides/refuge.png' (16:9 recommended)
  * @param {Object} [options]
  *   @param {string}  [options.at]         - timestamp, as for any other slide
- *   @param {boolean} [options.atStart]    - show once when playback first starts,
- *                                           instead of at a timestamp
- *   @param {boolean} [options.once]       - never re-arm on rewind
- *                                           (defaults to true for atStart slides)
+ *   @param {boolean} [options.openFromSegment] - do not fire on the timeline; list
+ *                                           the slide as a segment the viewer can
+ *                                           choose, and open it when they do
+ *   @param {string}  [options.segmentTitle] - label for that segment entry
+ *   @param {string}  [options.segmentNote]  - secondary line for that entry
  *   @param {'contain'|'cover'} [options.imageFit='contain']
  *   @param {string}  [options.title]      - accessible name; never rendered
  *   @param {string}  [options.buttonText]
@@ -37,15 +38,16 @@
  * @returns {Object} stopping slide descriptor
  */
 export function imageSlide(src, options = {}) {
-  const atStart = options.atStart === true;
+  const openFromSegment = options.openFromSegment === true;
 
   return {
     kind: options.kind || 'image',
     at: options.at || '0:00',
-    atStart,
-    // A slide shown before playback begins must not re-fire when the viewer
-    // continues, otherwise resuming re-triggers it and the lesson never starts.
-    once: options.once !== undefined ? options.once : atStart,
+    // A segment-opened slide is never triggered by the timeline: it is offered in
+    // the segments list and shown only if the viewer asks for it.
+    openFromSegment,
+    segmentTitle: options.segmentTitle || options.title || '',
+    segmentNote: options.segmentNote || '',
     title: options.title || '',
     bullets: [],
     bg: src,
@@ -61,12 +63,16 @@ export function imageSlide(src, options = {}) {
 }
 
 /**
- * Refuge slide, shown once when the viewer first starts the video — before any
- * of the teaching plays. Clicking play opens it and pauses; the lesson begins
- * when the viewer continues.
+ * Refuge slide, offered before the teaching begins.
+ *
+ * It is NOT shown automatically. It appears as the first entry in the segments
+ * list, above "Start of the Video", and opens only if the viewer chooses it;
+ * continuing from it then starts the video. A viewer who simply presses play
+ * goes straight into the teaching without ever seeing it — taking refuge is an
+ * invitation, not a toll gate.
  *
  * @param {string} src
- * @param {Object} [options] - any imageSlide option; `atStart` is implied
+ * @param {Object} [options] - any imageSlide option; `openFromSegment` is implied
  * @returns {Object} stopping slide descriptor
  */
 export function refuge(src, options = {}) {
@@ -74,7 +80,9 @@ export function refuge(src, options = {}) {
     kind: 'refuge',
     title: 'Refuge',
     buttonText: 'Begin lesson',
-    atStart: true,
+    openFromSegment: true,
+    segmentTitle: 'Refuge',
+    segmentNote: 'Take refuge before the teaching begins',
     ...options
   });
 }

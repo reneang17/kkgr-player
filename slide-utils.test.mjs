@@ -63,19 +63,19 @@ check('image slides have no auto-continue timer (no text to time)',
   `${ref.duration} / ${ded.duration}`);
 
 /* ---- Gating ----
-   The refuge slide is gated on playback starting, and must never re-arm: the
-   engine resumes playback when the viewer continues, and a re-arming start
-   slide would re-open immediately and the lesson could never begin. */
-check('refuge is gated on playback starting, not a timestamp', ref.atStart === true);
-check('refuge never re-arms', ref.once === true);
-check('dedication is gated on its timestamp', ded.atStart === false && ded.at === '00:53:32.933');
-check('dedication re-arms normally on rewind', ded.once === false);
-check('a plain image slide is not a start slide by default',
-  imageSlide('slides/x.png', { at: '1:00' }).atStart === false);
-check('atStart implies once unless overridden',
-  imageSlide('slides/x.png', { atStart: true }).once === true);
-check('once can be overridden explicitly',
-  imageSlide('slides/x.png', { atStart: true, once: false }).once === false);
+   The refuge slide is offered in the segments list, not fired by the timeline:
+   a viewer who simply presses play goes straight into the teaching. */
+check('refuge is opened from the segments list, not the timeline',
+  ref.openFromSegment === true);
+check('refuge supplies a segment label', ref.segmentTitle === 'Refuge');
+check('dedication is gated on its timestamp',
+  ded.openFromSegment === false && ded.at === '00:53:32.933');
+check('a plain image slide is timeline-driven by default',
+  imageSlide('slides/x.png', { at: '1:00' }).openFromSegment === false);
+check('segment label falls back to the slide title',
+  imageSlide('slides/x.png', { openFromSegment: true, title: 'Praises' }).segmentTitle === 'Praises');
+check('the old atStart gating is gone',
+  ref.atStart === undefined && ref.once === undefined);
 
 /* ---- Chant recordings ----
    Optional per slide. The engine shows the chant button only when `audio` is

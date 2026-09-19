@@ -1176,6 +1176,16 @@ body.has-pseudo-fullscreen {
   background: #000000;
 }
 
+/* An action segment (the refuge slide) opens a slide rather than seeking, so its
+   timestamp column carries a marker instead of a time. Kept visually quiet: it
+   is an invitation beside the chapter list, not a chapter. */
+.segment-button.segment-action .segment-timestamp,
+.drawer-chapter-btn.segment-action .drawer-timestamp {
+  color: var(--accent-celadon);
+  font-size: 1.1em;
+  text-align: center;
+}
+
 /* ==========================================================================
    5. SEGMENTS SECTION
    ========================================================================== */

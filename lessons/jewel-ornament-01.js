@@ -23,8 +23,9 @@ const SEGMENTS = [
 
 // 2. SLIDES & OVERLAYS (Interactive stopping slides, timed side panels, announcements)
 const SLIDES = [
-  // Refuge, shown once when the viewer first presses play — before the teaching
-  // begins. It is gated on playback starting rather than on a timestamp.
+  // Refuge, offered as the first entry in the segments list, above "Start of the
+  // Video". Shown only if the viewer chooses it; pressing play goes straight
+  // into the teaching.
   refuge("slides/refuge.webp", { audio: "audio/refuge.mp3" }),
 
   // Announcement banner at 00:29

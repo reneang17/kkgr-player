@@ -86,8 +86,9 @@ so the same object could equally arrive from a CMS or a JSON API — see
 5. Seeking backwards re-arms slides (`passed = false`) so they fire again —
    except slides marked `once`, which belong to the start of the sitting rather
    than to a point on the timeline.
-6. Slides marked `atStart` are not driven by the timeline at all; they open when
-   the player first reports PLAYING (the refuge slide).
+6. Slides marked `openFromSegment` are not driven by the timeline at all. They
+   are listed in the segments panel as actions rather than positions, and open
+   only when the viewer chooses them (the refuge slide).
 
 ## Invariants
 

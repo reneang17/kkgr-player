@@ -164,10 +164,30 @@ function buildSegmentsList() {
     }
   });
 
-  // 3. Sort chronologically by timestamp
-  merged.sort((a, b) => a.atSeconds - b.atSeconds);
+  // 3. Slides the viewer can open from the segments list (the refuge slide).
+  //    These are actions rather than positions, so they carry no timestamp.
+  currentSlides.forEach((slide, originalIndex) => {
+    if (!slide.openFromSegment) return;
+    merged.push({
+      at: '',
+      atSeconds: parseTimestamp(slide.at),
+      title: slide.segmentTitle || slide.title,
+      note: slide.segmentNote || '',
+      opensSlideIndex: originalIndex
+    });
+  });
 
-  // 4. Assign sequential index
+  // 4. Sort chronologically. Where an action segment shares a timestamp with a
+  //    position, the action comes first: "Refuge" belongs above "Start of the
+  //    Video", not after it.
+  merged.sort((a, b) => {
+    if (Math.abs(a.atSeconds - b.atSeconds) < 0.001) {
+      return (b.opensSlideIndex !== undefined ? 1 : 0) - (a.opensSlideIndex !== undefined ? 1 : 0);
+    }
+    return a.atSeconds - b.atSeconds;
+  });
+
+  // 5. Assign sequential index
   return merged.map((seg, index) => ({
     ...seg,
     index
@@ -216,9 +236,8 @@ const normalizedSlides = currentSlides.map((slide, index) => {
     untilSeconds,
     isStopping,
     duration,
-    // Gating flags (see slide-utils/image-slide.js)
-    atStart: slide.atStart === true,
-    once: slide.once === true,
+    // Gating flag (see slide-utils/image-slide.js)
+    openFromSegment: slide.openFromSegment === true,
     // Runtime tracking flags
     passed: false
   };
@@ -344,6 +363,18 @@ function seekToSegment(seg) {
     closeAnnouncement();
   }
 
+  // An action segment opens its slide rather than moving the playhead. The video
+  // stays where it is; continuing from the slide resumes from there, which for
+  // the refuge slide means the teaching starts from the beginning.
+  if (seg.opensSlideIndex !== undefined) {
+    const slide = normalizedSlides.find(s => s.originalIndex === seg.opensSlideIndex);
+    if (slide) {
+      playerPause();
+      openStoppingSlide(slide);
+    }
+    return;
+  }
+
   // Reset passed state for slides at or after this timestamp so stopping slides fire
   normalizedSlides.forEach((slide) => {
     if (slide.atSeconds >= seg.atSeconds - 0.5) {
@@ -365,11 +396,17 @@ function renderSegmentsList() {
     btn.className = 'segment-button';
     btn.id = `segment-btn-${seg.index}`;
     btn.setAttribute('type', 'button');
-    btn.setAttribute('aria-label', `Seek to ${seg.title} at ${formatTime(seg.atSeconds)}`);
+    // An action segment opens a slide instead of moving the playhead, so it
+    // shows no timestamp and is described as opening rather than seeking.
+    const isAction = seg.opensSlideIndex !== undefined;
+    btn.setAttribute('aria-label', isAction
+      ? `Open ${seg.title}`
+      : `Seek to ${seg.title} at ${formatTime(seg.atSeconds)}`);
+    if (isAction) btn.classList.add('segment-action');
 
     const timeSpan = document.createElement('span');
     timeSpan.className = 'segment-timestamp';
-    timeSpan.textContent = formatTime(seg.atSeconds);
+    timeSpan.textContent = isAction ? '\u2022' : formatTime(seg.atSeconds);
 
     const contentWrapper = document.createElement('div');
     contentWrapper.className = 'segment-content-wrapper';
@@ -407,11 +444,15 @@ function renderChaptersDrawer() {
     btn.className = 'drawer-chapter-btn';
     btn.id = `drawer-chapter-btn-${seg.index}`;
     btn.setAttribute('type', 'button');
-    btn.setAttribute('aria-label', `Jump to ${seg.title} at ${formatTime(seg.atSeconds)}`);
+    const isAction = seg.opensSlideIndex !== undefined;
+    btn.setAttribute('aria-label', isAction
+      ? `Open ${seg.title}`
+      : `Jump to ${seg.title} at ${formatTime(seg.atSeconds)}`);
+    if (isAction) btn.classList.add('segment-action');
 
     const timeSpan = document.createElement('span');
     timeSpan.className = 'drawer-timestamp';
-    timeSpan.textContent = formatTime(seg.atSeconds);
+    timeSpan.textContent = isAction ? '\u2022' : formatTime(seg.atSeconds);
 
     const contentWrapper = document.createElement('div');
     contentWrapper.className = 'drawer-content-wrapper';
@@ -873,33 +914,6 @@ function openStoppingSlide(slide) {
 
 
 /**
- * Open any slides gated on playback beginning rather than on a timestamp
- * (the refuge slide). Called when the player reports PLAYING.
- *
- * These pause immediately, so from the viewer's side clicking play opens the
- * slide instead of starting the teaching; the lesson begins when they continue.
- * They are marked `once`, so resuming does not re-trigger them.
- */
-function openStartSlidesIfPending() {
-  if (!pauseToggle.checked) return;
-
-  const pending = normalizedSlides.filter(s => s.atStart && !s.passed);
-  if (pending.length === 0) return;
-
-  pending.forEach(s => { s.passed = true; });
-  pending.sort((a, b) => getSlidePriority(a) - getSlidePriority(b));
-
-  if (activeStoppingSlide) {
-    stoppingQueue.push(...pending);
-    return;
-  }
-  playerPause();
-  const first = pending.shift();
-  stoppingQueue.push(...pending);
-  openStoppingSlide(first);
-}
-
-/**
  * Advance to reveal the next bullet on the stopping slide.
  */
 function advanceStoppingBullet() {
@@ -1197,9 +1211,7 @@ function checkPlaybackTime() {
   // 1. RE-ARMING ON REWIND: If user rewinds backwards before a slide timestamp, reset its passed state
   if (currentTime < lastKnownTime - 0.5) {
     normalizedSlides.forEach((slide) => {
-      // `once` slides (the refuge slide) deliberately never re-arm: they belong
-      // to the start of the sitting, not to a point on the timeline.
-      if (!slide.once && currentTime < slide.atSeconds - 0.2) {
+      if (currentTime < slide.atSeconds - 0.2) {
         slide.passed = false;
       }
     });
@@ -1222,6 +1234,9 @@ function checkPlaybackTime() {
   // 2. ACTIVE SEGMENT HIGHLIGHT in segment list and in-player chapters drawer
   let activeIndex = -1;
   for (let i = 0; i < normalizedSegments.length; i++) {
+    // Action segments open a slide; they are not places in the video, so they
+    // never light up as "where we are".
+    if (normalizedSegments[i].opensSlideIndex !== undefined) continue;
     if (currentTime >= normalizedSegments[i].atSeconds) {
       activeIndex = i;
     }
@@ -1252,9 +1267,9 @@ function checkPlaybackTime() {
   const triggeredAnnouncements = [];
 
   normalizedSlides.forEach((slide) => {
-    // atStart slides are gated on playback beginning, not on a timestamp; they
-    // are opened by openStartSlidesIfPending() instead.
-    if (slide.atStart) return;
+    // Segment-opened slides are offered in the segments list and shown only when
+    // the viewer chooses them, so the timeline never fires them.
+    if (slide.openFromSegment) return;
     // Trigger condition: current time reached marker and slide hasn't fired yet
     if (!slide.passed && currentTime >= slide.atSeconds && currentTime < slide.atSeconds + 2.0) {
       slide.passed = true;
@@ -1347,15 +1362,12 @@ window.onYouTubeIframeAPIReady = function() {
       },
       onStateChange: function(event) {
         updateTopCornerMenuVisibility();
-        // Re-arm slides if video is re-played from start.
-        // `once` slides are excluded: the refuge slide fires as playback begins,
-        // and resuming from it would otherwise re-trigger it forever.
+        // Re-arm slides if video is re-played from start
         if (event.data === YT.PlayerState.PLAYING) {
           const cur = playerGetCurrentTime();
           if (cur < 1.0) {
-            normalizedSlides.forEach(s => { if (!s.once) s.passed = false; });
+            normalizedSlides.forEach(s => s.passed = false);
           }
-          openStartSlidesIfPending();
         }
       }
     }

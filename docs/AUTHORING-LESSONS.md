@@ -94,7 +94,7 @@ other stopping slides → announcements.
 | `comingUp(bullets, opts)` | Yes | Previewing what the next section covers. Full-bleed artwork, no card. |
 | `takeaways(bullets, opts)` | Yes | Consolidating points after a section. Frosted translucent card. |
 | `finalSlide(title, opts)` | Yes | Closing the lesson. One large centred line. |
-| `refuge(src, opts)` | Yes | Refuge prayer, shown once when the viewer first presses play. |
+| `refuge(src, opts)` | Yes | Refuge prayer, offered as a segment before the video starts. |
 | `dedication(src, opts)` | Yes | Dedication, shown near the end before the closing slide. |
 | `imageSlide(src, opts)` | Yes | Any other full-frame image slide. |
 | `timedPanel(at, until, …)` | No | Notes alongside continuing playback. |
@@ -127,11 +127,15 @@ const SLIDES = [
 ];
 ```
 
-**`refuge()` is gated on playback, not on a timestamp.** It carries
-`atStart: true`, so it opens the moment the viewer presses play and pauses the
-video; the lesson begins when they continue. It also carries `once: true`, which
-stops it re-arming — without that, resuming from it would re-trigger it and the
-lesson could never start.
+**`refuge()` is offered, not imposed.** It carries `openFromSegment: true`, so
+it never fires on the timeline. Instead it appears as the first entry in the
+segments list, above "Start of the Video", marked with a bullet rather than a
+timestamp because it is an action and not a place in the video. Choosing it opens
+the slide with the video still paused; continuing from it starts the teaching.
+A viewer who simply presses play goes straight into the lesson and never sees it.
+
+Any image slide can work this way — pass `openFromSegment: true` with a
+`segmentTitle` and optional `segmentNote`.
 
 **The artwork is fitted with `contain`, not `cover`.** These images carry lesson
 text, and cropping would cut words off the slide (invariant 5). Supply 16:9 so
