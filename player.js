@@ -334,6 +334,23 @@ let activeTimedSlide = null;
 let activeAnnouncement = null;
 let lastKnownTime = 0;
 
+/* Has the viewer started the teaching at all this session? Used to decide where
+   "Begin lesson" returns to — see segmentReturn below. */
+let hasStartedPlayback = false;
+
+/* Where to go back to when the viewer continues from a slide they opened out of
+   the segments list. Opening such a slide does not move the playhead, so the
+   only thing that has to be restored is whatever the slide interrupted:
+
+     - nothing yet        -> start the teaching from the beginning
+     - a keypoint slide   -> put that slide back up, still paused
+     - a point in the video -> carry on from there
+
+   Holds { forSlide, slide, hadStarted }; `forSlide` identifies the instance that
+   was segment-opened, so a dedication reached by the timeline (which is also
+   listed as a segment) is unaffected. */
+let segmentReturn = null;
+
 /* Apply optional custom background if provided.
    The artwork is painted on the scaled canvas, not on the layer, so it composites
    as part of the presentation surface. See .slide-canvas in style.css. */
@@ -354,6 +371,9 @@ if (currentSlideBg && currentSlideBg.trim() !== "") {
    SEGMENTS & CHAPTERS RENDERING & NAVIGATION
    ========================================================================== */
 function seekToSegment(seg) {
+  // Captured before anything is torn down: this is what the viewer was on.
+  const interruptedSlide = activeStoppingSlide;
+
   // If a stopping slide was open or queued, clear and close
   stoppingQueue = [];
   pendingAnnouncements = [];
@@ -370,11 +390,20 @@ function seekToSegment(seg) {
   if (seg.opensSlideIndex !== undefined) {
     const slide = normalizedSlides.find(s => s.originalIndex === seg.opensSlideIndex);
     if (slide) {
+      segmentReturn = {
+        forSlide: slide,
+        slide: interruptedSlide,
+        hadStarted: hasStartedPlayback
+      };
       playerPause();
       openStoppingSlide(slide);
     }
     return;
   }
+
+  // A normal seek discards any pending return: the viewer has chosen a new place
+  // in the teaching, so there is nothing to come back to.
+  segmentReturn = null;
 
   // Reset passed state for slides at or after this timestamp so stopping slides fire
   normalizedSlides.forEach((slide) => {
@@ -956,6 +985,12 @@ function closeStoppingSlide(resumePlayback = true) {
     stoppingBulletsBox.style.display = '';
   }
   stoppingSlideLayer.setAttribute('aria-hidden', 'true');
+
+  // Only the instance that was opened from a segment carries a return point.
+  const pendingReturn = (segmentReturn && segmentReturn.forSlide === activeStoppingSlide)
+    ? segmentReturn
+    : null;
+
   activeStoppingSlide = null;
   stoppingBulletIndex = 0;
 
@@ -963,6 +998,27 @@ function closeStoppingSlide(resumePlayback = true) {
   if (stoppingQueue.length > 0) {
     const nextSlide = stoppingQueue.shift();
     openStoppingSlide(nextSlide);
+    return;
+  }
+
+  if (resumePlayback && pendingReturn) {
+    segmentReturn = null;
+
+    if (!pendingReturn.hadStarted) {
+      // Refuge taken before watching anything: begin the teaching at the start.
+      playerSeekTo(0);
+      lastKnownTime = 0;
+      playerPlay();
+    } else if (pendingReturn.slide) {
+      // Put back the keypoint slide the viewer was reading, still paused.
+      openStoppingSlide(pendingReturn.slide);
+      return;
+    } else {
+      // Carry on from where they were; the playhead was never moved.
+      playerPlay();
+    }
+
+    updateTopCornerMenuVisibility();
     return;
   }
 
@@ -1366,6 +1422,7 @@ window.onYouTubeIframeAPIReady = function() {
         updateTopCornerMenuVisibility();
         // Re-arm slides if video is re-played from start
         if (event.data === YT.PlayerState.PLAYING) {
+          hasStartedPlayback = true;
           const cur = playerGetCurrentTime();
           if (cur < 1.0) {
             normalizedSlides.forEach(s => s.passed = false);

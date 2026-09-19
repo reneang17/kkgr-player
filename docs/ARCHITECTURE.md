@@ -89,6 +89,10 @@ so the same object could equally arrive from a CMS or a JSON API — see
 6. Slides marked `openFromSegment` are not driven by the timeline at all. They
    are listed in the segments panel as actions rather than positions, and open
    only when the viewer chooses them (the refuge slide).
+7. Opening such a slide never moves the playhead, and continuing from it returns
+   the viewer to whatever it interrupted: the beginning of the teaching if they
+   had not started, the keypoint slide they were reading, or their position in
+   the video.
 
 ## Invariants
 

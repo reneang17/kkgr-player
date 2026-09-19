@@ -134,6 +134,19 @@ timestamp because it is an action and not a place in the video. Choosing it open
 the slide with the video still paused; continuing from it starts the teaching.
 A viewer who simply presses play goes straight into the lesson and never sees it.
 
+**Continuing from a segment-opened slide goes back where the viewer was.**
+Opening one never moves the playhead, so continuing restores whatever it
+interrupted:
+
+| What the viewer was doing | Where "Begin lesson" / "Continue" goes |
+| :--- | :--- |
+| Had not started the teaching | the beginning of the video |
+| Reading a keypoint slide | that keypoint slide, still paused |
+| Watching at some point | that point, playing on |
+
+So taking refuge first begins the lesson, and taking refuge part-way through
+costs the viewer nothing.
+
 **`dedication()` does both.** The teaching reaches it in its proper place at the
 end, *and* it is listed in the segments panel so a viewer can go straight to it —
 to dedicate without watching to the end, or to learn the chant.

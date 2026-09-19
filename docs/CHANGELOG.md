@@ -42,6 +42,16 @@ Three decisions worth keeping:
   now independent: `openFromSegment` lists it, `onTimeline` (default true) says
   whether the teaching reaches it.
 
+- **Continuing from a segment-opened slide returns the viewer where they were.**
+  Opening one never moves the playhead, so the only thing to restore is what it
+  interrupted: the start of the teaching if they had not begun (`hasStartedPlayback`),
+  the keypoint slide they were reading, or their position in the video.
+
+  The return point is captured in `seekToSegment()` before anything is torn down
+  and keyed to the slide instance (`segmentReturn.forSlide`), so a dedication
+  reached by the timeline — which is also listed as a segment — is unaffected. A
+  normal seek discards it: the viewer has chosen a new place in the teaching.
+
   In the segments list an action segment shows a bullet instead of a timestamp,
   is described as "Open ..." rather than "Seek to ...", sorts before a position
   sharing its timestamp, and never lights up as the active chapter.
