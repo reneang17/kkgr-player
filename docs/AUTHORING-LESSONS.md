@@ -201,9 +201,23 @@ Warnings appear on `localhost`/`127.0.0.1`, or on any host with `?slideDebug=1`.
 
 See [SLIDE-LAYOUT.md](SLIDE-LAYOUT.md) for the model itself.
 
+## Where assets go
+
+Put every runtime asset in **both** `public/<dir>/` and `<dir>/` at the repo root:
+
+```
+public/slides/refuge.webp   +   slides/refuge.webp
+public/audio/refuge.mp3     +   audio/refuge.mp3
+```
+
+`public/` is what the dev server and the production build use. The **repo root**
+is what the deployed site serves — GitHub Pages publishes the repository, not
+`dist/`, which is gitignored. Miss the root copy and the asset works perfectly
+in `npm run dev` and 404s in production.
+
 ## Backgrounds
 
-Put artwork in `slides/` (it is copied to the build via `public/`). Use 16:9 —
+Put artwork in `slides/` (and `public/slides/`). Use 16:9 —
 it is `cover`-fitted to the 1600×900 canvas, so other ratios crop. 1920×1080 is
 a good source size; the bundled art is 1024×576, which is adequate but soft on a
 4K display.

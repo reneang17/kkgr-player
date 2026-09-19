@@ -63,6 +63,19 @@ is in [docs/CHANGELOG.md](docs/CHANGELOG.md).
 7. **The runtime has no third-party dependencies.** Do not add one without a
    clear reason; the bundle size and integration surface are features here.
 
+8. **Runtime assets must exist at the repo root, not only in `public/`.**
+   The live site (GitHub Pages at `/kkgr-player/`) serves the **repository root**
+   — not `dist/`, which is gitignored and never published. A lesson referencing
+   `audio/refuge.mp3` therefore needs `audio/refuge.mp3` at the root, mirrored
+   from `public/audio/`.
+
+   That is why `slides/` and `public/slides/` both exist. It looks like accidental
+   duplication and is not: `public/` is what `npm run dev` and `npm run build`
+   serve, the root copy is what the deployed site serves. Add new assets to both.
+   *This has already bitten once: the chant recordings went into `public/audio/`
+   only, so the images loaded on the live site and the chant button 404'd, while
+   everything worked locally.*
+
 ## Conventions
 
 - **ES modules everywhere.** The `window.*` assignments in

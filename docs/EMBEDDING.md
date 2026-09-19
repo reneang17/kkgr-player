@@ -93,8 +93,12 @@ Until then, integration styles 1 and 2 above both work.
 
 ## Assets
 
-Background art is referenced by relative path (`slides/takeaways-bg.png`),
-resolved against the document. Serving the player from a sub-path works as long
+Runtime assets live in two places on purpose: `public/<dir>/` for the dev server
+and the Vite build, and `<dir>/` at the repo root for the deployed site, which
+serves the repository rather than `dist/`. Keep both in step.
+
+Background art and audio are referenced by relative path
+(`slides/takeaways-bg.png`, `audio/refuge.mp3`), resolved against the document. Serving the player from a sub-path works as long
 as the `slides/` directory sits beside the page. Hosting assets elsewhere means
 either setting Vite's `base`, or using absolute URLs in each lesson's `bg` fields
 — the `bg` option exists per slide precisely so this stays configurable.
