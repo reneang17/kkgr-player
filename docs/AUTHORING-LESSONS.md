@@ -94,6 +94,9 @@ other stopping slides → announcements.
 | `comingUp(bullets, opts)` | Yes | Previewing what the next section covers. Full-bleed artwork, no card. |
 | `takeaways(bullets, opts)` | Yes | Consolidating points after a section. Frosted translucent card. |
 | `finalSlide(title, opts)` | Yes | Closing the lesson. One large centred line. |
+| `refuge(src, opts)` | Yes | Refuge prayer, shown once when the viewer first presses play. |
+| `dedication(src, opts)` | Yes | Dedication, shown near the end before the closing slide. |
+| `imageSlide(src, opts)` | Yes | Any other full-frame image slide. |
 | `timedPanel(at, until, …)` | No | Notes alongside continuing playback. |
 | `stoppingSlide(at, title, …)` | Yes | Anything the named archetypes do not cover. |
 
@@ -101,6 +104,45 @@ Common options: `at`, `title`, `bullets`, `bg`, `buttonText`, `duration`,
 `revealAll`.
 
 `announcement()` accepts `{ segment: false }` to keep it out of the chapters list.
+
+## Image slides (refuge, dedication)
+
+Some slides are supplied as finished artwork with the text already set — a
+refuge prayer, a dedication. For these the engine renders **no heading, label or
+bullets**: the image is the whole slide.
+
+```js
+import { refuge, dedication } from '../slide-utils/index.js';
+
+const SLIDES = [
+  // Shown once when the viewer first presses play, before the teaching begins.
+  refuge('slides/refuge.webp'),
+
+  // ... the lesson ...
+
+  // Same timestamp as the closing slide; priority puts it after the final
+  // takeaways and before "Thanks for watching".
+  dedication('slides/dedication.webp', { at: '00:53:32.933' }),
+  finalSlide('Thanks for watching!', { at: '00:53:32.933' })
+];
+```
+
+**`refuge()` is gated on playback, not on a timestamp.** It carries
+`atStart: true`, so it opens the moment the viewer presses play and pauses the
+video; the lesson begins when they continue. It also carries `once: true`, which
+stops it re-arming — without that, resuming from it would re-trigger it and the
+lesson could never start.
+
+**The artwork is fitted with `contain`, not `cover`.** These images carry lesson
+text, and cropping would cut words off the slide (invariant 5). Supply 16:9 so
+there is no letterboxing; 1920x1080 is a good size.
+
+**There is no auto-continue timer.** The other archetypes derive one from their
+reading time; an image slide has no text to measure, so it waits for the viewer.
+Pass `duration` explicitly if you want it to advance on its own.
+
+For any other full-frame image, `imageSlide(src, opts)` takes the same options
+plus `kind`, `atStart`, `once` and `imageFit`.
 
 ## How much text fits on a slide
 

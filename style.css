@@ -187,7 +187,10 @@ header.page-header p.subtitle {
      subtree. With the artwork on the layer instead, the card's translucency had
      nothing to sample and read as flat dark slate. */
   background-image: var(--slide-bg, none);
-  background-size: cover;
+  /* `cover` for the decorative artwork behind the bullet archetypes; image
+     slides override this to `contain`, because their artwork IS the lesson
+     content and cropping it would cut words off the slide. */
+  background-size: var(--slide-bg-fit, cover);
   background-position: center;
   background-repeat: no-repeat;
 }
@@ -358,6 +361,7 @@ header.page-header p.subtitle {
 .stopping-slide-layer.coming-up-mode .slide-canvas::before,
 .stopping-slide-layer.takeaways-mode .slide-canvas::before,
 .stopping-slide-layer.final-mode .slide-canvas::before,
+.stopping-slide-layer.image-mode .slide-canvas::before,
 .stopping-slide-layer.no-scrim .slide-canvas::before {
   display: none;
 }
@@ -463,6 +467,26 @@ header.page-header p.subtitle {
 .stopping-slide-layer.final-mode .slide-bullets-box {
   display: none;
 }
+/* ---- Image slides (refuge, dedication) ----
+   The supplied artwork is the whole slide. The engine renders no heading, label
+   or bullets, so everything but the footer UI is hidden and the canvas shows the
+   image letterboxed against the player matte — like a still composited into the
+   video. Nothing here sets a font size: there is no text to size. */
+.stopping-slide-layer.image-mode .slide-label,
+.stopping-slide-layer.image-mode .slide-heading,
+.stopping-slide-layer.image-mode .slide-bullets-box {
+  display: none;
+}
+
+.stopping-slide-layer.image-mode .stopping-slide-content {
+  max-width: 100%;
+}
+
+/* The matte behind a `contain`-fitted image, matching the letterbox elsewhere. */
+.stopping-slide-layer.image-mode {
+  background: #111312;
+}
+
 /* B. Timed Panel Layer (Left side gradient, speaker visible on right) */
 .timed-panel-layer {
   position: absolute;

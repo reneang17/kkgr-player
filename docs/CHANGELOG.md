@@ -1,5 +1,52 @@
 # Changelog
 
+## Image Slides: Refuge and Dedication
+
+Added a slide archetype whose content is the artwork itself — no heading, no
+label, no bullets. Used for the refuge prayer at the start of a sitting and the
+dedication at the end, both supplied as finished 16:9 slides with their text
+already set.
+
+`slide-utils/image-slide.js` provides `imageSlide(src, opts)` plus the named
+`refuge()` and `dedication()` wrappers.
+
+Three decisions worth keeping:
+
+- **`contain`, not `cover`.** These images carry lesson text. Cropping them would
+  cut words off the slide, which invariant 5 forbids. The canvas background fit
+  became `var(--slide-bg-fit, cover)` so image slides can override it while the
+  decorative artwork behind the bullet archetypes keeps cropping to fill.
+
+- **The refuge slide is gated on playback, not on a timestamp.** It carries
+  `atStart: true` and opens when the player first reports PLAYING, pausing
+  immediately — so pressing play shows the prayer and the lesson begins when the
+  viewer continues.
+
+  It also carries `once: true`, and that flag is load-bearing. The engine resets
+  every slide's `passed` flag whenever playback starts below 1.0s, to re-arm
+  slides when a viewer replays from the beginning. A start-gated slide caught by
+  that reset would re-open the instant the viewer continued, and the lesson could
+  never start. Both re-arm paths now skip `once` slides.
+
+- **No auto-continue timer.** The other archetypes derive one from their reading
+  time; an image slide has no text to measure, so it waits for the viewer unless
+  `duration` is passed explicitly.
+
+Slide priority gained a rank for image slides between the takeaways and the
+closing slide, so a dedication sharing the closing timestamp is shown after the
+final takeaways and before "Thanks for watching".
+
+Artwork is stored as WebP: at 1920x1080 these are 200KB and 118KB, against
+1.4MB and 1.0MB as PNG. JPEG was rejected despite being smaller than PNG, because
+these slides are mostly text and JPEG rings around glyphs; the source was already
+WebP, so copying it avoids a re-encode entirely.
+
+Tests: `slide-utils.test.mjs` (16 checks) covers the descriptor contract,
+including that no factory emits a rem-based font size and that `atStart` implies
+`once`. `npm test` now runs both suites.
+
+---
+
 ## Slide Layout Rework
 
 This section records what changed in the slide rendering rework and, more

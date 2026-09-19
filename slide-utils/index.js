@@ -20,12 +20,14 @@ export { comingUp, makeComingUp } from './coming-up.js';
 export { takeaways, someTakeaways, makeTakeaways } from './takeaways.js';
 export { finalSlide, makeFinalSlide, closingSlide, thanksSlide } from './final-slide.js';
 export { stoppingSlide, timedPanel, segment } from './generic.js';
+export { imageSlide, makeImageSlide, refuge, dedication } from './image-slide.js';
 
 import { announcement } from './announcement.js';
 import { comingUp } from './coming-up.js';
 import { takeaways } from './takeaways.js';
 import { finalSlide } from './final-slide.js';
 import { stoppingSlide, timedPanel, segment } from './generic.js';
+import { imageSlide, refuge, dedication } from './image-slide.js';
 
 /**
  * Back-compatibility shim.
@@ -50,6 +52,10 @@ if (typeof window !== 'undefined') {
     thanksSlide: finalSlide,
     stoppingSlide,
     timedPanel,
-    segment
+    segment,
+    imageSlide,
+    makeImageSlide: imageSlide,
+    refuge,
+    dedication
   });
 }

@@ -10,7 +10,7 @@
  * See docs/AUTHORING-LESSONS.md for the full authoring guide.
  */
 
-import { announcement, comingUp, takeaways, finalSlide } from '../slide-utils/index.js';
+import { announcement, comingUp, takeaways, finalSlide, refuge, dedication } from '../slide-utils/index.js';
 
 const VIDEO_ID = "j8WneixXOV4";
 const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
@@ -23,6 +23,10 @@ const SEGMENTS = [
 
 // 2. SLIDES & OVERLAYS (Interactive stopping slides, timed side panels, announcements)
 const SLIDES = [
+  // Refuge, shown once when the viewer first presses play — before the teaching
+  // begins. It is gated on playback starting rather than on a timestamp.
+  refuge("slides/refuge.webp"),
+
   // Announcement banner at 00:29
   announcement(
     "Essence of the Jewel Ornament of Liberation",
@@ -219,6 +223,12 @@ const SLIDES = [
     at: "00:53:32.933",
     title: "The Error of Confusion, Takeaways",
     buttonText: "Continue lesson"
+  }),
+
+  // Dedication at 00:53:32.933. Shares the timestamp with the closing slide;
+  // slide priority shows it after the final takeaways and before the thanks.
+  dedication("slides/dedication.webp", {
+    at: "00:53:32.933"
   }),
 
   // Final closing stopping slide at 00:53:32.933

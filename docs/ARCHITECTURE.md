@@ -77,12 +77,17 @@ so the same object could equally arrive from a CMS or a JSON API — see
 
 1. The YouTube IFrame API loads and `player.js` polls playback position every 100ms.
 2. When playback crosses a slide's timestamp, the engine resolves collisions by
-   priority (takeaways → coming-up → final → other stopping slides → announcements
-   → timed panels), pauses if the slide is a stopping slide, and opens it.
+   priority (takeaways → coming-up → image slides such as the dedication → final
+   → other stopping slides → announcements → timed panels), pauses if the slide
+   is a stopping slide, and opens it.
 3. `slideLayout.layout(slide)` fits the content on the logical 1600×900 canvas and
    scales that canvas into the player.
 4. Continue / Enter / Escape / click closes the slide and resumes playback.
-5. Seeking backwards re-arms slides (`passed = false`) so they fire again.
+5. Seeking backwards re-arms slides (`passed = false`) so they fire again —
+   except slides marked `once`, which belong to the start of the sitting rather
+   than to a point on the timeline.
+6. Slides marked `atStart` are not driven by the timeline at all; they open when
+   the player first reports PLAYING (the refuge slide).
 
 ## Invariants
 

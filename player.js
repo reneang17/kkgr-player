@@ -179,17 +179,20 @@ const normalizedSegments = buildSegmentsList();
 // Priority ordering for slides triggered at identical timestamps:
 // 1. takeaways (shown first)
 // 2. coming-up (shown second)
-// 3. final slide (shown after takeaways / coming-up)
-// 4. other stopping slides
-// 5. announcements (shown after stopping slides when video resumes)
-// 6. timed side panels
+// 3. image slides such as the dedication — after the closing takeaways, but
+//    before "Thanks for watching", which is the last thing the viewer sees
+// 4. final slide
+// 5. other stopping slides
+// 6. announcements (shown after stopping slides when video resumes)
+// 7. timed side panels
 function getSlidePriority(slide) {
   if (slide.kind === 'takeaways') return 1;
   if (slide.kind === 'coming-up') return 2;
-  if (slide.kind === 'final' || slide.kind === 'final-slide') return 3;
-  if (slide.isStopping) return 4;
-  if (slide.kind === 'announcement') return 5;
-  return 6;
+  if (slide.kind === 'image' || slide.kind === 'refuge' || slide.kind === 'dedication') return 3;
+  if (slide.kind === 'final' || slide.kind === 'final-slide') return 4;
+  if (slide.isStopping) return 5;
+  if (slide.kind === 'announcement') return 6;
+  return 7;
 }
 
 // Normalize slides array with parsed timestamps & runtime state
@@ -213,6 +216,9 @@ const normalizedSlides = currentSlides.map((slide, index) => {
     untilSeconds,
     isStopping,
     duration,
+    // Gating flags (see slide-utils/image-slide.js)
+    atStart: slide.atStart === true,
+    once: slide.once === true,
     // Runtime tracking flags
     passed: false
   };
@@ -642,9 +648,18 @@ function openStoppingSlide(slide) {
   const isComingUp = slide.kind === 'coming-up';
   const isTakeaways = slide.kind === 'takeaways';
   const isFinal = slide.kind === 'final' || slide.kind === 'final-slide';
+  // Image slides carry their content in the artwork itself, so the engine
+  // renders no heading, label or bullets for them.
+  const isImage = slide.kind === 'image' || slide.kind === 'refuge' || slide.kind === 'dedication';
   stoppingSlideLayer.classList.toggle('coming-up-mode', isComingUp);
   stoppingSlideLayer.classList.toggle('takeaways-mode', isTakeaways);
   stoppingSlideLayer.classList.toggle('final-mode', isFinal);
+  stoppingSlideLayer.classList.toggle('image-mode', isImage);
+
+  // The artwork is lesson content, so it is fitted without cropping by default.
+  if (slideCanvas) {
+    slideCanvas.style.setProperty('--slide-bg-fit', slide.imageFit || 'cover');
+  }
 
   // Density is no longer guessed from bullet/character counts. The layout model
   // measures the rendered content and picks a typographic step for it; see the
@@ -656,7 +671,7 @@ function openStoppingSlide(slide) {
   setSlideBackground(bgImage);
 
   // Category label (hide for coming-up, takeaways, and final)
-  if (isComingUp || isTakeaways || isFinal) {
+  if (isComingUp || isTakeaways || isFinal || isImage) {
     stoppingLabel.style.display = 'none';
   } else {
     stoppingLabel.style.display = 'inline-block';
@@ -759,6 +774,33 @@ function openStoppingSlide(slide) {
 
 
 /**
+ * Open any slides gated on playback beginning rather than on a timestamp
+ * (the refuge slide). Called when the player reports PLAYING.
+ *
+ * These pause immediately, so from the viewer's side clicking play opens the
+ * slide instead of starting the teaching; the lesson begins when they continue.
+ * They are marked `once`, so resuming does not re-trigger them.
+ */
+function openStartSlidesIfPending() {
+  if (!pauseToggle.checked) return;
+
+  const pending = normalizedSlides.filter(s => s.atStart && !s.passed);
+  if (pending.length === 0) return;
+
+  pending.forEach(s => { s.passed = true; });
+  pending.sort((a, b) => getSlidePriority(a) - getSlidePriority(b));
+
+  if (activeStoppingSlide) {
+    stoppingQueue.push(...pending);
+    return;
+  }
+  playerPause();
+  const first = pending.shift();
+  stoppingQueue.push(...pending);
+  openStoppingSlide(first);
+}
+
+/**
  * Advance to reveal the next bullet on the stopping slide.
  */
 function advanceStoppingBullet() {
@@ -791,6 +833,7 @@ function closeStoppingSlide(resumePlayback = true) {
   stoppingSlideLayer.classList.remove('coming-up-mode');
   stoppingSlideLayer.classList.remove('takeaways-mode');
   stoppingSlideLayer.classList.remove('final-mode');
+  stoppingSlideLayer.classList.remove('image-mode');
   if (slideLayout) {
     slideLayout.release();
   }
@@ -1047,7 +1090,9 @@ function checkPlaybackTime() {
   // 1. RE-ARMING ON REWIND: If user rewinds backwards before a slide timestamp, reset its passed state
   if (currentTime < lastKnownTime - 0.5) {
     normalizedSlides.forEach((slide) => {
-      if (currentTime < slide.atSeconds - 0.2) {
+      // `once` slides (the refuge slide) deliberately never re-arm: they belong
+      // to the start of the sitting, not to a point on the timeline.
+      if (!slide.once && currentTime < slide.atSeconds - 0.2) {
         slide.passed = false;
       }
     });
@@ -1100,6 +1145,9 @@ function checkPlaybackTime() {
   const triggeredAnnouncements = [];
 
   normalizedSlides.forEach((slide) => {
+    // atStart slides are gated on playback beginning, not on a timestamp; they
+    // are opened by openStartSlidesIfPending() instead.
+    if (slide.atStart) return;
     // Trigger condition: current time reached marker and slide hasn't fired yet
     if (!slide.passed && currentTime >= slide.atSeconds && currentTime < slide.atSeconds + 2.0) {
       slide.passed = true;
@@ -1192,12 +1240,15 @@ window.onYouTubeIframeAPIReady = function() {
       },
       onStateChange: function(event) {
         updateTopCornerMenuVisibility();
-        // Re-arm slides if video is re-played from start
+        // Re-arm slides if video is re-played from start.
+        // `once` slides are excluded: the refuge slide fires as playback begins,
+        // and resuming from it would otherwise re-trigger it forever.
         if (event.data === YT.PlayerState.PLAYING) {
           const cur = playerGetCurrentTime();
           if (cur < 1.0) {
-            normalizedSlides.forEach(s => s.passed = false);
+            normalizedSlides.forEach(s => { if (!s.once) s.passed = false; });
           }
+          openStartSlidesIfPending();
         }
       }
     }
