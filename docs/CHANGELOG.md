@@ -1,5 +1,89 @@
 # Changelog
 
+## Image Slides: Refuge and Dedication
+
+Added a slide archetype whose content is the artwork itself — no heading, no
+label, no bullets. Used for the refuge prayer at the start of a sitting and the
+dedication at the end, both supplied as finished 16:9 slides with their text
+already set.
+
+`slide-utils/image-slide.js` provides `imageSlide(src, opts)` plus the named
+`refuge()` and `dedication()` wrappers.
+
+Three decisions worth keeping:
+
+- **`contain`, not `cover`.** These images carry lesson text. Cropping them would
+  cut words off the slide, which invariant 5 forbids. The canvas background fit
+  became `var(--slide-bg-fit, cover)` so image slides can override it while the
+  decorative artwork behind the bullet archetypes keeps cropping to fill.
+
+- **The refuge slide is offered, not imposed.** It carries
+  `openFromSegment: true`: it never fires on the timeline, and instead appears as
+  the first entry in the segments list, above "Start of the Video". Choosing it
+  opens the slide with the video still paused; continuing starts the teaching. A
+  viewer who simply presses play goes straight into the lesson.
+
+  An earlier iteration gated it on playback starting (`atStart`), so pressing
+  play always showed it. That was replaced because taking refuge should be an
+  invitation rather than a toll gate. The change also removed a subtle hazard:
+  the engine resets every slide's `passed` flag when playback starts below 1.0s
+  (to re-arm slides when a viewer replays from the beginning), which meant a
+  start-gated slide re-opened the instant the viewer continued — the lesson could
+  never begin — and needed a dedicated `once` flag to suppress. Segment-opened
+  slides sidestep the timeline entirely, so that flag and its guards are gone.
+
+- **The dedication is offered as a segment too, without leaving the timeline.**
+  A viewer can go straight to it to dedicate or to learn the chant, and the
+  teaching still reaches it in its proper place at the end.
+
+  This required splitting one flag into two. `openFromSegment` had meant both
+  "list it as a segment" and "do not fire on the timeline", which is right for
+  the refuge slide and wrong for the dedication. Listing and timeline firing are
+  now independent: `openFromSegment` lists it, `onTimeline` (default true) says
+  whether the teaching reaches it.
+
+  In the segments list an action segment shows a bullet instead of a timestamp,
+  is described as "Open ..." rather than "Seek to ...", sorts before a position
+  sharing its timestamp, and never lights up as the active chapter.
+
+- **No auto-continue timer.** The other archetypes derive one from their reading
+  time; an image slide has no text to measure, so it waits for the viewer unless
+  `duration` is passed explicitly.
+
+Slide priority gained a rank for image slides between the takeaways and the
+closing slide, so a dedication sharing the closing timestamp is shown after the
+final takeaways and before "Thanks for watching".
+
+Artwork is stored as WebP: at 1920x1080 these are 200KB and 118KB, against
+1.4MB and 1.0MB as PNG. JPEG was rejected despite being smaller than PNG, because
+these slides are mostly text and JPEG rings around glyphs; the source was already
+WebP, so copying it avoids a re-encode entirely.
+
+### Chant recordings
+
+Image slides can carry a recording of their text being chanted
+(`{ audio: 'audio/refuge.mp3' }`), offered on a "Play chant" button immediately
+left of Continue. Slides without `audio` show no button.
+
+It never plays on its own, and `closeStoppingSlide()` stops it — otherwise the
+chanting would continue over the resumed teaching. The `<audio>` element is
+`preload="none"`, so the 1.2MB refuge recording is only fetched if the viewer
+asks for it.
+
+Two guards were needed, both because the slide layer closes on any click or key
+that is not Continue:
+
+- the button calls `stopPropagation()`, or pressing it would also close the slide;
+- the window-level keyboard shortcuts ignore Space/Enter when focus is inside
+  `.stopping-slide-actions`, or activating the button from the keyboard would
+  both play the chant and close the slide.
+
+Tests: `slide-utils.test.mjs` (22 checks) covers the descriptor contract,
+including that no factory emits a rem-based font size and that `atStart` implies
+`once`. `npm test` now runs both suites.
+
+---
+
 ## Slide Layout Rework
 
 This section records what changed in the slide rendering rework and, more

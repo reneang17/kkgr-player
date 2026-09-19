@@ -100,6 +100,7 @@ kkgr-player/
 ├── slide-layout.test.js    # Layout model checks (npm test)
 │
 ├── slides/                 # Background artwork
+├── public/audio/           # Chant recordings offered on image slides
 ├── docs/                   # Architecture, authoring, layout, embedding, changelog
 └── CLAUDE.md               # Development guide and invariants
 ```

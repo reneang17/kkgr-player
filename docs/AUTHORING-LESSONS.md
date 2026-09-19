@@ -94,6 +94,9 @@ other stopping slides → announcements.
 | `comingUp(bullets, opts)` | Yes | Previewing what the next section covers. Full-bleed artwork, no card. |
 | `takeaways(bullets, opts)` | Yes | Consolidating points after a section. Frosted translucent card. |
 | `finalSlide(title, opts)` | Yes | Closing the lesson. One large centred line. |
+| `refuge(src, opts)` | Yes | Refuge prayer, offered as a segment before the video starts. |
+| `dedication(src, opts)` | Yes | Dedication, shown near the end and also offered as a segment. |
+| `imageSlide(src, opts)` | Yes | Any other full-frame image slide. |
 | `timedPanel(at, until, …)` | No | Notes alongside continuing playback. |
 | `stoppingSlide(at, title, …)` | Yes | Anything the named archetypes do not cover. |
 
@@ -101,6 +104,78 @@ Common options: `at`, `title`, `bullets`, `bg`, `buttonText`, `duration`,
 `revealAll`.
 
 `announcement()` accepts `{ segment: false }` to keep it out of the chapters list.
+
+## Image slides (refuge, dedication)
+
+Some slides are supplied as finished artwork with the text already set — a
+refuge prayer, a dedication. For these the engine renders **no heading, label or
+bullets**: the image is the whole slide.
+
+```js
+import { refuge, dedication } from '../slide-utils/index.js';
+
+const SLIDES = [
+  // Shown once when the viewer first presses play, before the teaching begins.
+  refuge('slides/refuge.webp'),
+
+  // ... the lesson ...
+
+  // Same timestamp as the closing slide; priority puts it after the final
+  // takeaways and before "Thanks for watching".
+  dedication('slides/dedication.webp', { at: '00:53:32.933' }),
+  finalSlide('Thanks for watching!', { at: '00:53:32.933' })
+];
+```
+
+**`refuge()` is offered, not imposed.** It carries `openFromSegment: true`, so
+it never fires on the timeline. Instead it appears as the first entry in the
+segments list, above "Start of the Video", marked with a bullet rather than a
+timestamp because it is an action and not a place in the video. Choosing it opens
+the slide with the video still paused; continuing from it starts the teaching.
+A viewer who simply presses play goes straight into the lesson and never sees it.
+
+**`dedication()` does both.** The teaching reaches it in its proper place at the
+end, *and* it is listed in the segments panel so a viewer can go straight to it —
+to dedicate without watching to the end, or to learn the chant.
+
+That is two independent options, not one:
+
+| Option | Meaning |
+| :--- | :--- |
+| `openFromSegment` | also list it in the segments panel as an action |
+| `onTimeline` | whether the teaching reaches it at `at` (default `true`) |
+
+`refuge()` sets `openFromSegment: true, onTimeline: false` — its `0:00` is where
+it is listed, not a cue, so the timeline must never fire it. `dedication()` sets
+`openFromSegment: true` and leaves `onTimeline` at its default.
+
+**The artwork is fitted with `contain`, not `cover`.** These images carry lesson
+text, and cropping would cut words off the slide (invariant 5). Supply 16:9 so
+there is no letterboxing; 1920x1080 is a good size.
+
+**Offering the chant.** A slide can carry a recording of its text being chanted,
+so the viewer can hear how it is sung:
+
+```js
+refuge('slides/refuge.webp', { audio: 'audio/refuge.mp3' }),
+dedication('slides/dedication.webp', { at: '00:53:32.933', audio: 'audio/dedication.mp3' }),
+```
+
+Put the recording in `public/audio/`. A "Play chant" button then appears
+immediately left of Continue; slides without `audio` show no button. It never
+plays on its own — the viewer asks for it — and it stops when the slide closes,
+so it cannot carry on over the resumed teaching. Pressing it again stops it.
+Use `audioLabel` to change the wording.
+
+The file is only fetched when the viewer presses the button, so a long chant
+costs nothing to viewers who skip it.
+
+**There is no auto-continue timer.** The other archetypes derive one from their
+reading time; an image slide has no text to measure, so it waits for the viewer.
+Pass `duration` explicitly if you want it to advance on its own.
+
+For any other full-frame image, `imageSlide(src, opts)` takes the same options
+plus `kind`, `atStart`, `once` and `imageFit`.
 
 ## How much text fits on a slide
 

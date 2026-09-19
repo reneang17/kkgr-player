@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node slide-layout.test.js",
+    "test": "node slide-layout.test.js && node slide-utils.test.mjs",
     "start": "vite"
   },
   "devDependencies": {

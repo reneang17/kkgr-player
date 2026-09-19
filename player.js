@@ -164,10 +164,30 @@ function buildSegmentsList() {
     }
   });
 
-  // 3. Sort chronologically by timestamp
-  merged.sort((a, b) => a.atSeconds - b.atSeconds);
+  // 3. Slides the viewer can open from the segments list (the refuge slide).
+  //    These are actions rather than positions, so they carry no timestamp.
+  currentSlides.forEach((slide, originalIndex) => {
+    if (!slide.openFromSegment) return;
+    merged.push({
+      at: '',
+      atSeconds: parseTimestamp(slide.at),
+      title: slide.segmentTitle || slide.title,
+      note: slide.segmentNote || '',
+      opensSlideIndex: originalIndex
+    });
+  });
 
-  // 4. Assign sequential index
+  // 4. Sort chronologically. Where an action segment shares a timestamp with a
+  //    position, the action comes first: "Refuge" belongs above "Start of the
+  //    Video", not after it.
+  merged.sort((a, b) => {
+    if (Math.abs(a.atSeconds - b.atSeconds) < 0.001) {
+      return (b.opensSlideIndex !== undefined ? 1 : 0) - (a.opensSlideIndex !== undefined ? 1 : 0);
+    }
+    return a.atSeconds - b.atSeconds;
+  });
+
+  // 5. Assign sequential index
   return merged.map((seg, index) => ({
     ...seg,
     index
@@ -179,17 +199,20 @@ const normalizedSegments = buildSegmentsList();
 // Priority ordering for slides triggered at identical timestamps:
 // 1. takeaways (shown first)
 // 2. coming-up (shown second)
-// 3. final slide (shown after takeaways / coming-up)
-// 4. other stopping slides
-// 5. announcements (shown after stopping slides when video resumes)
-// 6. timed side panels
+// 3. image slides such as the dedication — after the closing takeaways, but
+//    before "Thanks for watching", which is the last thing the viewer sees
+// 4. final slide
+// 5. other stopping slides
+// 6. announcements (shown after stopping slides when video resumes)
+// 7. timed side panels
 function getSlidePriority(slide) {
   if (slide.kind === 'takeaways') return 1;
   if (slide.kind === 'coming-up') return 2;
-  if (slide.kind === 'final' || slide.kind === 'final-slide') return 3;
-  if (slide.isStopping) return 4;
-  if (slide.kind === 'announcement') return 5;
-  return 6;
+  if (slide.kind === 'image' || slide.kind === 'refuge' || slide.kind === 'dedication') return 3;
+  if (slide.kind === 'final' || slide.kind === 'final-slide') return 4;
+  if (slide.isStopping) return 5;
+  if (slide.kind === 'announcement') return 6;
+  return 7;
 }
 
 // Normalize slides array with parsed timestamps & runtime state
@@ -213,6 +236,9 @@ const normalizedSlides = currentSlides.map((slide, index) => {
     untilSeconds,
     isStopping,
     duration,
+    // Gating flags (see slide-utils/image-slide.js)
+    openFromSegment: slide.openFromSegment === true,
+    onTimeline: slide.onTimeline !== false,
     // Runtime tracking flags
     passed: false
   };
@@ -265,6 +291,9 @@ const stoppingTitle = document.getElementById('stopping-title');
 const stoppingBulletsBox = document.getElementById('stopping-bullets-box');
 const stoppingBullets = document.getElementById('stopping-bullets');
 const continueBtn = document.getElementById('continue-btn');
+const chantBtn = document.getElementById('chant-btn');
+const chantBtnText = document.getElementById('chant-btn-text');
+const chantAudio = document.getElementById('chant-audio');
 const continueBtnText = document.getElementById('continue-btn-text');
 const slideHint = document.getElementById('slide-hint');
 
@@ -335,6 +364,18 @@ function seekToSegment(seg) {
     closeAnnouncement();
   }
 
+  // An action segment opens its slide rather than moving the playhead. The video
+  // stays where it is; continuing from the slide resumes from there, which for
+  // the refuge slide means the teaching starts from the beginning.
+  if (seg.opensSlideIndex !== undefined) {
+    const slide = normalizedSlides.find(s => s.originalIndex === seg.opensSlideIndex);
+    if (slide) {
+      playerPause();
+      openStoppingSlide(slide);
+    }
+    return;
+  }
+
   // Reset passed state for slides at or after this timestamp so stopping slides fire
   normalizedSlides.forEach((slide) => {
     if (slide.atSeconds >= seg.atSeconds - 0.5) {
@@ -356,11 +397,17 @@ function renderSegmentsList() {
     btn.className = 'segment-button';
     btn.id = `segment-btn-${seg.index}`;
     btn.setAttribute('type', 'button');
-    btn.setAttribute('aria-label', `Seek to ${seg.title} at ${formatTime(seg.atSeconds)}`);
+    // An action segment opens a slide instead of moving the playhead, so it
+    // shows no timestamp and is described as opening rather than seeking.
+    const isAction = seg.opensSlideIndex !== undefined;
+    btn.setAttribute('aria-label', isAction
+      ? `Open ${seg.title}`
+      : `Seek to ${seg.title} at ${formatTime(seg.atSeconds)}`);
+    if (isAction) btn.classList.add('segment-action');
 
     const timeSpan = document.createElement('span');
     timeSpan.className = 'segment-timestamp';
-    timeSpan.textContent = formatTime(seg.atSeconds);
+    timeSpan.textContent = isAction ? '\u2022' : formatTime(seg.atSeconds);
 
     const contentWrapper = document.createElement('div');
     contentWrapper.className = 'segment-content-wrapper';
@@ -398,11 +445,15 @@ function renderChaptersDrawer() {
     btn.className = 'drawer-chapter-btn';
     btn.id = `drawer-chapter-btn-${seg.index}`;
     btn.setAttribute('type', 'button');
-    btn.setAttribute('aria-label', `Jump to ${seg.title} at ${formatTime(seg.atSeconds)}`);
+    const isAction = seg.opensSlideIndex !== undefined;
+    btn.setAttribute('aria-label', isAction
+      ? `Open ${seg.title}`
+      : `Jump to ${seg.title} at ${formatTime(seg.atSeconds)}`);
+    if (isAction) btn.classList.add('segment-action');
 
     const timeSpan = document.createElement('span');
     timeSpan.className = 'drawer-timestamp';
-    timeSpan.textContent = formatTime(seg.atSeconds);
+    timeSpan.textContent = isAction ? '\u2022' : formatTime(seg.atSeconds);
 
     const contentWrapper = document.createElement('div');
     contentWrapper.className = 'drawer-content-wrapper';
@@ -626,6 +677,99 @@ updateTopCornerMenuVisibility();
    Handles stopping slides, timed side panels, and lower-third announcements.
    ========================================================================== */
 
+/* ==========================================================================
+   CHANT PLAYBACK
+   Some slides carry a recording of their text being chanted, so a viewer can
+   hear how it is sung. It is offered on its own button beside Continue and
+   never plays on its own: the viewer asks for it.
+
+   The video is always paused while a stopping slide is open, so the chant never
+   competes with the teaching — and closing the slide stops it, so it cannot
+   carry on over the resumed video.
+   ========================================================================== */
+
+function setChantLabel(playing) {
+  if (!chantBtn) return;
+  chantBtn.classList.toggle('is-playing', playing);
+  chantBtn.setAttribute('aria-pressed', playing ? 'true' : 'false');
+  if (chantBtnText) {
+    chantBtnText.textContent = playing ? 'Stop chant' : (chantBtn.dataset.label || 'Play chant');
+  }
+}
+
+function stopChant() {
+  if (!chantAudio) return;
+  chantAudio.pause();
+  try { chantAudio.currentTime = 0; } catch (err) { /* not seekable yet */ }
+  setChantLabel(false);
+}
+
+function toggleChant() {
+  if (!chantAudio || !chantAudio.getAttribute('src')) return;
+  if (!chantAudio.paused) {
+    stopChant();
+    return;
+  }
+  chantAudio.currentTime = 0;
+  const started = chantAudio.play();
+  if (started && typeof started.then === 'function') {
+    started.then(() => setChantLabel(true)).catch((err) => {
+      console.warn('[kkgr-player] Could not play chant:', err);
+      setChantLabel(false);
+    });
+  } else {
+    setChantLabel(true);
+  }
+}
+
+/**
+ * Point the chant button at this slide's recording, or hide it when the slide
+ * has none.
+ */
+function configureChant(slide) {
+  if (!chantBtn || !chantAudio) return;
+  stopChant();
+
+  const src = slide && slide.audio;
+  if (!src) {
+    chantBtn.hidden = true;
+    chantAudio.removeAttribute('src');
+    return;
+  }
+
+  const label = slide.audioLabel || 'Play chant';
+  chantBtn.dataset.label = label;
+  chantBtn.hidden = false;
+  chantBtn.setAttribute('aria-label', label);
+  setChantLabel(false);
+
+  // Only reload when the recording actually changes, so reopening the same
+  // slide does not refetch it.
+  if (chantAudio.getAttribute('src') !== src) {
+    chantAudio.setAttribute('src', src);
+    chantAudio.load();
+  }
+}
+
+if (chantAudio) {
+  chantAudio.addEventListener('ended', () => setChantLabel(false));
+  chantAudio.addEventListener('error', () => {
+    if (chantAudio.getAttribute('src')) {
+      console.warn('[kkgr-player] Chant recording could not be loaded:', chantAudio.getAttribute('src'));
+    }
+    setChantLabel(false);
+  });
+}
+
+if (chantBtn) {
+  chantBtn.addEventListener('click', (e) => {
+    // The slide layer closes the slide on any click that is not the Continue
+    // button, so this must not bubble.
+    e.stopPropagation();
+    toggleChant();
+  });
+}
+
 /**
  * Open full-frame stopping slide: pauses video, reveals title and prepares bullets.
  */
@@ -642,9 +786,18 @@ function openStoppingSlide(slide) {
   const isComingUp = slide.kind === 'coming-up';
   const isTakeaways = slide.kind === 'takeaways';
   const isFinal = slide.kind === 'final' || slide.kind === 'final-slide';
+  // Image slides carry their content in the artwork itself, so the engine
+  // renders no heading, label or bullets for them.
+  const isImage = slide.kind === 'image' || slide.kind === 'refuge' || slide.kind === 'dedication';
   stoppingSlideLayer.classList.toggle('coming-up-mode', isComingUp);
   stoppingSlideLayer.classList.toggle('takeaways-mode', isTakeaways);
   stoppingSlideLayer.classList.toggle('final-mode', isFinal);
+  stoppingSlideLayer.classList.toggle('image-mode', isImage);
+
+  // The artwork is lesson content, so it is fitted without cropping by default.
+  if (slideCanvas) {
+    slideCanvas.style.setProperty('--slide-bg-fit', slide.imageFit || 'cover');
+  }
 
   // Density is no longer guessed from bullet/character counts. The layout model
   // measures the rendered content and picks a typographic step for it; see the
@@ -656,7 +809,7 @@ function openStoppingSlide(slide) {
   setSlideBackground(bgImage);
 
   // Category label (hide for coming-up, takeaways, and final)
-  if (isComingUp || isTakeaways || isFinal) {
+  if (isComingUp || isTakeaways || isFinal || isImage) {
     stoppingLabel.style.display = 'none';
   } else {
     stoppingLabel.style.display = 'inline-block';
@@ -713,6 +866,9 @@ function openStoppingSlide(slide) {
       stoppingBullets.appendChild(li);
     });
   }
+
+  // Offer this slide's chant recording, if it has one.
+  configureChant(slide);
 
   // Update Continue button label
   if (continueBtnText) {
@@ -791,6 +947,8 @@ function closeStoppingSlide(resumePlayback = true) {
   stoppingSlideLayer.classList.remove('coming-up-mode');
   stoppingSlideLayer.classList.remove('takeaways-mode');
   stoppingSlideLayer.classList.remove('final-mode');
+  stoppingSlideLayer.classList.remove('image-mode');
+  stopChant();
   if (slideLayout) {
     slideLayout.release();
   }
@@ -1019,6 +1177,13 @@ window.addEventListener('keydown', (e) => {
 
   if (!activeStoppingSlide) return;
 
+  // When a footer button has focus, let the button handle Space/Enter itself.
+  // Otherwise activating the chant button would also advance or close the slide,
+  // because the shortcuts below are bound at the window level.
+  if (e.target instanceof Element && e.target.closest('.stopping-slide-actions')) {
+    if (e.code === 'Space' || e.code === 'Enter') return;
+  }
+
   if (e.code === 'Space') {
     e.preventDefault();
     const bulletElements = stoppingBullets.querySelectorAll('li');
@@ -1070,6 +1235,9 @@ function checkPlaybackTime() {
   // 2. ACTIVE SEGMENT HIGHLIGHT in segment list and in-player chapters drawer
   let activeIndex = -1;
   for (let i = 0; i < normalizedSegments.length; i++) {
+    // Action segments open a slide; they are not places in the video, so they
+    // never light up as "where we are".
+    if (normalizedSegments[i].opensSlideIndex !== undefined) continue;
     if (currentTime >= normalizedSegments[i].atSeconds) {
       activeIndex = i;
     }
@@ -1100,6 +1268,10 @@ function checkPlaybackTime() {
   const triggeredAnnouncements = [];
 
   normalizedSlides.forEach((slide) => {
+    // A slide may be listed in the segments panel and still be reached by the
+    // teaching (the dedication). Only skip the ones that are not on the timeline
+    // at all (the refuge slide).
+    if (!slide.onTimeline) return;
     // Trigger condition: current time reached marker and slide hasn't fired yet
     if (!slide.passed && currentTime >= slide.atSeconds && currentTime < slide.atSeconds + 2.0) {
       slide.passed = true;
