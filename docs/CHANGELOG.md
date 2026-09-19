@@ -41,7 +41,26 @@ Artwork is stored as WebP: at 1920x1080 these are 200KB and 118KB, against
 these slides are mostly text and JPEG rings around glyphs; the source was already
 WebP, so copying it avoids a re-encode entirely.
 
-Tests: `slide-utils.test.mjs` (16 checks) covers the descriptor contract,
+### Chant recordings
+
+Image slides can carry a recording of their text being chanted
+(`{ audio: 'audio/refuge.mp3' }`), offered on a "Play chant" button immediately
+left of Continue. Slides without `audio` show no button.
+
+It never plays on its own, and `closeStoppingSlide()` stops it — otherwise the
+chanting would continue over the resumed teaching. The `<audio>` element is
+`preload="none"`, so the 1.2MB refuge recording is only fetched if the viewer
+asks for it.
+
+Two guards were needed, both because the slide layer closes on any click or key
+that is not Continue:
+
+- the button calls `stopPropagation()`, or pressing it would also close the slide;
+- the window-level keyboard shortcuts ignore Space/Enter when focus is inside
+  `.stopping-slide-actions`, or activating the button from the keyboard would
+  both play the chant and close the slide.
+
+Tests: `slide-utils.test.mjs` (22 checks) covers the descriptor contract,
 including that no factory emits a rem-based font size and that `atStart` implies
 `once`. `npm test` now runs both suites.
 

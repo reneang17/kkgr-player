@@ -43,11 +43,30 @@
                footprint is reserved out of the canvas so it cannot cover slide text. -->
           <div class="stopping-slide-footer" id="stopping-footer">
             <span class="slide-tip" id="slide-hint">Click or press Space for next point</span>
-            <button class="continue-btn" id="continue-btn" disabled>
-              <span id="continue-btn-text">Continue lesson</span>
-              <span aria-hidden="true">&rarr;</span>
-            </button>
+            <!-- Grouped so the pair stays together on the right, with the chant
+                 button immediately left of Continue. -->
+            <div class="stopping-slide-actions">
+              <!-- Shown only for slides that supply a chant recording. -->
+              <button class="chant-btn" id="chant-btn" type="button" hidden>
+                <svg class="chant-icon-play" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5v14l11-7z"></path>
+                </svg>
+                <svg class="chant-icon-stop" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                  <rect x="6" y="6" width="12" height="12" rx="1.5"></rect>
+                </svg>
+                <span id="chant-btn-text">Play chant</span>
+              </button>
+              <button class="continue-btn" id="continue-btn" disabled>
+                <span id="continue-btn-text">Continue lesson</span>
+                <span aria-hidden="true">&rarr;</span>
+              </button>
+            </div>
           </div>
+
+          <!-- One reusable element; the engine points it at the active slide's
+               recording. preload="none" so a 1.2MB chant is only fetched if the
+               viewer actually asks for it. -->
+          <audio id="chant-audio" preload="none"></audio>
         </div>
 
         <!-- Timed Side Panel Overlay Layer -->

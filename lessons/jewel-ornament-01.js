@@ -25,7 +25,7 @@ const SEGMENTS = [
 const SLIDES = [
   // Refuge, shown once when the viewer first presses play — before the teaching
   // begins. It is gated on playback starting rather than on a timestamp.
-  refuge("slides/refuge.webp"),
+  refuge("slides/refuge.webp", { audio: "audio/refuge.mp3" }),
 
   // Announcement banner at 00:29
   announcement(
@@ -228,7 +228,8 @@ const SLIDES = [
   // Dedication at 00:53:32.933. Shares the timestamp with the closing slide;
   // slide priority shows it after the final takeaways and before the thanks.
   dedication("slides/dedication.webp", {
-    at: "00:53:32.933"
+    at: "00:53:32.933",
+    audio: "audio/dedication.mp3"
   }),
 
   // Final closing stopping slide at 00:53:32.933

@@ -26,6 +26,10 @@
  *   @param {'contain'|'cover'} [options.imageFit='contain']
  *   @param {string}  [options.title]      - accessible name; never rendered
  *   @param {string}  [options.buttonText]
+ *   @param {string}  [options.audio]      - optional recording of the text being
+ *                                           chanted, offered on its own button so
+ *                                           the viewer can hear how it is sung
+ *   @param {string}  [options.audioLabel] - label for that button
  *   @param {number}  [options.duration]   - seconds before auto-continue.
  *                                           Omitted by default: there is no text
  *                                           to derive a reading time from, so the
@@ -48,6 +52,8 @@ export function imageSlide(src, options = {}) {
     imageFit: options.imageFit || 'contain',
     duration: typeof options.duration === 'number' ? options.duration : null,
     buttonText: options.buttonText || 'Continue lesson',
+    audio: options.audio || null,
+    audioLabel: options.audioLabel || 'Play chant',
     pause: true,
     revealAll: true,
     align: 'center'

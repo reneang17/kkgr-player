@@ -137,6 +137,23 @@ lesson could never start.
 text, and cropping would cut words off the slide (invariant 5). Supply 16:9 so
 there is no letterboxing; 1920x1080 is a good size.
 
+**Offering the chant.** A slide can carry a recording of its text being chanted,
+so the viewer can hear how it is sung:
+
+```js
+refuge('slides/refuge.webp', { audio: 'audio/refuge.mp3' }),
+dedication('slides/dedication.webp', { at: '00:53:32.933', audio: 'audio/dedication.mp3' }),
+```
+
+Put the recording in `public/audio/`. A "Play chant" button then appears
+immediately left of Continue; slides without `audio` show no button. It never
+plays on its own — the viewer asks for it — and it stops when the slide closes,
+so it cannot carry on over the resumed teaching. Pressing it again stops it.
+Use `audioLabel` to change the wording.
+
+The file is only fetched when the viewer presses the button, so a long chant
+costs nothing to viewers who skip it.
+
 **There is no auto-continue timer.** The other archetypes derive one from their
 reading time; an image slide has no text to measure, so it waits for the viewer.
 Pass `duration` explicitly if you want it to advance on its own.

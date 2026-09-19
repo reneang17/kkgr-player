@@ -345,6 +345,68 @@ header.page-header p.subtitle {
   outline-offset: 2px;
 }
 
+/* Keeps the chant button and Continue together at the right of the footer,
+   so the footer still reads as [hint] .......... [chant] [continue]. */
+.stopping-slide-actions {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.3rem, 1cqw, 0.7rem);
+  pointer-events: none;
+}
+
+/* Secondary action beside Continue: same sizing rules as the primary button
+   (player UI, so it keeps a legible, tappable size on a small player) but a
+   quieter treatment, since Continue is the action that moves the lesson on. */
+.chant-btn {
+  appearance: none;
+  border: 1px solid var(--border-light);
+  background: rgba(18, 22, 20, 0.82);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: clamp(0.68rem, 1.4cqw, 0.95rem);
+  font-weight: 500;
+  padding: clamp(0.3rem, 0.85cqw, 0.7rem) clamp(0.5rem, 1.4cqw, 1.05rem);
+  border-radius: clamp(4px, 0.6cqw, 10px);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(0.2rem, 0.45cqw, 0.45rem);
+  white-space: nowrap;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: auto;
+}
+
+.chant-btn[hidden] {
+  display: none;
+}
+
+.chant-btn:hover {
+  background: rgba(30, 38, 33, 0.92);
+  border-color: var(--accent-celadon);
+}
+
+.chant-btn:focus-visible {
+  outline: 2px solid var(--accent-celadon);
+  outline-offset: 2px;
+}
+
+.chant-btn.is-playing {
+  border-color: var(--accent-celadon);
+  color: var(--accent-celadon-light);
+}
+
+/* One icon at a time: play when idle, stop while the chant is sounding. */
+.chant-btn .chant-icon-stop,
+.chant-btn.is-playing .chant-icon-play {
+  display: none;
+}
+
+.chant-btn.is-playing .chant-icon-stop {
+  display: inline-block;
+}
+
 /* ---- Unresolvable overflow ----
    The slide did not fit even at the readability floor. Rather than shrinking text
    into illegibility or clipping bullets away, the content region becomes

@@ -77,6 +77,28 @@ check('atStart implies once unless overridden',
 check('once can be overridden explicitly',
   imageSlide('slides/x.png', { atStart: true, once: false }).once === false);
 
+/* ---- Chant recordings ----
+   Optional per slide. The engine shows the chant button only when `audio` is
+   set, so every other archetype must leave it undefined. */
+const refugeWithChant = refuge('slides/refuge.webp', { audio: 'audio/refuge.mp3' });
+const dedWithChant = dedication('slides/dedication.webp',
+  { at: '00:53:32.933', audio: 'audio/dedication.mp3' });
+
+check('a chant recording is carried on the slide descriptor',
+  refugeWithChant.audio === 'audio/refuge.mp3' && dedWithChant.audio === 'audio/dedication.mp3');
+check('each slide can carry a different recording',
+  refugeWithChant.audio !== dedWithChant.audio);
+check('image slides have no chant unless one is given',
+  refuge('slides/refuge.webp').audio === null &&
+  imageSlide('slides/x.png', { at: '1:00' }).audio === null);
+check('chant button has a default label', refugeWithChant.audioLabel === 'Play chant');
+check('chant label can be overridden',
+  imageSlide('slides/x.png', { audio: 'a.mp3', audioLabel: 'Hear it chanted' }).audioLabel
+    === 'Hear it chanted');
+check('bullet archetypes carry no chant',
+  [comingUp(['a']), takeaways(['a']), finalSlide('x'), announcement('a', 'b')]
+    .every(s => s.audio === undefined));
+
 /* ---- Distinct kinds, so slide priority can order them ---- */
 check('refuge and dedication have distinct kinds',
   ref.kind === 'refuge' && ded.kind === 'dedication');

@@ -271,6 +271,9 @@ const stoppingTitle = document.getElementById('stopping-title');
 const stoppingBulletsBox = document.getElementById('stopping-bullets-box');
 const stoppingBullets = document.getElementById('stopping-bullets');
 const continueBtn = document.getElementById('continue-btn');
+const chantBtn = document.getElementById('chant-btn');
+const chantBtnText = document.getElementById('chant-btn-text');
+const chantAudio = document.getElementById('chant-audio');
 const continueBtnText = document.getElementById('continue-btn-text');
 const slideHint = document.getElementById('slide-hint');
 
@@ -632,6 +635,99 @@ updateTopCornerMenuVisibility();
    Handles stopping slides, timed side panels, and lower-third announcements.
    ========================================================================== */
 
+/* ==========================================================================
+   CHANT PLAYBACK
+   Some slides carry a recording of their text being chanted, so a viewer can
+   hear how it is sung. It is offered on its own button beside Continue and
+   never plays on its own: the viewer asks for it.
+
+   The video is always paused while a stopping slide is open, so the chant never
+   competes with the teaching — and closing the slide stops it, so it cannot
+   carry on over the resumed video.
+   ========================================================================== */
+
+function setChantLabel(playing) {
+  if (!chantBtn) return;
+  chantBtn.classList.toggle('is-playing', playing);
+  chantBtn.setAttribute('aria-pressed', playing ? 'true' : 'false');
+  if (chantBtnText) {
+    chantBtnText.textContent = playing ? 'Stop chant' : (chantBtn.dataset.label || 'Play chant');
+  }
+}
+
+function stopChant() {
+  if (!chantAudio) return;
+  chantAudio.pause();
+  try { chantAudio.currentTime = 0; } catch (err) { /* not seekable yet */ }
+  setChantLabel(false);
+}
+
+function toggleChant() {
+  if (!chantAudio || !chantAudio.getAttribute('src')) return;
+  if (!chantAudio.paused) {
+    stopChant();
+    return;
+  }
+  chantAudio.currentTime = 0;
+  const started = chantAudio.play();
+  if (started && typeof started.then === 'function') {
+    started.then(() => setChantLabel(true)).catch((err) => {
+      console.warn('[kkgr-player] Could not play chant:', err);
+      setChantLabel(false);
+    });
+  } else {
+    setChantLabel(true);
+  }
+}
+
+/**
+ * Point the chant button at this slide's recording, or hide it when the slide
+ * has none.
+ */
+function configureChant(slide) {
+  if (!chantBtn || !chantAudio) return;
+  stopChant();
+
+  const src = slide && slide.audio;
+  if (!src) {
+    chantBtn.hidden = true;
+    chantAudio.removeAttribute('src');
+    return;
+  }
+
+  const label = slide.audioLabel || 'Play chant';
+  chantBtn.dataset.label = label;
+  chantBtn.hidden = false;
+  chantBtn.setAttribute('aria-label', label);
+  setChantLabel(false);
+
+  // Only reload when the recording actually changes, so reopening the same
+  // slide does not refetch it.
+  if (chantAudio.getAttribute('src') !== src) {
+    chantAudio.setAttribute('src', src);
+    chantAudio.load();
+  }
+}
+
+if (chantAudio) {
+  chantAudio.addEventListener('ended', () => setChantLabel(false));
+  chantAudio.addEventListener('error', () => {
+    if (chantAudio.getAttribute('src')) {
+      console.warn('[kkgr-player] Chant recording could not be loaded:', chantAudio.getAttribute('src'));
+    }
+    setChantLabel(false);
+  });
+}
+
+if (chantBtn) {
+  chantBtn.addEventListener('click', (e) => {
+    // The slide layer closes the slide on any click that is not the Continue
+    // button, so this must not bubble.
+    e.stopPropagation();
+    toggleChant();
+  });
+}
+
 /**
  * Open full-frame stopping slide: pauses video, reveals title and prepares bullets.
  */
@@ -728,6 +824,9 @@ function openStoppingSlide(slide) {
       stoppingBullets.appendChild(li);
     });
   }
+
+  // Offer this slide's chant recording, if it has one.
+  configureChant(slide);
 
   // Update Continue button label
   if (continueBtnText) {
@@ -834,6 +933,7 @@ function closeStoppingSlide(resumePlayback = true) {
   stoppingSlideLayer.classList.remove('takeaways-mode');
   stoppingSlideLayer.classList.remove('final-mode');
   stoppingSlideLayer.classList.remove('image-mode');
+  stopChant();
   if (slideLayout) {
     slideLayout.release();
   }
@@ -1061,6 +1161,13 @@ window.addEventListener('keydown', (e) => {
   }
 
   if (!activeStoppingSlide) return;
+
+  // When a footer button has focus, let the button handle Space/Enter itself.
+  // Otherwise activating the chant button would also advance or close the slide,
+  // because the shortcuts below are bound at the window level.
+  if (e.target instanceof Element && e.target.closest('.stopping-slide-actions')) {
+    if (e.code === 'Space' || e.code === 'Enter') return;
+  }
 
   if (e.code === 'Space') {
     e.preventDefault();
