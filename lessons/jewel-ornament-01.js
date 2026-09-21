@@ -108,7 +108,7 @@ const SLIDES = [
     "All phenomena fall into two: samsara and nirvana — both empty by nature.",
     "Empty means no independent entity: everything is illusory, changing, never staying by itself.",
     "Samsara is a confused mental formation/projection; its defining characteristic is suffering.",
-    "For example, I think, \"myself, something independent, exists.\" But when I investigate I cannot find it. Not having realized that, I grasp at a self as real and permanent, I cherish so much and I suffer because of that.",
+    "For example, we think, \"myself, something independent, exists.\" But when we investigate we cannot find it. Not having realized that, we grasp at a self as real and permanent, we cherish it so much and we suffer because of that.",
     "Nirvana is all confused projections exhausted and dissipated: freedom from all suffering."
   ], {
     at: "00:25:15.300",
@@ -140,7 +140,7 @@ const SLIDES = [
   comingUp([
     "Who is it that is confused in samsara? All sentient beings of the three realms — desire, form, and formless — are confused.",
     "On what basis does confusion arise? Confusion arises on the basis of emptiness — not that emptiness is the cause, but that we are confused about emptiness.",
-    "For example, I grasp at this body of mine as one whole, complete, independent thing, so attached to it that I do everything just to feed this ego-attachment."
+    "For example, we grasp at this body of ours as one whole, complete, independent thing, so attached to it that we do everything just to feed this ego-attachment."
   ], {
     at: "00:36:14.900",
     title: "Coming Up, Some Clarifications about Confusion",
@@ -157,7 +157,7 @@ const SLIDES = [
   // "Some takeaways" keypoints stopping slide at 00:42:01.900
   takeaways([
     "What causes confusion to arise? The cause of confusion is great ignorance. Because of ignorance, I hold on to self-grasping, believing that a self exists within me; I cherish it so much and I suffer because of that.",
-    "I need to realize there is no independent self — for example that my body is just interdependent, arising from many causes and conditions. When I realize that, I see it as just a manifestation: not so much attachment, and no aversion when negative things happen.",
+    "We need to realize there is no independent self — for example that my body is just interdependent, arising from many causes and conditions. When we realize that, we see it as just a manifestation: not so much attachment, and no aversion when negative things happen.",
     "Our study and practice is so important to purify our ignorance."
   ], {
     at: "00:42:01.900",
@@ -217,7 +217,7 @@ const SLIDES = [
   // "Some takeaways" keypoints stopping slide at 00:53:32.933
   takeaways([
     "When does this confusion become transformed into primordial wisdom? When one attains unsurpassable enlightenment — that means buddhahood.",
-    "Within Buddhahood, the Dharmakaya. When I actualize the Dharmakaya, then all these confusions... there is nothing but wisdom.",
+    "Within Buddhahood, the Dharmakaya. When one actualizes the Dharmakaya, then all these confusions... there is nothing but wisdom.",
     "The nature of confusion is emptiness. When you realize the nature of confusion as emptiness, then primordial wisdom is percieved or achieved.",
     "For this we need to study and practice the Dharma."
   ], {
@@ -247,7 +247,14 @@ export const lesson = {
   videoId: VIDEO_ID,
   slideBg: SLIDE_BG,
   segments: SEGMENTS,
-  slides: SLIDES
+  slides: SLIDES,
+
+  // Printable copy of the slide bullet points, offered from the control bar.
+  handout: {
+    file: 'handouts/jewel-ornament-01-points-to-remember.pdf',
+    label: 'Points to remember',
+    filename: 'Jewel Ornament of Liberation 1 - Points to remember.pdf'
+  }
 };
 
 export default lesson;

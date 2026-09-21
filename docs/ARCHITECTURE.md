@@ -55,7 +55,8 @@ The single contract between content and engine:
   videoId:  'j8WneixXOV4',         // YouTube id
   slideBg:  'slides/slide-1.png',  // fallback background for generic slides
   segments: [ /* chapter markers */ ],
-  slides:   [ /* slide descriptors, any order; the engine sorts them */ ]
+  slides:   [ /* slide descriptors, any order; the engine sorts them */ ],
+  handout:  { file, label, filename }   // optional PDF offered in the control bar
 }
 ```
 

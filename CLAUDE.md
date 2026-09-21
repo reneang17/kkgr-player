@@ -76,6 +76,10 @@ is in [docs/CHANGELOG.md](docs/CHANGELOG.md).
    only, so the images loaded on the live site and the chant button 404'd, while
    everything worked locally.*
 
+   `assets.test.mjs` now enforces this: it walks every asset each lesson
+   references and fails if either copy is missing or the two differ. Run
+   `npm test` before pushing anything that adds an asset.
+
 ## Conventions
 
 - **ES modules everywhere.** The `window.*` assignments in
@@ -93,7 +97,7 @@ is in [docs/CHANGELOG.md](docs/CHANGELOG.md).
 ## Checks
 
 ```bash
-npm test        # layout model constraints, 29 checks, no framework needed
+npm test        # layout model, slide factories, lesson assets — no framework needed
 npm run build   # Vite production build
 npm run dev     # dev server
 ```

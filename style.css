@@ -929,6 +929,12 @@ header.page-header p.subtitle {
   display: flex;
   align-items: center;
   gap: 0.65rem;
+  /* The outer bar wraps, but that only moves this group as a whole — without
+     this its own children cannot wrap, so a narrow viewport pushed them past the
+     page edge and produced a horizontal scrollbar. Right-aligned when it does
+     wrap, so it stays visually anchored to the fullscreen button. */
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .ctrl-btn {
@@ -947,6 +953,20 @@ header.page-header p.subtitle {
   cursor: pointer;
   transition: all 0.2s ease;
   min-height: 34px;
+}
+
+/* The handout button is an <a>, so it needs the anchor bits the others get for
+   free, and an explicit [hidden] rule because .ctrl-btn sets a display value. */
+.handout-btn {
+  text-decoration: none;
+  /* Its label is the longest in the bar. Left to wrap it made the button twice
+     the height of its neighbours on a phone; keeping it on one line lets the
+     control bar's flex-wrap move the whole button to its own row instead. */
+  white-space: nowrap;
+}
+
+.handout-btn[hidden] {
+  display: none;
 }
 
 .ctrl-btn:hover {

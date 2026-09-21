@@ -214,6 +214,31 @@ Warnings appear on `localhost`/`127.0.0.1`, or on any host with `?slideDebug=1`.
 
 See [SLIDE-LAYOUT.md](SLIDE-LAYOUT.md) for the model itself.
 
+## Offering a handout
+
+A lesson can offer a printable copy of its slide points. Add a `handout` to the
+lesson descriptor and a download button appears in the control bar; lessons
+without one show no button.
+
+```js
+export const lesson = {
+  // ...
+  handout: {
+    file: 'handouts/jewel-ornament-01-points-to-remember.pdf',
+    label: 'Points to remember',
+    filename: 'Jewel Ornament of Liberation 1 - Points to remember.pdf'
+  }
+};
+```
+
+- `file` — path to the PDF, in `public/handouts/` **and** `handouts/` (below).
+- `label` — the button text.
+- `filename` — what the viewer's browser saves it as; optional, and worth
+  setting because the URL basename is rarely what you want on disk.
+
+It is a plain download link, so the browser's own "save as" and open-in-new-tab
+behaviours work as the viewer expects.
+
 ## Where assets go
 
 Put every runtime asset in **both** `public/<dir>/` and `<dir>/` at the repo root:

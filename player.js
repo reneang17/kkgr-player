@@ -85,6 +85,27 @@ if (typeof document !== 'undefined') {
   if (titleEl && activeLesson.title) titleEl.textContent = activeLesson.title;
   if (subtitleEl && activeLesson.subtitle) subtitleEl.textContent = activeLesson.subtitle;
   if (activeLesson.title) document.title = activeLesson.title;
+
+  /* Optional handout: a printable copy of the slide bullet points. Lessons
+     without one simply show no button. */
+  const handoutBtn = document.getElementById('handout-btn');
+  const handout = activeLesson.handout;
+  if (handoutBtn) {
+    if (handout && handout.file) {
+      const label = handout.label || 'Download handout';
+      handoutBtn.href = handout.file;
+      // `download` names the saved file; without a value the browser keeps the
+      // URL's basename, which is fine but less readable.
+      handoutBtn.setAttribute('download', handout.filename || '');
+      handoutBtn.setAttribute('aria-label', `${label} (PDF, opens a download)`);
+      handoutBtn.setAttribute('title', label);
+      const labelEl = document.getElementById('handout-btn-text');
+      if (labelEl) labelEl.textContent = label;
+      handoutBtn.hidden = false;
+    } else {
+      handoutBtn.hidden = true;
+    }
+  }
 }
 
 /* ==========================================================================

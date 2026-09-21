@@ -94,6 +94,28 @@ including that no factory emits a rem-based font size and that `atStart` implies
 
 ---
 
+## Lesson Handouts
+
+A lesson can offer a printable PDF of its slide points via a `handout` entry on
+the lesson descriptor; a download button then appears in the control bar, and
+lessons without one show no button. It is a plain `<a download>` rather than a
+scripted button, so the browser's own save and open-in-new-tab behaviours work.
+
+Adding a fourth item to the control bar exposed a latent layout bug:
+`.control-bar-right` was `display: flex` with no `flex-wrap`. The outer bar
+wrapped, but that only moved the group as a whole, so on a 375px viewport its
+children pushed 32px past the page edge and produced a horizontal scrollbar.
+Fixed by letting that group wrap and right-aligning it.
+
+`assets.test.mjs` was added at the same time, and matters more than the feature.
+It walks every asset each lesson references — backgrounds, chant recordings,
+handouts — and fails if the file is missing from `public/`, missing from the repo
+root, or if the two copies differ. That is precisely the failure that shipped the
+chant button broken to production while it worked perfectly in `npm run dev`, and
+it is now caught before a push rather than by probing the live site.
+
+---
+
 ## Slide Layout Rework
 
 This section records what changed in the slide rendering rework and, more
