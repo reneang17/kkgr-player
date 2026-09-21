@@ -252,8 +252,8 @@ export const lesson = {
   // Printable copy of the slide bullet points, offered from the control bar.
   handout: {
     file: 'handouts/jewel-ornament-01-points-to-remember.pdf',
-    label: 'Points to remember',
-    filename: 'Jewel Ornament of Liberation 1 - Points to remember.pdf'
+    label: 'Some takeaways',
+    filename: 'Jewel Ornament of Liberation 1 - Some takeaways.pdf'
   }
 };
 
