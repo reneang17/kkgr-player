@@ -26,18 +26,37 @@
  */
 
 import { lesson as jewelOrnament01 } from './jewel-ornament-01.js';
+import { lesson as jewelOrnament02 } from './jewel-ornament-02.js';
 
 /**
  * id -> lesson descriptor. The id is what appears in the `?lesson=` query
  * parameter, and must match the descriptor's own `id`.
+ *
+ * Insertion order is the viewing order: the landing page lists lessons in the
+ * order they appear here, so add each new teaching after the one it follows.
  * @type {Record<string, Object>}
  */
 export const LESSONS = {
-  'jewel-ornament-01': jewelOrnament01
+  'jewel-ornament-01': jewelOrnament01,
+  'jewel-ornament-02': jewelOrnament02
 };
 
 /** Used when no `?lesson=` is given. */
 export const DEFAULT_LESSON_ID = 'jewel-ornament-01';
+
+/**
+ * The player page, relative to the site root. Kept here so the landing page and
+ * any host site build lesson links the same way instead of each spelling the URL.
+ */
+export const PLAYER_PAGE = 'watch.html';
+
+/**
+ * @param {string} id - a registered lesson id
+ * @returns {string} relative URL that opens that lesson in the player
+ */
+export function lessonUrl(id) {
+  return `${PLAYER_PAGE}?lesson=${encodeURIComponent(id)}`;
+}
 
 /** @returns {string[]} every registered lesson id */
 export function listLessonIds() {

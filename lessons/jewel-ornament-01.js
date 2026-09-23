@@ -1,6 +1,6 @@
 /**
  * lessons/jewel-ornament-01.js
- * Lesson content: Khenchen Rinpoche — Jewel Ornament of Liberation, Part 1.
+ * Lesson content: Khenchen Rinpoche — Jewel Ornament of Liberation, Introduction Part 1.
  *
  * This file is PURE DATA. It contains no DOM access, no player calls and no
  * styling: only the video id, the chapter markers and the slide timeline. Every
@@ -242,6 +242,7 @@ const SLIDES = [
 /** The lesson descriptor consumed by the player engine. */
 export const lesson = {
   id: 'jewel-ornament-01',
+  name: 'Introduction Part 1',
   title: 'Khenchen Rinpoche',
   subtitle: 'Teachings on the Jewel Ornament of Liberation',
   videoId: VIDEO_ID,
@@ -253,7 +254,7 @@ export const lesson = {
   handout: {
     file: 'handouts/jewel-ornament-01-points-to-remember.pdf',
     label: 'Some takeaways',
-    filename: 'Jewel Ornament of Liberation 1 - Some takeaways.pdf'
+    filename: 'Jewel Ornament of Liberation - Introduction Part 1 - Some takeaways.pdf'
   }
 };
 

@@ -35,6 +35,7 @@ const SLIDES = [
 
 export const lesson = {
   id: 'my-lesson',
+  name: 'Introduction Part 3',      // this video's place in the series
   title: 'Teacher Name',
   subtitle: 'Series or text being taught',
   videoId: VIDEO_ID,
@@ -51,20 +52,30 @@ export default lesson;
 In `lessons/index.js`:
 
 ```js
-import { lesson as jewelOrnament01 } from './jewel-ornament-01.js';
+import { lesson as jewelOrnament02 } from './jewel-ornament-02.js';
 import { lesson as myLesson } from './my-lesson.js';      // <- add this
 
 export const LESSONS = {
-  'jewel-ornament-01': jewelOrnament01,
+  // ...
+  'jewel-ornament-02': jewelOrnament02,
   'my-lesson':         myLesson                           // <- and this
 };
 ```
 
+The order of `LESSONS` is the viewing order: the landing page lists lessons as
+they appear here.
+
 ## 3. Open it
 
-`http://localhost:5173/?lesson=my-lesson`
+It now appears on the landing page, `http://localhost:5173/`, which links to
+`http://localhost:5173/watch.html?lesson=my-lesson`.
 
-Omitting `?lesson=` loads `DEFAULT_LESSON_ID`. An unknown id warns in the console
+The landing card shows `name` as its heading, `subtitle` beneath it, and the
+video's own YouTube thumbnail, so a new lesson needs no artwork to be listed. In
+the player, `name` appears under the subtitle and leads the browser tab title.
+
+Old-style links to `/?lesson=<id>` are forwarded to the player. Opening
+`watch.html` without `?lesson=` loads `DEFAULT_LESSON_ID`. An unknown id warns in the console
 and falls back to the default rather than showing a broken page.
 
 ---

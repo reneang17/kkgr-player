@@ -1,5 +1,53 @@
 # Changelog
 
+## Fix: Slide Cut Off After Resizing During a Keypoint
+
+Resizing the window while a keypoint slide was showing (seen going from phone
+width to laptop width) could leave the slide shifted left and cut off, and it
+stayed that way until the slide closed.
+
+The cause was `.player-stage { overflow: hidden }`. A hidden box is still a
+scroll container, and the browser scrolls it to bring a focused element into
+view. The stopping slide takes focus when it opens. If that happened while the
+canvas was briefly wider than the stage, the stage scrolled sideways (196px in
+the reproduction), and nothing ever scrolled it back. The scale arithmetic was
+correct throughout; the whole layer was simply displaced.
+
+The stage now uses `overflow: clip`, which clips the same way but cannot be
+scrolled at all, with `hidden` kept as the fallback. This fixes it for every
+focusable element inside the stage, not just the one focus call that exposed it.
+
+## Second Lesson and a Landing Page
+
+Added *Introduction Part 2* (`lessons/jewel-ornament-02.js`, video
+`pSF8WODjf94`) — so far only the refuge and the start of the teaching — and
+named the first lesson *Introduction Part 1*.
+
+- **`index.html` is now a landing page; the player moved to `watch.html`.** The
+  landing page is generated from the registry by `landing.js`, which never
+  imports the engine, so listing lessons does not load the YouTube API. Lessons
+  are listed in `LESSONS` insertion order, with the video's own YouTube
+  thumbnail, so a new lesson needs nothing beyond its registry line.
+
+- **Old links keep working.** Links shared while `index.html` was the player
+  (`/?lesson=<id>`) are forwarded to `watch.html` by an inline script in the
+  landing page's `<head>`. A bare `/` now shows the list rather than Part 1.
+
+- **`name` joined the descriptor.** It places a video in its series and shows
+  on the landing card, under the player subtitle and at the front of the tab
+  title. It is optional, so injected descriptors without one still render.
+
+- **Lesson URLs come from one place.** `lessonUrl(id)` in `lessons/index.js`, so
+  the landing page and any host site agree on the player's address.
+
+- **`vite.config.js` declares both pages.** Vite builds only `index.html` by
+  default; without the config the production build would silently drop the
+  player.
+
+Nothing in the engine or the slide utilities changed beyond reading `name`:
+every lesson already gets every archetype, the layout model and fullscreen
+handling through the shared modules.
+
 ## Image Slides: Refuge and Dedication
 
 Added a slide archetype whose content is the artwork itself — no heading, no

@@ -3,206 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Khenchen Rinpoche</title>
+  <title>Khenchen Rinpoche · Teachings</title>
+  <!-- Links shared before the landing page existed point at /?lesson=<id>, when
+       this page was the player. Forward them to the player so they keep working.
+       Inline and in <head> so it runs before anything renders. -->
+  <script>
+    if (/[?&]lesson=/.test(location.search)) {
+      location.replace('watch.html' + location.search + location.hash);
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+  <!-- Provisional landing page. It is generated from lessons/index.js, so
+       registering a lesson is enough to list it here. A host site that has its
+       own navigation can drop this page and link to watch.html?lesson=<id>. -->
   <div class="app-container">
-    <!-- 1. Header -->
     <header class="page-header">
       <h1>Khenchen Rinpoche</h1>
       <p class="subtitle">Teachings on the Jewel Ornament of Liberation</p>
     </header>
 
-    <!-- 2. Player with 16:9 Aspect Ratio Container -->
-    <div class="player-aspect-box" id="player-box">
-      <div class="player-stage" id="player-stage">
-        <!-- YouTube Video Container Layer -->
-        <div class="video-layer">
-          <div id="yt-player"></div>
-        </div>
-
-        <!-- Stopping Slide Overlay Layer -->
-        <div class="stopping-slide-layer" id="stopping-slide" role="dialog" aria-modal="true" aria-hidden="true" tabindex="0">
-          <!-- Logical presentation canvas (1600x900). Laid out at a fixed logical size,
-               then fitted to the player with a single uniform transform. -->
-          <div class="slide-canvas" id="slide-canvas">
-            <div class="stopping-slide-content" id="stopping-content">
-              <span class="slide-label" id="stopping-label">Overview</span>
-              <h2 class="slide-heading" id="stopping-title">Slide Title</h2>
-              <div class="slide-bullets-box" id="stopping-bullets-box">
-                <ul class="slide-bullets" id="stopping-bullets"></ul>
-              </div>
-            </div>
-          </div>
-          <!-- Player UI: stays readable and tappable at any player size, and its
-               footprint is reserved out of the canvas so it cannot cover slide text. -->
-          <div class="stopping-slide-footer" id="stopping-footer">
-            <span class="slide-tip" id="slide-hint">Click or press Space for next point</span>
-            <!-- Grouped so the pair stays together on the right, with the chant
-                 button immediately left of Continue. -->
-            <div class="stopping-slide-actions">
-              <!-- Shown only for slides that supply a chant recording. -->
-              <button class="chant-btn" id="chant-btn" type="button" hidden>
-                <svg class="chant-icon-play" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-                  <path d="M8 5v14l11-7z"></path>
-                </svg>
-                <svg class="chant-icon-stop" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-                  <rect x="6" y="6" width="12" height="12" rx="1.5"></rect>
-                </svg>
-                <span id="chant-btn-text">Play chant</span>
-              </button>
-              <button class="continue-btn" id="continue-btn" disabled>
-                <span id="continue-btn-text">Continue lesson</span>
-                <span aria-hidden="true">&rarr;</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- One reusable element; the engine points it at the active slide's
-               recording. preload="none" so a 1.2MB chant is only fetched if the
-               viewer actually asks for it. -->
-          <audio id="chant-audio" preload="none"></audio>
-        </div>
-
-        <!-- Timed Side Panel Overlay Layer -->
-        <div class="timed-panel-layer" id="timed-panel" aria-hidden="true">
-          <div class="timed-panel-content">
-            <span class="slide-label" id="timed-label">Take-home</span>
-            <h2 class="slide-heading" id="timed-title">Slide Title</h2>
-            <ul class="slide-bullets" id="timed-bullets"></ul>
-          </div>
-        </div>
-
-        <!-- Exit button for pseudo fullscreen. In native fullscreen the browser
-             provides its own way out (Escape / system UI), but pseudo fullscreen
-             covers the control bar and phones have no Escape key, so without this
-             the viewer would be trapped. Shown only while pseudo fullscreen is on. -->
-        <button class="pseudo-fs-exit-btn" id="pseudo-fs-exit-btn" type="button" aria-label="Exit full screen" title="Exit full screen">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
-          </svg>
-        </button>
-
-        <!-- Floating Top-Right Chapters Menu Button (Accessible in standard and fullscreen mode) -->
-        <button class="top-corner-menu-btn" id="top-corner-menu-btn" type="button" aria-label="Open chapters menu" aria-expanded="false" title="Chapters & Topics">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="4" y1="6" x2="20" y2="6"></line>
-            <line x1="4" y1="12" x2="20" y2="12"></line>
-            <line x1="4" y1="18" x2="20" y2="18"></line>
-          </svg>
-        </button>
-
-        <!-- Announcement Lower-Third Overlay Layer -->
-        <div class="announcement-layer" id="announcement-layer" aria-hidden="true">
-          <!-- Same logical 1600x900 canvas as the stopping slides, scaled by the
-               shared --slide-scale, so the banner behaves like a lower-third
-               burnt into the video frame. -->
-          <div class="announcement-canvas" id="announcement-canvas">
-            <div class="announcement-banner" id="announcement-banner">
-              <div class="announcement-primary" id="announcement-primary"></div>
-              <div class="announcement-secondary" id="announcement-secondary"></div>
-            </div>
-          </div>
-        </div>
-
-
-        <!-- In-Player Chapters Drawer Layer (Accessible in standard and fullscreen mode) -->
-        <div class="chapters-drawer-layer" id="chapters-drawer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Video Chapters">
-          <div class="chapters-drawer-backdrop" id="chapters-drawer-backdrop"></div>
-          <div class="chapters-drawer-panel">
-            <div class="chapters-drawer-header">
-              <div class="chapters-drawer-title-group">
-                <svg class="chapters-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                </svg>
-                <span class="chapters-drawer-title">Chapters &amp; Topics</span>
-              </div>
-              <button class="chapters-drawer-close" id="chapters-drawer-close" type="button" aria-label="Close chapters menu">
-                &times;
-              </button>
-            </div>
-            <ul class="chapters-drawer-list" id="chapters-drawer-list">
-              <!-- Rendered dynamically by player.js -->
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. Thin Control Bar directly under the player -->
-    <div class="control-bar">
-      <div class="control-bar-left">
-        <label class="toggle-container" for="pause-toggle">
-          <input type="checkbox" id="pause-toggle" checked>
-          <span class="toggle-label-text">Pause on Keypoints</span>
-        </label>
-      </div>
-
-      <div class="control-bar-right">
-        <button class="ctrl-btn chapters-toggle-btn" id="chapters-toggle-btn" type="button" aria-label="Open chapters menu" aria-expanded="false">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="8" y1="6" x2="21" y2="6"></line>
-            <line x1="8" y1="12" x2="21" y2="12"></line>
-            <line x1="8" y1="18" x2="21" y2="18"></line>
-            <line x1="3" y1="6" x2="3.01" y2="6"></line>
-            <line x1="3" y1="12" x2="3.01" y2="12"></line>
-            <line x1="3" y1="18" x2="3.01" y2="18"></line>
-          </svg>
-          <span class="ctrl-btn-text">Chapters</span>
-        </button>
-
-        <!-- Shown only for lessons that supply a handout. A plain download link
-             rather than a scripted button, so the browser's own "save as" and
-             open-in-new-tab behaviours work as the viewer expects. -->
-        <a class="ctrl-btn handout-btn" id="handout-btn" hidden download>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          <span class="ctrl-btn-text" id="handout-btn-text">Download handout</span>
-        </a>
-
-        <div class="time-display" id="time-display">0:00 / 0:00</div>
-
-        <button class="ctrl-btn fullscreen-btn" id="fullscreen-btn" type="button" aria-label="Toggle full screen">
-          <svg id="fullscreen-icon-expand" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-          </svg>
-          <svg id="fullscreen-icon-compress" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;">
-            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-
-    <!-- 4. Segments Section -->
-    <section class="segments-section" aria-label="Video Segments">
-      <div class="segments-header">
-        <span class="segments-title">Segments</span>
-      </div>
-      <ul class="segments-list" id="segments-list">
-        <!-- Dynamically generated from SEGMENTS and SLIDES array -->
-      </ul>
+    <section class="lesson-index" aria-label="Teachings">
+      <ol class="lesson-list" id="lesson-list">
+        <!-- Rendered by landing.js -->
+      </ol>
     </section>
   </div>
 
-  <!-- Slide layout model: typography fitting + uniform viewport scaling.
-       Loaded before the engine because the engine installs a controller from it. -->
-  <script type="module" src="slide-layout.js"></script>
-
-  <!-- Player engine. It imports its lesson from lessons/index.js, chosen by the
-       ?lesson= query parameter, so this page is the template for every video. -->
-  <script type="module" src="player.js"></script>
-
-
+  <script type="module" src="landing.js"></script>
 </body>
 </html>
-

@@ -84,7 +84,15 @@ if (typeof document !== 'undefined') {
   const subtitleEl = document.querySelector('.page-header p.subtitle');
   if (titleEl && activeLesson.title) titleEl.textContent = activeLesson.title;
   if (subtitleEl && activeLesson.subtitle) subtitleEl.textContent = activeLesson.subtitle;
-  if (activeLesson.title) document.title = activeLesson.title;
+  // `name` places this video within its series ("Introduction Part 1"). It is
+  // optional so that injected or older descriptors without one still render.
+  const nameEl = document.getElementById('lesson-name');
+  if (nameEl) {
+    nameEl.textContent = activeLesson.name || '';
+    nameEl.hidden = !activeLesson.name;
+  }
+  const docTitle = [activeLesson.name, activeLesson.title].filter(Boolean).join(' · ');
+  if (docTitle) document.title = docTitle;
 
   /* Optional handout: a printable copy of the slide bullet points. Lessons
      without one simply show no button. */

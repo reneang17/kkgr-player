@@ -12,7 +12,7 @@ place.
 ```bash
 npm install
 npm run dev          # http://localhost:5173
-npm run dev -- --open '/?lesson=jewel-ornament-01'
+npm run dev -- --open '/watch.html?lesson=jewel-ornament-02'
 ```
 
 ---
@@ -71,7 +71,7 @@ export const LESSONS = {
 };
 ```
 
-Then open `?lesson=my-lesson`. Full guide: [docs/AUTHORING-LESSONS.md](docs/AUTHORING-LESSONS.md).
+It appears on the landing page; the player URL is `watch.html?lesson=my-lesson`. Full guide: [docs/AUTHORING-LESSONS.md](docs/AUTHORING-LESSONS.md).
 
 ---
 
@@ -79,12 +79,15 @@ Then open `?lesson=my-lesson`. Full guide: [docs/AUTHORING-LESSONS.md](docs/AUTH
 
 ```
 kkgr-player/
-├── index.html              # Page template: the 16:9 stage and overlay markup
+├── index.html              # Landing page: lists every registered lesson
+├── landing.js              #   renders that list from lessons/index.js
+├── watch.html              # Player page template: the 16:9 stage and overlay markup
 ├── style.css               # Design system, slide canvas, drawer, fullscreen
 │
 ├── lessons/                # CONTENT — pure data, one file per video
 │   ├── index.js            #   registry + ?lesson= resolution
-│   └── jewel-ornament-01.js
+│   ├── jewel-ornament-01.js  # Introduction Part 1
+│   └── jewel-ornament-02.js  # Introduction Part 2
 │
 ├── slide-utils/            # AUTHORING — factories producing slide descriptors
 │   ├── index.js            #   public API (re-exports only)

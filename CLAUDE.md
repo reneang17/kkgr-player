@@ -22,7 +22,8 @@ Changes that cross a layer boundary are almost always a mistake.
 | Add a slide archetype | `slide-utils/` | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Change playback / chapters / fullscreen | `player.js` | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Change how slides look or size themselves | `slide-layout.js`, `style.css` | [docs/SLIDE-LAYOUT.md](docs/SLIDE-LAYOUT.md) |
-| Put the player into a website | `player.js`, `index.html` | [docs/EMBEDDING.md](docs/EMBEDDING.md) |
+| Change the lesson list / landing page | `landing.js`, `index.html` | [docs/EMBEDDING.md](docs/EMBEDDING.md) |
+| Put the player into a website | `player.js`, `watch.html` | [docs/EMBEDDING.md](docs/EMBEDDING.md) |
 | Understand why something is the way it is | — | [docs/CHANGELOG.md](docs/CHANGELOG.md) |
 
 ## Invariants — do not break these
@@ -123,10 +124,11 @@ jumping, and controls covering slide text.
 ## Known gaps
 
 - **No mount API yet.** `player.js` runs at module top level against hard-coded
-  element ids, so one player per page and the host must supply the markup. See
+  element ids, so one player per page and the host must supply the markup (`watch.html`). See
   [docs/EMBEDDING.md](docs/EMBEDDING.md) for the plan.
 - **Native fullscreen is unverified on hardware.** It could not be exercised in
   the available automation environments; the mobile fallback path is the one that
   has been tested (by simulating the API being absent).
-- **Only one lesson exists.** The registry and `?lesson=` switching work, but the
-  multi-lesson path has not been exercised with a second real lesson.
+- **The landing page is provisional.** `index.html` lists every registered lesson
+  in registry order and links to `watch.html?lesson=<id>`. It has no grouping by
+  series yet; a host site with its own navigation can replace it outright.

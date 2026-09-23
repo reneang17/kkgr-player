@@ -37,7 +37,8 @@ touches only the bottom.
 | File | Owns | Must NOT contain |
 | :--- | :--- | :--- |
 | `lessons/<id>.js` | One video's id, chapters and slide timeline | DOM, styling, player calls |
-| `lessons/index.js` | Which lessons exist; `?lesson=` resolution | Lesson content |
+| `lessons/index.js` | Which lessons exist, their order; `?lesson=` resolution; lesson URLs | Lesson content |
+| `landing.js` | The lesson list on `index.html` | Playback; it never imports the engine |
 | `slide-utils/*.js` | Slide descriptor shapes and defaults | DOM, typography sizes |
 | `player.js` | Playback, timeline, overlays, chapters, fullscreen | Lesson content, typography sizes |
 | `slide-layout.js` | Design tokens, typography fitting, viewport scaling | Lesson content, playback logic |
@@ -50,6 +51,7 @@ The single contract between content and engine:
 ```js
 {
   id:       'jewel-ornament-01',   // must match the registry key
+  name:     'Introduction Part 1', // place in the series: landing card, header, tab title
   title:    'Khenchen Rinpoche',   // page <h1> and document title
   subtitle: 'Teachings on the Jewel Ornament of Liberation',
   videoId:  'j8WneixXOV4',         // YouTube id

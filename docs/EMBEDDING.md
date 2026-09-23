@@ -14,8 +14,15 @@ engine code.
 and resolves `?lesson=`. Lookup is currently synchronous via static imports; that
 file documents the tradeoff and when to switch to code-split dynamic imports.
 
-**Page chrome follows the lesson.** `title` and `subtitle` drive the `<h1>`, the
-subtitle line and `document.title`, so one page template serves every video.
+**Two pages.** `index.html` is a provisional landing page that lists every
+registered lesson; `watch.html` is the player. Lesson links are built by
+`lessonUrl(id)` in `lessons/index.js` (`watch.html?lesson=<id>`), so a host site
+listing lessons its own way should use it rather than spelling the URL. Old
+`/?lesson=<id>` links, from when `index.html` was the player, are forwarded.
+
+**Page chrome follows the lesson.** `title`, `subtitle` and `name` drive the
+`<h1>`, the subtitle lines and `document.title`, so one page template serves
+every video.
 
 **No global namespace dependency.** Everything is ES modules. The `window`
 assignments that remain are back-compatibility shims, marked as such and safe to
@@ -28,7 +35,8 @@ JS and assets, deployable anywhere.
 
 ### 1. Deploy the built page as-is
 
-Build and host `dist/`. Link to lessons with `?lesson=<id>`. Simplest option;
+Build and host `dist/`. Link to lessons with `watch.html?lesson=<id>`, or to
+the landing page. Simplest option;
 appropriate when the player is its own page on the site.
 
 ### 2. Inject the lesson from the host page
@@ -48,7 +56,7 @@ or CMS), set a global before the player's module runs:
     slides:   [ /* ... */ ]
   };
 </script>
-<script type="module" src="/player.js"></script>
+<script type="module" src="/player.js"></script>   <!-- in a copy of watch.html -->
 ```
 
 `player.js` prefers `window.KKGR_LESSON` over the registry, so the registry
@@ -68,7 +76,7 @@ the same descriptor objects directly. A JSON-fed integration would replace
 **The engine still runs as a script, not as a component.** `player.js` executes
 its setup at module top level and looks elements up by hard-coded `id`
 (`player-box`, `stopping-slide`, `slide-canvas`, …). So today the host page must
-contain the markup from `index.html` with those ids, and only one player can
+contain the markup from `watch.html` with those ids, and only one player can
 exist per page.
 
 For a component-style integration the engine needs:
