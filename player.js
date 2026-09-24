@@ -636,9 +636,26 @@ function updateTopCornerMenuVisibility() {
    chapters drawer and the corner menu keep working, and the slide layout model
    rescales automatically through its ResizeObserver on the player stage. */
 
+/* Whether the browser will actually put an ordinary element into fullscreen.
+   Checking for the method alone is not enough: iPhone Safari defines
+   webkitRequestFullscreen but only honours it for <video>, so on an element it
+   is silently ignored — no promise rejection, no error, no fullscreenchange —
+   and the pseudo-fullscreen fallback never ran. The *Enabled flags report the
+   truth there (false on iPhone), so they win when the browser provides them. */
 function nativeFullscreenSupported() {
-  return !!(playerBox && (playerBox.requestFullscreen || playerBox.webkitRequestFullscreen));
+  if (!playerBox || !(playerBox.requestFullscreen || playerBox.webkitRequestFullscreen)) {
+    return false;
+  }
+  if (typeof document.fullscreenEnabled === 'boolean') return document.fullscreenEnabled;
+  if (typeof document.webkitFullscreenEnabled === 'boolean') return document.webkitFullscreenEnabled;
+  return true;
 }
+
+/* How long a native fullscreen request gets to take effect before we assume it
+   was silently ignored and fall back to pseudo fullscreen. Browsers apply it
+   within a frame or two; 400ms is comfortably longer than that while still
+   feeling like one response to one tap. */
+const NATIVE_FULLSCREEN_GRACE_MS = 400;
 
 function isNativeFullscreen() {
   return !!(document.fullscreenElement || document.webkitFullscreenElement);
@@ -698,6 +715,15 @@ function toggleFullscreen() {
       if (request && typeof request.catch === 'function') {
         request.catch(onRefused);
       }
+      // Safety net for a request that is neither honoured nor refused (a
+      // browser that reports support it does not have). Without this the
+      // fullscreen button does nothing at all.
+      setTimeout(() => {
+        if (!isNativeFullscreen() && !isPseudoFullscreen()) {
+          console.warn('Fullscreen request had no effect, using pseudo fullscreen.');
+          enterPseudoFullscreen();
+        }
+      }, NATIVE_FULLSCREEN_GRACE_MS);
     } catch (err) {
       onRefused(err);
     }
@@ -1440,7 +1466,12 @@ window.onYouTubeIframeAPIReady = function() {
       playsinline: 1,
       rel: 0,
       modestbranding: 1,
-      fs: 1
+      // YouTube's own fullscreen button (and double-click-to-fullscreen) hands
+      // the frame to the iframe — on iPhone, to Apple's native video player —
+      // where none of our overlays can render: no slides, no chapters button
+      // (CLAUDE.md invariant 6). Our fullscreen button in the control bar keeps
+      // everything in our DOM, so it is the only one offered.
+      fs: 0
     },
     events: {
       onReady: function(event) {

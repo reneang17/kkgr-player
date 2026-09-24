@@ -274,14 +274,18 @@ header.page-header p.lesson-name {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 1600px;
-  height: 900px;
+  /* 1600x900, or a smaller canvas on a small player — chosen by
+     slide-layout.js (designFor) and written on .player-stage. */
+  width: var(--slide-design-w, 1600px);
+  height: var(--slide-design-h, 900px);
   z-index: 2;
   transform: translate(-50%, -50%) scale(var(--slide-scale));
   transform-origin: center center;
   display: flex;
   flex-direction: column;
-  padding: 48px 77px 29px;   /* TOKENS.padTop / padX / padBottom */
+  /* TOKENS.padTop / padX / padBottom. The side padding is a variable because
+     the smaller canvases use narrower ones (their own padX in slide-layout.js). */
+  padding: 48px var(--slide-pad-x, 77px) 29px;
   pointer-events: none;
 
   /* The slide artwork belongs to the presentation surface, not to the player
@@ -324,6 +328,11 @@ header.page-header p.lesson-name {
      never bleed into the footer; genuinely oversized slides opt into scrolling
      via [data-slide-overflow] below. */
   overflow: hidden;
+  /* The fit resizes the text inside this box. With the browser's scroll
+     anchoring on, each resize could shift a scrolled slide to "keep a line in
+     place", so a dense slide opened part-way down with its heading hidden. The
+     layout model owns this box's position; the browser should not move it. */
+  overflow-anchor: none;
   pointer-events: none;
 }
 
@@ -520,9 +529,66 @@ header.page-header p.lesson-name {
    slide-layout.js. Normal slides never reach this state, so scrollbars never
    appear during ordinary playback. */
 .slide-canvas[data-slide-overflow="true"] .stopping-slide-content {
-  overflow-y: auto;
   pointer-events: auto;
+}
+
+/* Only the bullets scroll; the label and heading stay in place, so the viewer
+   never loses track of which slide they are reading. The bullet list becomes a
+   flex item that may shrink below its content (min-height: 0) and scrolls. */
+.slide-canvas[data-slide-overflow="true"] .slide-label,
+.slide-canvas[data-slide-overflow="true"] .slide-heading {
+  flex-shrink: 0;
+}
+
+/* Coming-up has no card, so while its bullets scroll they sit directly under
+   the heading. Give the heading room (TOKENS.scrollHeadingGap). */
+.stopping-slide-layer.coming-up-mode .slide-canvas[data-slide-overflow="true"] .slide-heading {
+  margin-bottom: var(--slide-scroll-heading-gap, 32px);
+}
+
+.slide-canvas[data-slide-overflow="true"] .slide-bullets-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+/* Prefixed with .stopping-slide-layer so it outranks the per-archetype rules
+   below (`.takeaways-mode .slide-bullets { padding: 0 }` and the coming-up
+   equivalent), which would otherwise cancel the scroll-end padding. */
+.stopping-slide-layer .slide-canvas[data-slide-overflow="true"] .slide-bullets {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-anchor: none;          /* see .stopping-slide-content */
   scrollbar-width: thin;
+  overscroll-behavior: contain;   /* scrolling the slide never scrolls the page */
+  /* A scroll region with no visible edge reads as text cut off mid-line. The
+     fade says "there is more below". The matching bottom padding lets the last
+     line scroll fully clear of the fade, so nothing stays half-faded at the end.
+     48 logical px is about one line at the floor size (28.7 * 1.24 = 36) plus
+     a little, which is the least that reads as a deliberate fade. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent);
+  padding-bottom: 48px;
+}
+
+/* ---- Smaller canvases (small windows, tablets, phones) ----
+   The 78% card and 80% column read as framing on a wide slide; on a smaller
+   canvas the margins they leave are lines of text the viewer has to scroll for.
+   Widths only: typography is still chosen by slide-layout.js. */
+.player-stage[data-slide-canvas="medium"] .stopping-slide-layer.takeaways-mode .slide-bullets-box,
+.player-stage[data-slide-canvas="compact"] .stopping-slide-layer.takeaways-mode .slide-bullets-box {
+  max-width: 100%;
+}
+
+/* Coming-up has no card, so its bullets sit directly on the artwork, which has
+   the lineage logo in its top-right corner. At full width they would run under
+   it (and scroll beneath it). They take the heading's title-safe width instead:
+   still wider than the 80% used on the full canvas, and centred. */
+.player-stage[data-slide-canvas="medium"] .stopping-slide-layer.coming-up-mode .slide-bullets,
+.player-stage[data-slide-canvas="compact"] .stopping-slide-layer.coming-up-mode .slide-bullets {
+  max-width: calc(100% - 2 * var(--slide-heading-safe-inset, 60px));
 }
 
 /* ---- "Coming up": full-bleed art, centred type, no card ---- */
@@ -719,9 +785,12 @@ header.page-header p.lesson-name {
   position: absolute;
   top: 50%;
   left: 50%;
+  /* Always the full 1600x900 canvas, scaled by --banner-scale rather than
+     --slide-scale: the stopping slides switch to a smaller canvas on a phone,
+     but the banner keeps the proportions it has always had. */
   width: 1600px;
   height: 900px;
-  transform: translate(-50%, -50%) scale(var(--slide-scale));
+  transform: translate(-50%, -50%) scale(var(--banner-scale, var(--slide-scale)));
   transform-origin: center center;
   pointer-events: none;
 }
@@ -730,7 +799,13 @@ header.page-header p.lesson-name {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 48px;             /* was 5.38% of the frame */
+  /* Raised clear of YouTube's subtitles, which the iframe draws along the bottom
+     of the frame where we cannot measure them. Measured with captions on, on a
+     397px (laptop) and a 200px (phone) player: one subtitle line reaches ~7.5% of
+     the frame height from the bottom and two lines ~11.5%, in the same proportion
+     at both sizes. 120 of 900 = 13.3% clears two lines with a small gap. (It was
+     48 = 5.3%, which sat on top of the first subtitle line.) */
+  bottom: 120px;
   min-height: 130px;        /* was 14.41% */
   background: linear-gradient(
     to right,

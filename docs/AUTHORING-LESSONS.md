@@ -111,6 +111,12 @@ other stopping slides → announcements.
 | `timedPanel(at, until, …)` | No | Notes alongside continuing playback. |
 | `stoppingSlide(at, title, …)` | Yes | Anything the named archetypes do not cover. |
 
+**Title convention.** Coming-up and takeaways titles are written
+`Coming up: <topic>` and `Takeaways: <topic>`, with the topic in sentence case:
+only its first letter capitalised, apart from names such as Gampopa or Dharma.
+For example `Coming up: The error of confusion` and
+`Takeaways: The error of confusion`.
+
 Common options: `at`, `title`, `bullets`, `bg`, `buttonText`, `duration`,
 `revealAll`.
 

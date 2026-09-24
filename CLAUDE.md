@@ -41,8 +41,10 @@ is in [docs/CHANGELOG.md](docs/CHANGELOG.md).
    banner via `redSize` / `blackSize`, so check the factories too — any default
    carrying a `rem` unit is a bug waiting to happen.*
 
-   The same applies to the announcement banner, which shares the logical canvas
-   and the `--slide-scale` written on `.player-stage`.
+   The same applies to the announcement banner. It always uses the full 1600×900
+   canvas, scaled by `--banner-scale` on `.player-stage`, and deliberately does
+   **not** follow the slides onto the smaller canvases (it was already readable
+   there).
 
 2. **Lesson files are pure data.** No DOM access, no player imports, no styling.
 
@@ -51,7 +53,9 @@ is in [docs/CHANGELOG.md](docs/CHANGELOG.md).
 
 4. **Resizing scales; it does not reflow.** A viewport change may only update
    `--slide-scale`. Re-running the typography fit on resize makes the slide jump
-   while the viewer drags the window.
+   while the viewer drags the window. The one exception is the player moving to
+   a different logical canvas (a phone rotating, a window resized past a size
+   class), which must re-fit once — see `docs/SLIDE-LAYOUT.md` §1e.
 
 5. **Never truncate or drop lesson content.** A slide that will not fit above the
    readability floor is *reported* (`data-slide-overflow`, console warning), never
@@ -128,7 +132,9 @@ jumping, and controls covering slide text.
   [docs/EMBEDDING.md](docs/EMBEDDING.md) for the plan.
 - **Native fullscreen is unverified on hardware.** It could not be exercised in
   the available automation environments; the mobile fallback path is the one that
-  has been tested (by simulating the API being absent).
+  has been tested (by simulating the API being absent, and by a browser that
+  silently ignores the request, as iPhone Safari does). The iPhone fix in
+  docs/CHANGELOG.md still needs confirming on a real device.
 - **The landing page is provisional.** `index.html` lists every registered lesson
   in registry order and links to `watch.html?lesson=<id>`. It has no grouping by
   series yet; a host site with its own navigation can replace it outright.

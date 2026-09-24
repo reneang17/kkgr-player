@@ -1,5 +1,79 @@
 # Changelog
 
+## Announcement Banner Raised Above the Subtitles
+
+The lower-third banner sat at 5.3% of the frame height from the bottom, which
+covered YouTube's subtitles. Measured with captions on at a laptop (397px) and a
+phone (200px) player, subtitles scale with the player: one line reaches ~7.5% of
+the frame height and two lines ~11.5%. The banner now starts at 13.3% (120 of 900
+logical px), clearing two lines on both, and is otherwise unchanged. The page
+cannot read the subtitle position from inside the YouTube iframe, so this is
+measured rather than computed. A rare three-line subtitle can still touch the
+banner.
+
+## Fix: Chapters Button Missing in Fullscreen on iPhone
+
+On an iPhone, entering fullscreen hid the chapters (☰) button, and with it any
+way to reach the chapters. Two causes:
+
+- **YouTube's own fullscreen button was enabled** (`fs: 1`). On iPhone it hands
+  the video to Apple's native player, which covers the page, so none of our
+  overlays can show: not the chapters button and not the slides either
+  (invariant 6). It is now off (`fs: 0`), which leaves our fullscreen button in
+  the control bar as the only one. That button keeps everything in our DOM.
+- **Our fullscreen button could silently do nothing.** It checked only that
+  `webkitRequestFullscreen` exists. iPhone Safari defines it, but honours it only
+  for `<video>`, so on the player it was ignored without an error and the
+  pseudo-fullscreen fallback never ran. Support is now read from
+  `document.fullscreenEnabled` / `webkitFullscreenEnabled`. As a safety net, a
+  request that has had no effect after `NATIVE_FULLSCREEN_GRACE_MS` (400ms)
+  falls back to pseudo fullscreen.
+
+Verified in an emulated phone, whose browser silently ignores fullscreen
+requests in the same way: the button now enters pseudo fullscreen, and the
+chapters button shows there, stays visible during playback, opens the chapters
+drawer, and survives rotating to landscape. **Not yet verified on a real
+iPhone.**
+
+## Readable Slides on Phones and Small Windows
+
+On a phone held upright, slide body text rendered at 6.4 screen px (measured on a
+356px player): every slide was laid out on the 1600×900 canvas and scaled to 0.22.
+Changing the fit's floor could not fix that, since the fit sizes text relative to
+the canvas and the canvas was what shrank. A narrow desktop window had the same
+problem to a lesser degree.
+
+- **Smaller canvases, chosen by readable text size.** A small player lays out on a
+  1200×675 or 900×506.25 canvas with the same tokens. `designFor()` picks the
+  largest canvas on which floor-size text renders at 16px (the web's default body
+  size) or more, so the rule is the same for phones, tablets and narrow browser
+  windows. A 745px laptop player now shows the densest slide at 16.9px with a short
+  scroll (was 13.4px), a 581px window 18.5px, a phone 11.3px (was 6.4px). A
+  full-width 960px laptop player is unchanged.
+- **The minimum started at 12px.** That kept a 745px laptop player on the full
+  canvas, where the densest slide fit without scrolling but at 13.4px. Larger text
+  with a short scroll read better, so the minimum became 16px.
+- **Three sizes, not two.** An earlier version switched straight from 1600 to 900
+  at a 600px player, so a player just under that jumped to much larger text and
+  scrolled far more than it needed to. The middle size keeps each step moderate.
+- **Smaller canvases use the width.** Each has its own side padding and
+  title-safe inset, and the takeaways card and coming-up column widen.
+- **Dense slides scroll their bullets.** When the text will not fit at a readable
+  size, only the bullet list scrolls. The heading stays fixed, and a bottom fade
+  shows there is more. This reuses the existing overflow state, which previously
+  never triggered on small players because the text shrank instead.
+- **The announcement banner is unchanged.** It keeps the 1600×900 canvas via its
+  own `--banner-scale`. Moving it onto the compact canvas made it two lines tall
+  and a third of the frame, and it was already readable.
+- **Switching canvas re-fits once.** Rotating a phone or resizing a window past a
+  size class with a slide open switches canvas and re-fits. Resizing within a size
+  class still only rescales.
+
+Found while testing: the fit has to be measured with scrolling switched off, or a
+re-fit sees no overflow and picks the preferred size; and browser scroll anchoring
+had to be disabled, or a slide could open part-way down. Details in
+`docs/SLIDE-LAYOUT.md` §1e.
+
 ## Fix: Slide Cut Off After Resizing During a Keypoint
 
 Resizing the window while a keypoint slide was showing (seen going from phone

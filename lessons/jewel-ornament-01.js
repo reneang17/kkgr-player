@@ -43,7 +43,7 @@ const SLIDES = [
     "The world's wars, famines, climate problems all manifest from our own confusion."
   ], {
     at: "00:03:05.000",
-    title: "Coming Up, Overview",
+    title: "Coming up: Overview",
     buttonText: "Continue lesson"
   }),
 
@@ -68,7 +68,7 @@ const SLIDES = [
     "One who studies, understands and practices is rich, not in wealth, but in wisdom and contentment."
   ], {
     at: "00:17:48.233",
-    title: "Overview, Takeaways",
+    title: "Takeaways: Overview",
     buttonText: "Continue lesson"
   }),
 
@@ -80,7 +80,7 @@ const SLIDES = [
     "Gampopa wrote this book out of his teachers' kindness, for our benefit."
   ], {
     at: "00:17:48.233",
-    title: "Coming Up, Paying Homage",
+    title: "Coming up: Paying homage",
     buttonText: "Continue lesson"
   }),
 
@@ -99,7 +99,7 @@ const SLIDES = [
     "Gampopa wrote this book depending on the kindness of Milarepa and Atisha, for our benefit."
   ], {
     at: "00:25:15.300",
-    title: "Paying Homage, Takeaways",
+    title: "Takeaways: Paying homage",
     buttonText: "Continue lesson"
   }),
 
@@ -112,7 +112,7 @@ const SLIDES = [
     "Nirvana is all confused projections exhausted and dissipated: freedom from all suffering."
   ], {
     at: "00:25:15.300",
-    title: "Coming Up, Introduction — Written by Gampopa",
+    title: "Coming up: Introduction — written by Gampopa",
     buttonText: "Continue lesson"
   }),
 
@@ -132,7 +132,7 @@ const SLIDES = [
     "Our interest is to be free from suffering and to achieve peace and happiness. This is the why we practice."
   ], {
     at: "00:36:14.900",
-    title: "Introduction — Written by Gampopa, Takeaways",
+    title: "Takeaways: Introduction — written by Gampopa",
     buttonText: "Continue lesson"
   }),
 
@@ -143,7 +143,7 @@ const SLIDES = [
     "For example, we grasp at this body of ours as one whole, complete, independent thing, so attached to it that we do everything just to feed this ego-attachment."
   ], {
     at: "00:36:14.900",
-    title: "Coming Up, Some Clarifications about Confusion",
+    title: "Coming up: Some clarifications about confusion",
     buttonText: "Continue lesson"
   }),
 
@@ -161,7 +161,7 @@ const SLIDES = [
     "Our study and practice is so important to purify our ignorance."
   ], {
     at: "00:42:01.900",
-    title: "Some Clarifications about Confusion, Takeaways",
+    title: "Takeaways: Some clarifications about confusion",
     buttonText: "Continue lesson"
   }),
 
@@ -173,7 +173,7 @@ const SLIDES = [
     "Even in the human realm we can have all six of these experiences: hell-realm suffering, hungry-ghost suffering, animal suffering, human birth-and-death suffering, and the suffering of the demigods and gods."
   ], {
     at: "00:42:01.900",
-    title: "Coming Up, How Does Confusion Operate?",
+    title: "Coming up: How does confusion operate?",
     buttonText: "Continue lesson"
   }),
 
@@ -191,7 +191,7 @@ const SLIDES = [
     "When did this confusion originate? This confusion originated in beginningless samsara — there is no beginning and no end; it is a complete cycle. Like space, like the universe, it has no beginning."
   ], {
     at: "00:47:22.900",
-    title: "How Does Confusion Operate?, Takeaways",
+    title: "Takeaways: How does confusion operate?",
     buttonText: "Continue lesson"
   }),
 
@@ -203,7 +203,7 @@ const SLIDES = [
     "We are not making samsara something bad. Samsara is beautiful. But we have to understand its reality nature."
   ], {
     at: "00:47:22.900",
-    title: "Coming Up, The Error of Confusion",
+    title: "Coming up: The error of confusion",
     buttonText: "Continue lesson"
   }),
 
@@ -222,7 +222,7 @@ const SLIDES = [
     "For this we need to study and practice the Dharma."
   ], {
     at: "00:53:32.933",
-    title: "The Error of Confusion, Takeaways",
+    title: "Takeaways: The error of confusion",
     buttonText: "Continue lesson"
   }),
 
@@ -234,7 +234,7 @@ const SLIDES = [
   }),
 
   // Final closing stopping slide at 00:53:32.933
-  finalSlide("Thanks for watching!", {
+  finalSlide("Thank you everybody", {
     at: "00:53:32.933"
   })
 ];

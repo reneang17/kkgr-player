@@ -146,6 +146,66 @@ check('title-safe inset is not so large it cramps the heading',
   headingHalfWidth * 2 > (L.DESIGN.width - 2 * L.TOKENS.padX) * 0.8,
   `${(headingHalfWidth * 2).toFixed(0)} of ${(L.DESIGN.width - 2 * L.TOKENS.padX).toFixed(0)}`);
 
+/* ---- Smaller canvases for small players ----
+   The canvas is chosen by the rendered size of floor-size text, not by device:
+   the largest canvas on which it stays at MIN_READABLE_BODY_PX. */
+const floorBodyLogical = L.TOKENS.bodySize * L.FIT_MIN;
+const onScreen = (canvas, w) => floorBodyLogical * (w / canvas.width);
+
+L.CANVASES.forEach((canvas) => {
+  check(`${canvas.name} canvas is 16:9`,
+    Math.abs(canvas.width / canvas.height - 16 / 9) < 1e-9);
+});
+check('canvases are ordered largest first',
+  L.CANVASES.every((c, i) => i === 0 || c.width < L.CANVASES[i - 1].width));
+
+check('a full-width laptop player (960px) keeps the full canvas', L.designFor(960, 540) === L.DESIGN);
+check('a smaller laptop player (745px) gets the medium canvas', L.designFor(745, 419) === L.MEDIUM_DESIGN);
+check('phone landscape (772px player) gets the medium canvas', L.designFor(772, 434) === L.MEDIUM_DESIGN);
+check('a narrow desktop window (560px player) gets the compact canvas',
+  L.designFor(560, 315) === L.COMPACT_DESIGN);
+check('a phone held upright (356px player) gets the compact canvas',
+  L.designFor(356, 200) === L.COMPACT_DESIGN);
+check('an unmeasured (zero-width) player keeps the full canvas', L.designFor(0, 0) === L.DESIGN);
+
+// Every choice above the smallest canvas renders the floor at the readable minimum.
+[1200, 960, 892, 891, 772, 745, 669, 668].forEach((w) => {
+  const canvas = L.designFor(w, w * 9 / 16);
+  if (canvas === L.COMPACT_DESIGN) return;
+  check(`at a ${w}px player the floor renders at >= ${L.MIN_READABLE_BODY_PX}px`,
+    onScreen(canvas, w) >= L.MIN_READABLE_BODY_PX - 1e-9,
+    `${onScreen(canvas, w).toFixed(1)}px on ${canvas.name}`);
+});
+
+// Each canvas is the LARGEST readable one: the next size up would be too small.
+[891, 668].forEach((w) => {
+  const i = L.CANVASES.indexOf(L.designFor(w, w * 9 / 16));
+  check(`at a ${w}px player the next larger canvas would be below the minimum`,
+    i > 0 && onScreen(L.CANVASES[i - 1], w) < L.MIN_READABLE_BODY_PX);
+});
+
+check('floor body text is at least 11 screen px on a phone (356px)',
+  onScreen(L.COMPACT_DESIGN, 356) >= 11, `${onScreen(L.COMPACT_DESIGN, 356).toFixed(1)}px`);
+
+check('full canvas keeps its original side padding',
+  num(L.typographyFor(1), '--slide-pad-x') === L.TOKENS.padX);
+check('smaller canvases use narrower side padding than the full one',
+  [L.MEDIUM_DESIGN, L.COMPACT_DESIGN].every((c) =>
+    num(L.typographyFor(1, c), '--slide-pad-x') < L.TOKENS.padX));
+
+// The coming-up artwork's logo sits at ~0.90 of the width on every canvas
+// (the art is cover-fitted), so each canvas's title-safe inset must clear it.
+L.CANVASES.forEach((canvas) => {
+  const vars = L.typographyFor(1, canvas);
+  const padX = num(vars, '--slide-pad-x');
+  const inset = num(vars, '--slide-heading-safe-inset');
+  const headingRight = canvas.width / 2 + ((canvas.width - 2 * padX) / 2 - inset);
+  const logoLeft = 0.9033 * canvas.width;
+  check(`${canvas.name} title-safe inset keeps the heading clear of the logo`,
+    headingRight < logoLeft,
+    `heading reaches ${headingRight.toFixed(0)}, logo starts at ${logoLeft.toFixed(0)}`);
+});
+
 /* ---- Search grid ---- */
 check('grid index 0 is the readability floor', Math.abs(L.fitAt(0) - L.FIT_MIN) < 1e-9);
 check('top grid index is the preferred step', Math.abs(L.fitAt(L.STEP_COUNT) - L.FIT_MAX) < 1e-9);

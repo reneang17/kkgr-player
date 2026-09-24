@@ -18,6 +18,13 @@
  *             Runs on every resize / fullscreen / orientation change. It never
  *             changes typography, so nothing reflows and nothing jumps.
  *
+ *   On a small player (a phone, a narrow browser window) the canvas itself is
+ *   smaller: MEDIUM_DESIGN or COMPACT_DESIGN instead of DESIGN, whichever is the
+ *   largest that keeps floor-size text at MIN_READABLE_BODY_PX on screen. The
+ *   same tokens on a smaller canvas are larger relative to the slide; a slide
+ *   too dense to fit at that size scrolls its bullets instead of shrinking. Only
+ *   switching canvas re-fits; ordinary resizing still only rescales.
+ *
  * Everything the visual design depends on lives in the TOKENS block below, expressed
  * in logical pixels on the design canvas. Nothing else in the codebase should contain
  * a slide typography number.
@@ -39,13 +46,107 @@
      ====================================================================== */
 
   const DESIGN = {
+    name: 'full',
     width: 1600,
     height: 900
   };
 
+  /* ----------------------------------------------------------------------
+     SMALLER CANVASES FOR SMALL PLAYERS
+
+     Uniform scaling alone cannot serve a small player. On a phone held upright
+     the player is ~356px wide, so the 1600px canvas renders at scale 0.22 and a
+     dense slide at the readability floor came out at 6.4 screen px — measured,
+     and unreadable. The fit cannot help: it chooses sizes relative to the
+     canvas, and the canvas is what shrinks. A narrow desktop window has the
+     same problem to a lesser degree.
+
+     So a small player lays out on a smaller canvas with the SAME tokens: text is
+     then larger relative to the slide, and larger on screen after scaling.
+
+     The rule is about the result, not the device: use the LARGEST canvas on
+     which floor-size body text still renders at MIN_READABLE_BODY_PX or more.
+     16px is the web's default body text size, the usual target for comfortable
+     reading. It was chosen after viewing on a 745px laptop player, where the
+     densest slide at 13.4px fit without scrolling but was harder to read than a
+     larger size with a short scroll. With the floor at 28.7 logical px that
+     works out to:
+
+       canvas        used when the player is     floor body on screen
+       1600 x 900    892px wide and up           16px and up
+       1200 x 675    669 - 891px                 16 - 21px
+        900 x 506    under 669px                 up to 21px; 11.4px at a 356px phone
+
+     Three sizes rather than two keep each step moderate: each step down enlarges
+     the text by a third rather than jumping straight from the full to the
+     phone canvas. The 900 canvas is the smallest; below it a
+     player simply gets smaller text, because a still smaller canvas would leave
+     too few lines per screen to read comfortably.
+
+     A slide that needs more room than its canvas has at the floor scrolls its
+     bullets (data-slide-overflow) rather than shrinking below that: scrolling
+     readable text beats glancing at unreadable text.
+
+     Each smaller canvas carries its own side padding and title-safe inset. The
+     full-canvas values are proportionally too wide there, and every column
+     spent on margin is another line to scroll.
+     ---------------------------------------------------------------------- */
+
+  /** Smallest on-screen size, in CSS px, that floor-size body text may render at
+      before a smaller canvas is used. 16px: the web's default body text size. */
+  const MIN_READABLE_BODY_PX = 16;
+
+  const MEDIUM_DESIGN = {
+    name: 'medium',
+    width: 1200,
+    height: 675,        // 1200 * 9/16, so the canvas stays exactly 16:9
+    /* Between the full (77) and compact (36) values; clear of the rounded
+       player corners (radius 10 screen px = ~22 logical px at scale ~0.46). */
+    padX: 56,
+    /* The artwork is `cover`-fitted, so the lineage logo's left edge stays at
+       ~0.90 of the width = 1084 logical px; the content box ends at
+       1200 - 56 = 1144, so 60 is the minimum and 70 leaves some clearance. */
+    headingSafeInset: 70
+  };
+
+  const COMPACT_DESIGN = {
+    name: 'compact',
+    width: 900,
+    height: 506.25,     // 900 * 9/16
+    /* 77px would be 8.5% of the canvas per side. 36 keeps the text clear of the
+       rounded player corners (~25 logical px at the compact scale of ~0.40). */
+    padX: 36,
+    /* Logo left edge ~0.90 * 900 = 810; content box ends at 900 - 36 = 864:
+       54px minimum, 60 for a little clearance. */
+    headingSafeInset: 60
+  };
+
+  /** Largest first; designFor() takes the first one that is readable. */
+  const CANVASES = [DESIGN, MEDIUM_DESIGN, COMPACT_DESIGN];
+
+  /**
+   * The logical canvas for a player of the given size: the largest whose
+   * floor-size body text renders at MIN_READABLE_BODY_PX or more, falling back
+   * to the smallest. A zero width (not yet measured) keeps the full canvas.
+   *
+   * @param {number} stageWidth
+   * @param {number} [stageHeight] - omitted or 0 means "not limited by height"
+   */
+  function designFor(stageWidth, stageHeight) {
+    if (!(stageWidth > 0)) return DESIGN;
+    const floorBody = TOKENS.bodySize * FIT_MIN;
+    for (const canvas of CANVASES) {
+      const scale = stageHeight > 0
+        ? Math.min(stageWidth / canvas.width, stageHeight / canvas.height)
+        : stageWidth / canvas.width;
+      if (floorBody * scale >= MIN_READABLE_BODY_PX) return canvas;
+    }
+    return CANVASES[CANVASES.length - 1];
+  }
+
   const TOKENS = {
     /* Slide padding (safe area inside the 16:9 frame) */
-    padX: 77,            // was 4.8cqw
+    padX: 77,            // was 4.8cqw  (smaller canvases carry their own)
     padTop: 48,          // was 3.0cqw
     padBottom: 29,       // was 1.8cqw
 
@@ -53,6 +154,15 @@
     headingSize: 77,     // was 4.8cqw
     headingLineHeight: 1.22,
     headingMarginBottom: 14,
+    /* Gap under the heading while a coming-up slide's bullets scroll. A slide
+       only scrolls at the floor step, where spacing is compressed to
+       SPACING_MIN and the heading margin is ~5px: fine above bullets that are
+       vertically centred in free space, but with the list pressed up against
+       the heading the title reads as part of the first bullet. Takeaways have
+       the card's own padding and edge in that gap, so this only applies to
+       coming-up. 32 is the card's uncompressed boxPadY, so the two archetypes
+       read alike. Scrolling already makes room, so the gap costs nothing. */
+    scrollHeadingGap: 32,
 
     bodySize: 41,        // was 2.55cqw
     bodyLineHeightMax: 1.42,
@@ -82,7 +192,7 @@
        the logo's left edge sits at ~1445 logical px, the content box ends at
        1523, so 78px is the minimum; 90 leaves a little clearance.
        Applied symmetrically so the heading stays centred. */
-    headingSafeInset: 90
+    headingSafeInset: 90   // smaller canvases carry their own
   };
 
   /* ======================================================================
@@ -166,7 +276,8 @@
    * that drive the slide. Font sizes track `f` directly; spacing and line-height
    * ride a steeper curve so whitespace is spent before legibility is.
    */
-  function typographyFor(f) {
+  function typographyFor(f, design) {
+    const canvas = design || DESIGN;
     const t = (f - FIT_MIN) / (FIT_MAX - FIT_MIN);        // 0 at the floor, 1 at preferred
     const spacing = SPACING_MIN + (1 - SPACING_MIN) * t;
     const bodyLineHeight =
@@ -178,6 +289,7 @@
       '--slide-heading-size': px(TOKENS.headingSize * f),
       '--slide-heading-line-height': TOKENS.headingLineHeight.toFixed(3),
       '--slide-heading-margin': px(TOKENS.headingMarginBottom * spacing),
+      '--slide-scroll-heading-gap': px(TOKENS.scrollHeadingGap),
       '--slide-body-size': px(TOKENS.bodySize * f),
       '--slide-body-line-height': bodyLineHeight.toFixed(3),
       '--slide-bullet-gap': px(TOKENS.bulletGap * spacing),
@@ -186,7 +298,8 @@
       '--slide-box-pad-x': px(TOKENS.boxPadX * f),
       '--slide-label-size': px(TOKENS.labelSize * f),
       '--slide-label-margin': px(TOKENS.labelMarginBottom * spacing),
-      '--slide-heading-safe-inset': px(TOKENS.headingSafeInset)
+      '--slide-heading-safe-inset': px(canvas.headingSafeInset ?? TOKENS.headingSafeInset),
+      '--slide-pad-x': px(canvas.padX ?? TOKENS.padX)
     };
   }
 
@@ -216,6 +329,8 @@
     const { stage, canvas, content, footer, heading } = refs;
 
     let currentScale = 1;
+    let design = DESIGN;
+    let fittedDesign = null;       // the canvas the current fit was measured on
     let reservedFooterLogical = 0;
     let frame = null;
     let active = false;
@@ -224,15 +339,35 @@
 
     /* ---------- 2. Uniform viewport scaling ---------- */
 
-    function measureScale() {
-      const rect = stage.getBoundingClientRect();
+    function measureScale(rect) {
       if (!rect.width || !rect.height) return currentScale;
-      const s = Math.min(rect.width / DESIGN.width, rect.height / DESIGN.height);
+      const s = Math.min(rect.width / design.width, rect.height / design.height);
       return Math.min(MAX_SCALE, Math.max(MIN_SCALE, s));
     }
 
     function applyScale() {
-      currentScale = measureScale();
+      const rect = stage.getBoundingClientRect();
+      if (rect.width) {
+        const next = designFor(rect.width, rect.height);
+        if (next !== design) {
+          design = next;
+          // The stopping-slide canvas sizes itself from these. The announcement
+          // canvas deliberately does not (see --banner-scale below).
+          stage.style.setProperty('--slide-design-w', design.width + 'px');
+          stage.style.setProperty('--slide-design-h', design.height + 'px');
+          stage.dataset.slideCanvas = design.name;
+        }
+      }
+      currentScale = measureScale(rect);
+      // The announcement banner always uses the full 1600x900 canvas, even on a
+      // small player: it is a brief lower-third over the video, and it already
+      // read correctly on phones. So it gets its own scale, computed the way
+      // --slide-scale was before the smaller canvases existed.
+      if (rect.width && rect.height) {
+        const bannerScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE,
+          Math.min(rect.width / DESIGN.width, rect.height / DESIGN.height)));
+        stage.style.setProperty('--banner-scale', String(bannerScale));
+      }
       // Written on the stage rather than the slide canvas: custom properties
       // inherit, so every overlay that composites on the same logical canvas
       // (the stopping slide, the announcement banner) shares one scale and
@@ -256,7 +391,7 @@
     }
 
     function usableContentHeight() {
-      return DESIGN.height - TOKENS.padTop - TOKENS.padBottom - reservedFooterLogical;
+      return design.height - TOKENS.padTop - TOKENS.padBottom - reservedFooterLogical;
     }
 
     /* ---------- 1. Content fitting ---------- */
@@ -268,7 +403,7 @@
     }
 
     function tryFit(f) {
-      applyVars(canvas, typographyFor(f));
+      applyVars(canvas, typographyFor(f, design));
       // Reading scrollHeight forces the pending layout, so no explicit flush needed.
       return !overflows();
     }
@@ -300,7 +435,7 @@
         return { fit: 1, wrapped: false };
       }
 
-      applyVars(canvas, typographyFor(FIT_MAX));
+      applyVars(canvas, typographyFor(FIT_MAX, design));
       canvas.style.setProperty('--slide-heading-wrap', 'nowrap');
       canvas.style.setProperty('--slide-heading-fit', '1');
 
@@ -351,6 +486,10 @@
      */
     function fitContent() {
       content.style.height = usableContentHeight() + 'px';
+      // Measure with the overflow state off. While it is on, the bullet list
+      // scrolls inside the content box, so the box itself never overflows and
+      // every re-fit would wrongly conclude the preferred size fits.
+      delete canvas.dataset.slideOverflow;
 
       // The title is sized first. It does not depend on the body, and settling it
       // up front means the body fit measures the heading's final height.
@@ -387,7 +526,7 @@
       }
 
       const chosen = fitAt(best);
-      applyVars(canvas, typographyFor(chosen));
+      applyVars(canvas, typographyFor(chosen, design));
       return { fit: chosen, overflow: false, steps };
     }
 
@@ -404,9 +543,15 @@
       active = true;
       applyScale();
       reservedFooterLogical = measureFooterReserve();
+      // The content and bullet list are reused for every slide. A dense slide
+      // that the viewer scrolled would otherwise leave the next one opening
+      // mid-way.
+      content.scrollTop = 0;
+      content.querySelectorAll('.slide-bullets').forEach((el) => { el.scrollTop = 0; });
 
       const result = fitContent();
       lastFit = result;
+      fittedDesign = design;
 
       canvas.dataset.slideFit = result.fit.toFixed(2);
       if (result.overflow) {
@@ -416,7 +561,7 @@
       }
 
       if (result.overflow) {
-        reportOverflow(meta, result);
+        reportOverflow(meta, result, design);
       }
 
       return {
@@ -434,15 +579,20 @@
     function refresh() {
       if (!active) return;
 
+      // Re-fit only on a discrete change: the footer reaching its minimum
+      // readable size, or the player moving to a different canvas (rotating a phone,
+      // entering fullscreen). Continuous resizing within a size class never
+      // gets here, so it still only rescales.
       const reserve = measureFooterReserve();
-      if (Math.abs(reserve - reservedFooterLogical) > 1) {
+      if (Math.abs(reserve - reservedFooterLogical) > 1 || design !== fittedDesign) {
         reservedFooterLogical = reserve;
         const result = fitContent();
         lastFit = result;
+        fittedDesign = design;
         canvas.dataset.slideFit = result.fit.toFixed(2);
         if (result.overflow) {
           canvas.dataset.slideOverflow = 'true';
-          reportOverflow(null, result);
+          reportOverflow(null, result, design);
         } else {
           delete canvas.dataset.slideOverflow;
         }
@@ -519,8 +669,11 @@
     return debugFlag || host === 'localhost' || host === '127.0.0.1' || host === '';
   }
 
-  function reportOverflow(meta, result) {
+  function reportOverflow(meta, result, design) {
     if (!isDevEnvironment()) return;
+    // On a smaller canvas scrolling is the intended behaviour for a dense
+    // slide, not an authoring problem. The warning is about the full canvas.
+    if (design && design !== DESIGN) return;
     const title = meta && meta.title ? `"${meta.title}"` : '(active slide)';
     const at = meta && meta.at ? ` @ ${meta.at}` : '';
     console.warn(
@@ -554,6 +707,11 @@
 
   global.KKGRSlideLayout = {
     DESIGN,
+    MEDIUM_DESIGN,
+    COMPACT_DESIGN,
+    CANVASES,
+    MIN_READABLE_BODY_PX,
+    designFor,
     TOKENS,
     FIT_MIN,
     FIT_MAX,

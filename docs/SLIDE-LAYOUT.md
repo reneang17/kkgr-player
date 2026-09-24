@@ -146,14 +146,22 @@ different place), adjust that single token.
 
 ### 1c-ii. The Announcement Banner
 
-The lower-third announcement is composited on the **same logical 1600×900 canvas**
-as the stopping slides, scaled by the same shared `--slide-scale`, so it behaves
-like a lower-third burnt into the video frame: identical proportions at every
-player size.
+The lower-third announcement is composited on a **logical 1600×900 canvas**, so it
+behaves like a lower-third burnt into the video frame: identical proportions at
+every player size.
 
-`--slide-scale` is therefore written on `.player-stage`, not on an individual
-canvas. Custom properties inherit, so `.slide-canvas` and `.announcement-canvas`
-share one scale and stay in lockstep with the video.
+Its scale, `--banner-scale`, is written on `.player-stage` alongside
+`--slide-scale`. On a laptop or phone landscape the two are equal. On a smaller player
+they differ on purpose: the stopping slides move to a smaller canvas (§1e) but the
+banner stays on 1600×900, because it was already readable there and
+enlarging it made it cover a third of the video.
+
+**It sits above YouTube's subtitles.** The iframe draws subtitles along the bottom
+of the frame, where our page cannot measure them. Measured with captions on at a
+397px and a 200px player, they scale with the player: one line reaches ~7.5% of
+the frame height from the bottom, two lines ~11.5%. The banner's bottom edge is
+therefore at 120 of 900 (13.3%), clearing two lines at every player size. It was
+at 48 (5.3%), on top of the first line.
 
 > The banner previously mixed container units in the stylesheet with
 > `clamp(0.95rem, 2.85cqw, 1.6rem)` inline sizes applied by the engine — the same
@@ -161,6 +169,66 @@ share one scale and stay in lockstep with the video.
 > floor and rendered roughly 50% oversized relative to the frame, wrapping and
 > overflowing the banner. Its sizes are now logical pixels on the canvas, and the
 > factory no longer emits `redSize` / `blackSize` defaults.
+
+---
+
+### 1e. Smaller Canvases for Small Players
+
+Uniform scaling alone cannot serve a small player. On a phone held upright the
+player is about 356px wide, so the 1600px canvas renders at scale 0.22, and a dense
+slide at the readability floor came out at **6.4 screen px** (measured). A narrow
+desktop window has the same problem to a lesser degree. The fit cannot help,
+because it chooses sizes relative to the canvas, and the canvas is what shrinks.
+
+So a small player lays out on a smaller canvas **with the same tokens**. The text
+is then larger relative to the slide, and larger on screen.
+
+**The rule is about the result, not the device.** `designFor()` picks the
+**largest** canvas on which floor-size body text still renders at
+`MIN_READABLE_BODY_PX`, and falls back to the smallest. It applies equally to
+phones, tablets and a browser window someone has made narrow on a laptop.
+
+`MIN_READABLE_BODY_PX` is **16px**, the web's default body text size. It was first
+12px (a readable minimum), but on a 745px laptop player the densest slide then fit
+at 13.4px without scrolling, and it was plainly easier to read larger with a short
+scroll. Raise it for larger type (more scrolling); lower it for less scrolling.
+
+| Canvas | Used when the player is | Floor body on screen | Side padding | Title-safe inset |
+| :--- | :--- | :--- | :--- | :--- |
+| `DESIGN` 1600×900 | 892px wide and up (a full-width laptop player is 960) | 16px and up | 77 | 90 |
+| `MEDIUM_DESIGN` 1200×675 | 669–891px (smaller laptop windows, phone landscape) | 16–21px | 56 | 70 |
+| `COMPACT_DESIGN` 900×506.25 | under 669px (small windows, phones) | up to 21px; 11.4px at a 356px phone | 36 | 60 |
+
+Each smaller canvas carries its own `padX` and `headingSafeInset`, because the
+full-canvas margins are proportionally too wide there. On the medium and compact
+canvases the takeaways card and the coming-up column also widen: the card to 100%,
+and the column to the title-safe width so it stays clear of the artwork's logo.
+
+Three sizes rather than two keep each step moderate: each step down enlarges the
+text by a third, rather than jumping straight from the full to the phone canvas.
+
+**A slide too dense for its canvas scrolls instead of shrinking.** Only the bullet
+list scrolls; the label and heading stay fixed so the viewer never loses the
+slide's title. A fade at the bottom signals there is more, and matching bottom
+padding lets the last line scroll fully clear of it. On a smaller canvas this is
+the expected state for a dense slide, so it is not reported as an authoring
+problem. The console warning still means "does not fit the full canvas".
+
+Two details that were found by testing on a phone:
+
+- **The fit must be measured with scrolling off.** While `data-slide-overflow` is
+  set, the bullets scroll inside the content box, so the box never overflows and a
+  re-fit would conclude the preferred size fits. `fitContent()` clears the flag
+  before measuring.
+- **Scroll anchoring is off** (`overflow-anchor: none`) on the content and the
+  bullet list. The browser otherwise nudges a scroll box when the fit resizes the
+  text inside it, and a slide could open part-way down. The bullet list's scroll
+  position is also reset whenever a slide is laid out, because the element is
+  reused from slide to slide.
+
+**The canvas is chosen per size class, not continuously.** Resizing within a class
+only rescales (invariant 4). Moving to a different canvas re-fits once, through the
+same path as the footer-reserve re-fit in `refresh()`.
 
 ---
 

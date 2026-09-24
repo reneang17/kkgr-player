@@ -4,13 +4,9 @@
  *
  * PURE DATA, like every lesson file: video id, chapter markers, slide timeline.
  * See docs/AUTHORING-LESSONS.md.
- *
- * Work in progress: so far only the refuge and the start of the teaching.
- * Keypoint slides, announcements and the dedication are added as the recording
- * is worked through.
  */
 
-import { announcement, comingUp, takeaways, refuge } from '../slide-utils/index.js';
+import { announcement, comingUp, takeaways, refuge, dedication } from '../slide-utils/index.js';
 
 const VIDEO_ID = "pSF8WODjf94";
 const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
@@ -35,7 +31,7 @@ const SLIDES = [
     "Please understand that samsara is confusion. Samsara is not something that exists outside but within the mind. As long as there is confusion we are in samsara. As long as we have grasping, grasping to the self, grasping to our whole being, so much attachment, aversion and affliction, we are in samsara."
   ], {
     at: "00:00:28.233",
-    title: "Understanding more about confusion, Coming up",
+    title: "Coming up: Understanding more about confusion",
     buttonText: "Continue lesson"
   }),
 
@@ -48,14 +44,13 @@ const SLIDES = [
 
   // "Some takeaways" keypoints stopping slide at 00:06:47.300
   takeaways([
-    "Please understand how much suffering there is in samsara. See how much suffering of suffering there is in the world. For example, how much suffering we went through in the pandemic. And it is not just one country or a few people — rich or poor, famous or not famous, young or old — we all go through this. And now there is a war: how many people are suffering unbearably.",
+    "Please understand how much suffering there is in samsara. See how much suffering of suffering there is in the world. It is not just a few people — rich or poor, famous or not famous, young or old — we all go through this. Now, for example there is war: how many people are suffering unbearably.",
     "It is the twenty-first century — how much have technologies and science developed, yet suffering continues.",
     "With dharma teachings now we have the opportunity to study, practice, and purify our mind — to develop such understanding, loving-kindness, compassion, bodhicitta.",
-    "Through that, we understand everything is interdependent, interconnected — it is just a manifestation, a manifestation of causes and conditions.",
-    "So we can see that nothing stands independently; that demonstrates that everything is naturally emptiness. Everything is like a rainbow, a mirage."
+    "Through that, we understand everything is interdependent, interconnected — it is just a manifestation, a manifestation of causes and conditions. So we can see that nothing stands independently; that demonstrates that everything is naturally emptiness. Everything is like a rainbow, a mirage."
   ], {
     at: "00:06:47.300",
-    title: "Understanding how much suffering is there, Takeaways",
+    title: "Takeaways: Understanding how much suffering is there",
     buttonText: "Continue lesson"
   }),
 
@@ -68,7 +63,7 @@ const SLIDES = [
     "I myself am not a great practitioner but I see the precious nature of the Dharma and I like to share it, to give people the opportunity to study and practice these teachings and get some benefit in the world."
   ], {
     at: "00:06:47.300",
-    title: "Coming up, A life in the dharma",
+    title: "Coming up: A life in the Dharma",
     buttonText: "Continue lesson"
   }),
 
@@ -87,8 +82,148 @@ const SLIDES = [
     "Having a good lunch will not heal the mind; having a good place to live does not heal the mind — but the mind can be healed by bodhicitta, by the Dharma."
   ], {
     at: "00:11:20.467",
-    title: "Appreciate yourself & with joy progress your practice, Takeaways",
+    title: "Takeaways: Appreciate yourself & with joy progress your practice",
     buttonText: "Continue lesson"
+  }),
+
+  // "Coming up" keypoints stopping slide at 00:11:20.467. Shares the timestamp
+  // with the takeaways above and the announcement below; slide priority shows
+  // takeaways first, then this.
+  comingUp([
+    "There is no self-liberation: our confusion, our self-grasping, will not disappear by itself. Look at our own minds — even after many years of Dharma practice, self-grasping is still so fresh, if not more.",
+    "Right now our mind is in confinement, as if in a small room — the cocoon of self-grasping. Through the wisdom of emptiness and the wisdom of bodhicitta, we can expand our mind, break through that boundary, and realize the unconfined mind like space — the vastness of bodhicitta, the space of mahamudra."
+  ], {
+    at: "00:11:20.467",
+    title: "Coming up: From today onward",
+    buttonText: "Continue lesson"
+  }),
+
+  // Announcement banner at 00:11:20.467. Shares the timestamp with the
+  // takeaways and coming-up above; slide priority shows those first.
+  announcement(
+    "From today onwards make as much effort as possible",
+    "Otherwise our self-grasping will not disappear by itself",
+    { at: "00:11:20.467" }
+  ),
+
+  // "Some takeaways" keypoints stopping slide at 00:16:36.633. Shares the
+  // timestamp with the coming-up and announcement below; slide priority shows
+  // this first.
+  takeaways([
+    "From today onward, make as much effort as possible — there is no suggestion to start next year, or when you get older: as soon as you understand, that's the day you have to start to study and practice Dharma.",
+    "Buddhahood is the fully awakened mind — unsurpassable, nothing above it — and it is within our own mind, not outside: it means revealing our total mind itself.",
+    "Right now our minds are confined within the cocoon of confusion — we just go around and around, repeating the same thing, even Dharma practitioners. So we have to have wisdom: how to practice Dharma, how to open the heart."
+  ], {
+    at: "00:16:36.633",
+    title: "Takeaways: From today onwards",
+    buttonText: "Continue lesson"
+  }),
+
+  // "Coming up" keypoints stopping slide at 00:16:36.633. Shares the timestamp
+  // with the takeaways above and the announcement below; slide priority shows
+  // takeaways first, then this.
+  comingUp([
+    "Gampopa gives six: the primary cause, the working basis, the contributory cause, the method, the result, and the activities.",
+    "Gampopa says all discriminating beings should understand these six, which means all wise ones. We should have discriminative wisdom: what makes samsara? What makes enlightenment? What makes nirvana?",
+    "We should first understand these six topics and bring this picture into our heart."
+  ], {
+    at: "00:16:36.633",
+    title: "Coming up: Causes and conditions of enlightenment",
+    buttonText: "Continue lesson"
+  }),
+
+  // Announcement banner at 00:16:36.633
+  announcement(
+    "Causes and Conditions of enlightenment",
+    "The six topics of the path, starting with Buddha-nature.",
+    { at: "00:16:36.633" }
+  ),
+
+  // "Some takeaways" keypoints stopping slide at 00:26:48.067
+  takeaways([
+    "The primary cause is the essence of the Well-Gone One: gone from samsara into the state of complete perfection. All confusion and mental afflictions are purified, and all suffering is reduced.",
+    "Well gone, perfectly gone, beautifully gone: the person becomes better and better. For example, when you develop love, compassion, and bodhicitta, that person is so beautiful; everybody admires that person, they appreciate that person.",
+    "Once you achieve buddhahood, you never return to samsara.",
+    "We all have this essence, the Buddha-nature. It is the primary cause for enlightenment and the reason we can become Buddha.",
+    "Everybody, even animals, wants peace and happiness and nobody likes suffering, because that nature is total peace. This is true no matter how many adventitious afflictions are present.",
+    "So we should reflect: \"I have the primary cause for enlightenment. If I make effort, it is definitely possible!\""
+  ], {
+    at: "00:26:48.067",
+    title: "Takeaways: The primary cause is the Buddha-nature within us",
+    buttonText: "Continue lesson"
+  }),
+
+  // "Coming up" keypoints stopping slide at 00:26:48.067. Shares the timestamp
+  // with the takeaways above; slide priority shows the takeaways first.
+  comingUp([
+    "As a working basis, the precious human life is excellent.",
+    "Some animals are so kind, so peaceful, so intelligent — but if you ask them to develop bodhicitta or to meditate on emptiness, they have no idea.",
+    "Not every human life is a precious human life. Those who have this opportunity can then understand how to develop bodhicitta, how to practice emptiness, and how to be free from samsara.",
+    "The precious human life is the best opportunity. We should never take it for granted; rather, appreciate it, rejoice, and make it useful.",
+    "The contributory cause is the spiritual master: a teacher who has studied and practiced the Dharma, especially bodhicitta, emptiness, and mahāmudrā, who first shows us this is samsara and then guides us how to be free from it, step by step.",
+    "We need a genuine spiritual master — not necessarily one with a high title, but one who has studied and practiced the Dharma teachings, follows the path, and sincerely helps others — especially one who has bodhicitta.",
+    "So this is what we need: a spiritual master who can help us how to be free from samsara."
+  ], {
+    at: "00:26:48.067",
+    title: "Coming up: Precious human life and the spiritual master",
+    buttonText: "Continue lesson"
+  }),
+
+  // Announcement banner at 00:26:48.067. Shares the timestamp with the
+  // takeaways and coming-up above; slide priority shows those first.
+  announcement(
+    "Working Basis and Spiritual Master",
+    "Then the spiritual master gives the method leading to the result and the activities.",
+    { at: "00:26:48.067" }
+  ),
+
+  // "Some takeaways" keypoints stopping slide at 00:36:17.533
+  takeaways([
+    "The method is the spiritual master's instruction — on impermanence, the suffering of samsara, and causality, then on loving kindness, compassion, refuge, and bodhicitta, step by step. These help us purify all our mental afflictions.",
+    "Our single focus is to purify our mental afflictions. We should not just count mantras; what matters is how to purify our mental obscurations and develop more love, compassion, and responsibility. It is very important that we individually take full responsibility.",
+    "The result of the method is the body of perfect buddhahood. Here, \"body\" means the complete Dharmakāya. Dharmakāya is buddhahood — not just the Nirmāṇakāya and Sambhogakāya.",
+    "The activities of Buddhas are benefiting sentient beings without conceptual thought, which means effortlessly. We ordinary beings have to make great effort and sacrifice so many things, and still encounter obstacles, difficulties, impediments; but once you become a buddha, benefiting many sentient beings is effortless."
+  ], {
+    at: "00:36:17.533",
+    title: "Takeaways: The method, the result, and the activities",
+    buttonText: "Continue lesson"
+  }),
+
+  // Announcement banner at 00:36:17.533. Shares the timestamp with the
+  // takeaways above; slide priority shows the takeaways first.
+  announcement(
+    "Transmission of the Jewel Ornament of Liberation",
+    "This Wisdom Is for Everyone",
+    { at: "00:36:17.533" }
+  ),
+
+  // "Some takeaways" keypoints stopping slide at 00:40:33.133
+  takeaways([
+    "I received the Jewel Ornament of Liberation from the great teacher Khunu Rinpoche and was so blessed to meet such a precious teacher. He lived a very simple life, but when he taught, you could see the excellent quality of his scholarship and of his enlightenment.",
+    "I have shared the full text in the monasteries, in many places in India, Nepal, and Tibet, and I feel very good about sharing this.",
+    "Now I also want to share the essence of these teachings — how to put it into practice, and help ourselves and help other people in the world.",
+    "We need real wisdom of the Buddha — not as a Buddhist, but as a human being. As anybody wants peace and happiness, as anybody wants to be free from suffering, this is the only way.",
+    "Through the war, the pandemic, different diseases, mental and physical — how much suffering there is! There's no one to blame outside of us; everybody shares this, and we have to practice the Dharma.",
+    "Please appreciate, rejoice, and try to implement the practice on a daily basis, which means purifying our mind. It is in our own hand; no one controls us. We have the opportunity ourselves."
+  ], {
+    at: "00:40:33.133",
+    title: "Takeaways: This wisdom is for everyone",
+    buttonText: "Continue lesson"
+  }),
+
+  // Announcement banner at 00:40:33.133, red line only (empty black text hides
+  // the second line). Shares the timestamp with the takeaways above; slide
+  // priority shows the takeaways first.
+  announcement(
+    "Please take a deep breath",
+    "",
+    { at: "00:40:33.133" }
+  ),
+
+  // Dedication at 00:42:01.700, closing the teaching.
+  dedication("slides/dedication.webp", {
+    at: "00:42:01.700",
+    audio: "audio/dedication.mp3"
   })
 ];
 
