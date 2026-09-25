@@ -179,7 +179,7 @@ const SLIDES = [
 
   // "Some takeaways" keypoints stopping slide at 00:36:17.533
   takeaways([
-    "The method is the spiritual master's instruction — on impermanence, the suffering of samsara, and causality, then on loving kindness, compassion, refuge, and bodhicitta, step by step. These help us purify all our mental afflictions.",
+    "The method is the spiritual master's instruction — on impermanence, the nature of samsara, suffering and causality, then on loving kindness, compassion, refuge, and bodhicitta, step by step. These help us purify all our mental afflictions.",
     "Our single focus is to purify our mental afflictions. We should not just count mantras; what matters is how to purify our mental obscurations and develop more love, compassion, and responsibility. It is very important that we individually take full responsibility.",
     "The result of the method is the body of perfect buddhahood. Here, \"body\" means the complete Dharmakāya. Dharmakāya is buddhahood — not just the Nirmāṇakāya and Sambhogakāya.",
     "The activities of Buddhas are benefiting sentient beings without conceptual thought, which means effortlessly. We ordinary beings have to make great effort and sacrifice so many things, and still encounter obstacles, difficulties, impediments; but once you become a buddha, benefiting many sentient beings is effortless."
@@ -236,7 +236,14 @@ export const lesson = {
   videoId: VIDEO_ID,
   slideBg: SLIDE_BG,
   segments: SEGMENTS,
-  slides: SLIDES
+  slides: SLIDES,
+
+  // Printable copy of the slide bullet points, offered from the control bar.
+  handout: {
+    file: 'handouts/jewel-ornament-02-points-to-remember.pdf',
+    label: 'Some takeaways',
+    filename: 'Jewel Ornament of Liberation - Introduction Part 2 - Some takeaways.pdf'
+  }
 };
 
 export default lesson;
