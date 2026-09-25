@@ -201,9 +201,9 @@ const SLIDES = [
   takeaways([
     "I received the Jewel Ornament of Liberation from the great teacher Khunu Rinpoche and was so blessed to meet such a precious teacher. He lived a very simple life, but when he taught, you could see the excellent quality of his scholarship and of his enlightenment.",
     "I have shared the full text in the monasteries, in many places in India, Nepal, and Tibet, and I feel very good about sharing this.",
-    "Now I also want to share the essence of these teachings — how to put it into practice, and help ourselves and help other people in the world.",
+    "This time we don't have enough time to go through the whole text, but the essence of these teachings I will try to explain as much as I can — how to put it into practice, and help ourselves and help other people in the world.",
     "We need real wisdom of the Buddha — not as a Buddhist, but as a human being. As anybody wants peace and happiness, as anybody wants to be free from suffering, this is the only way.",
-    "Through the war, the pandemic, different diseases, mental and physical — how much suffering there is! There's no one to blame outside of us; everybody shares this, and we have to practice the Dharma.",
+    "Through the war, the pandemic, different diseases, mental and physical — how much suffering there is! It's our own accumulation. There's no one to blame outside of us, and we have to practice the Dharma.",
     "Please appreciate, rejoice, and try to implement the practice on a daily basis, which means purifying our mind. It is in our own hand; no one controls us. We have the opportunity ourselves."
   ], {
     at: "00:40:33.133",
