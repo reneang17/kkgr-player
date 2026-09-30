@@ -6,7 +6,7 @@
  * See docs/AUTHORING-LESSONS.md.
  */
 
-import { announcement, comingUp, takeaways, refuge, dedication } from '../slide-utils/index.js';
+import { announcement, comingUp, takeaways, finalSlide, refuge, dedication } from '../slide-utils/index.js';
 
 const VIDEO_ID = "uM8RbGPaOxA";
 const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
@@ -268,8 +268,14 @@ const SLIDES = [
     buttonText: "Continue lesson"
   }),
 
-  // Dedication at 00:48:20.500, closing the teaching. Shares the timestamp with
-  // the takeaways above (the video ends here); slide priority shows those first.
+  // Final closing stopping slide at 00:48:20.500. Shares the timestamp with the
+  // takeaways above; slide priority shows it after them.
+  finalSlide("Thank you everybody", {
+    at: "00:48:20.500"
+  }),
+
+  // Dedication at 00:48:20.500, closing the session (the video ends here).
+  // Slide priority shows it last, after the takeaways and the thanks.
   dedication("slides/dedication.webp", {
     at: "00:48:20.500",
     audio: "audio/dedication.mp3"
