@@ -75,7 +75,7 @@ const SLIDES = [
   // Announcement banner at 00:09:57.633. Shares the timestamp with the
   // takeaways and coming-up above; slide priority shows those first.
   announcement(
-    "Because the perfect form of Buddha radiates",
+    "0.1 Because the perfect form of Buddha radiates",
     "First reason showing that all sentient beings are always of the essence of enlightenment.",
     { at: "00:09:57.633" }
   ),
@@ -110,7 +110,7 @@ const SLIDES = [
   // Announcement banner at 00:13:14.467. Shares the timestamp with the
   // takeaways and coming-up above; slide priority shows those first.
   announcement(
-    "Dharmakaya pervades all sentient beings",
+    "0.1 Look at your mind, we can get a glimpse of its nature",
     "Look inside your mind, directly glimpse it",
     { at: "00:13:14.467" }
   ),
@@ -145,7 +145,7 @@ const SLIDES = [
   // Announcement banner at 00:18:57.600. Shares the timestamp with the
   // takeaways and coming-up above; slide priority shows those first.
   announcement(
-    "Because there are no distinctions within suchness",
+    "0.2 Because there are no distinctions within suchness",
     "Second reason showing that all sentient beings are always of the essence of enlightenment.",
     { at: "00:18:57.600" }
   ),
@@ -181,7 +181,7 @@ const SLIDES = [
   // Announcement banner at 00:28:06.833. Shares the timestamp with the
   // takeaways and coming-up above; slide priority shows those first.
   announcement(
-    "Because all are in a family",
+    "0.3 Because all are in a family",
     "Third reason showing that all sentient beings are always of the essence of enlightenment",
     { at: "00:28:06.833" }
   ),
@@ -216,7 +216,7 @@ const SLIDES = [
   // Announcement banner at 00:36:06.200. Shares the timestamp with the
   // takeaways and coming-up above; slide priority shows those first.
   announcement(
-    "The mahayana family",
+    "V. The mahayana family",
     "Classification, definition, synonyms, superior to other families, causal characteristics, and marks",
     { at: "00:36:06.200" }
   ),
@@ -249,7 +249,7 @@ const SLIDES = [
   // Announcement banner at 00:43:17.867. Shares the timestamp with the
   // takeaways and coming-up above; slide priority shows those first.
   announcement(
-    "Examples and conclusion on Buddha-nature",
+    "V.F Examples and closing remarks on Buddha-nature",
     "Sentient beings can become Buddhas.",
     { at: "00:43:17.867" }
   ),
