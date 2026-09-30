@@ -80,6 +80,12 @@ check('a plain image slide is timeline-driven and unlisted by default',
   imageSlide('slides/x.png', { at: '1:00' }).onTimeline === true);
 check('segment label falls back to the slide title',
   imageSlide('slides/x.png', { openFromSegment: true, title: 'Praises' }).segmentTitle === 'Praises');
+// Refuge sits above "Start of the Video"; the dedication sits below "End of the
+// Video", because the teaching reaches the closing takeaways before it dedicates.
+check('refuge is listed before a segment sharing its timestamp',
+  ref.segmentPlacement === 'before');
+check('dedication is listed after a segment sharing its timestamp',
+  ded.segmentPlacement === 'after');
 check('the old atStart gating is gone',
   ref.atStart === undefined && ref.once === undefined);
 

@@ -193,7 +193,7 @@ function buildSegmentsList() {
     }
   });
 
-  // 3. Slides the viewer can open from the segments list (the refuge slide).
+  // 3. Slides the viewer can open from the segments list (refuge, dedication).
   //    These are actions rather than positions, so they carry no timestamp.
   currentSlides.forEach((slide, originalIndex) => {
     if (!slide.openFromSegment) return;
@@ -202,16 +202,22 @@ function buildSegmentsList() {
       atSeconds: parseTimestamp(slide.at),
       title: slide.segmentTitle || slide.title,
       note: slide.segmentNote || '',
-      opensSlideIndex: originalIndex
+      opensSlideIndex: originalIndex,
+      segmentPlacement: slide.segmentPlacement === 'after' ? 'after' : 'before'
     });
   });
 
   // 4. Sort chronologically. Where an action segment shares a timestamp with a
-  //    position, the action comes first: "Refuge" belongs above "Start of the
-  //    Video", not after it.
+  //    position, the slide decides which side it goes on: "Refuge" belongs above
+  //    "Start of the Video", while "Dedication" belongs below "End of the Video",
+  //    because the teaching reaches the closing takeaways before it dedicates.
+  const tieRank = (seg) => {
+    if (seg.opensSlideIndex === undefined) return 0;
+    return seg.segmentPlacement === 'after' ? 1 : -1;
+  };
   merged.sort((a, b) => {
     if (Math.abs(a.atSeconds - b.atSeconds) < 0.001) {
-      return (b.opensSlideIndex !== undefined ? 1 : 0) - (a.opensSlideIndex !== undefined ? 1 : 0);
+      return tieRank(a) - tieRank(b);
     }
     return a.atSeconds - b.atSeconds;
   });
@@ -228,17 +234,17 @@ const normalizedSegments = buildSegmentsList();
 // Priority ordering for slides triggered at identical timestamps:
 // 1. takeaways (shown first)
 // 2. coming-up (shown second)
-// 3. image slides such as the dedication — after the closing takeaways, but
-//    before "Thanks for watching", which is the last thing the viewer sees
-// 4. final slide
+// 3. final slide ("Thank you everybody") — closes the teaching itself
+// 4. image slides such as the dedication — the dedication comes last, after
+//    the teaching has been closed, so the session ends by dedicating the merit
 // 5. other stopping slides
 // 6. announcements (shown after stopping slides when video resumes)
 // 7. timed side panels
 function getSlidePriority(slide) {
   if (slide.kind === 'takeaways') return 1;
   if (slide.kind === 'coming-up') return 2;
-  if (slide.kind === 'image' || slide.kind === 'refuge' || slide.kind === 'dedication') return 3;
-  if (slide.kind === 'final' || slide.kind === 'final-slide') return 4;
+  if (slide.kind === 'final' || slide.kind === 'final-slide') return 3;
+  if (slide.kind === 'image' || slide.kind === 'refuge' || slide.kind === 'dedication') return 4;
   if (slide.isStopping) return 5;
   if (slide.kind === 'announcement') return 6;
   return 7;
