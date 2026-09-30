@@ -260,7 +260,7 @@ const SLIDES = [
     "So we sentient beings in samsara, even though we have every potential of the Buddha, cannot say, \"I'm a Buddha,\" and cannot do as the Buddha does, helping sentient beings, because the enlightened qualities are obscured by temporary obscurations.",
     "The Buddha nature, the primary cause, pervades all sentient beings. Just relax, reflect on this, and meditate: even I can do it now; it's not far away.",
     "Sometimes we feel the Buddha is somewhere out there, and \"I am so insignificant; I am nothing.\" But if you touch these teachings and reflect on them, you can see: \"I have the Buddha nature. I can see it. I can experience it.\"",
-    "If we don't know how to practice these teachings, it is still so far. In that case, we keep analyzing more and more — no end, because there's no end of thinking. That's why we have to know how to sit, reflect on this, meditate, and digest the teachings; then you can say, \"Oh yes, I can make it.\""
+    "If we don't know how to practice these teachings, it still feels so far. In that case, we keep analyzing more and more — no end, because there's no end of thinking. That's why we have to know how to sit, reflect on this, meditate, and digest the teachings; then you can say, \"Oh yes, I can make it.\""
   ], {
     at: "00:48:20.500",
     title: "Some Takeaways: Concluding remarks",
