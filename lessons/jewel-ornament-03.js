@@ -110,8 +110,8 @@ const SLIDES = [
   // Announcement banner at 00:13:14.467. Shares the timestamp with the
   // takeaways and coming-up above; slide priority shows those first.
   announcement(
-    "Looking inside our mind to get a glimpse of that nature",
-    "Our mind has the nature of the Buddha",
+    "Dharmakaya pervades all sentient beings",
+    "Look inside your mind, directly glimpse it",
     { at: "00:13:14.467" }
   ),
 
@@ -134,8 +134,7 @@ const SLIDES = [
   comingUp([
     "The suchness of the Buddha is identical to the suchness of sentient beings. None is better or worse, bigger or smaller, higher or lower. So, because of that, all sentient beings are of the Buddha-nature.",
     "Look at your mind. All the different thoughts manifest. And when you use your special insight, with the support of calm abiding you cannot find that thought, because it does not exist as we thought — as something to grasp.",
-    "For example, sometimes we are so excited: \"Why am I so excited? A very good friend of mine... So I'm so excited.\" Look at that excitement: without your friend, there's no excitement; without the mind, there's no excitement.",
-    "That very excitement itself is of very illusory nature — just a display of causes and conditions, but in its own nature, itself does not exist. That is what is called suchness.",
+    "For example, sometimes we are so excited: \"Why am I so excited? A very good friend of mine... So I'm so excited.\" Look at that excitement: without your friend, there's no excitement; without the mind, there's no excitement.That very excitement itself is of very illusory nature — just a display of causes and conditions, but in its own nature, itself does not exist. That is what is called suchness.",
     "Between the suchness of the Buddha and the suchness of sentient beings, there is not a single difference. When you see this directly, all your grasping and fixations dissipate, and then that makes your mind calm and peaceful: there is nothing to attach to and hate."
   ], {
     at: "00:18:57.600",
@@ -153,7 +152,7 @@ const SLIDES = [
 
   // "Some takeaways" keypoints stopping slide at 00:28:06.833
   takeaways([
-    "When you could practice this, slowly your mind adjusts to this practice and becomes clearer and clearer. From that clarity, the qualities of the mind manifest: the understanding of causality, of bodhicitta, how you can develop loving-kindness and compassion.",
+    "When you could practice this, slowly your mind adjusts to this practice and becomes clearer and clearer. From that clarity, the qualities will manifest from your mind: the understanding of causality, of bodhicitta, how you can develop loving-kindness and compassion.",
     "These qualities come out because our adventitious obscurations, the defilements, subside; slowly, slowly they go away and have no place to abide within us... So that mind neither exists nor non-exists; the effulgence of the clarity of the mind becomes clearer and clearer. So that itself is the Buddha's mind, and we have that within us.",
     "The Buddha's mind is no better than our mind — neither higher nor lower, neither better nor worse. For example, the emptiness of my right hand is not worse than the emptiness of my left hand, no difference in their emptiness. The emptiness of my happiness and the emptiness of my suffering: no difference.",
     "When we realize that, we don't attach to our happiness; we don't hate our suffering. When we comprehend that, that very nature itself is joy, because the Buddha nature itself is peace and joy. That is how we achieve undefiled, unafflicted peace.",
@@ -191,7 +190,7 @@ const SLIDES = [
   takeaways([
     "Even in our own practice, sometimes we feel, \"There's no progress. I have chanted so many mantras, I have meditated so many years, but still my very thick, obscured mind — it's difficult.\" But if we continue without losing courage, interest, or devotion to the Dharma, to the Buddha, definitely we can progress step-by-step.",
     "Especially we have to develop bodhicitta. It's not easy even to help one person. You repeat again and again, and they don't get it. But from your side, never give up; always go forward: meditate, helping others, helping yourself.",
-    "That's called family. Even though they are divided into five families, at the end all are in one family, Buddhahood: in Sanskrit, Ekayana, the one vehicle.",
+    "That's called family. Even though they are divided into five families, at the end all are in one family, Buddhahood: in Sanskrit, Ekayana, the one vehicle, the mahayana family",
     "With these teachings on Buddha nature we should inspire ourselves: \"I have the Buddha nature. If I study and practice Dharma, I can make it. I'm so fortunate that now I have met the Dharma teachings in my life.\"",
     "Then we also respect all sentient beings: \"Everyone is like me; they want peace and happiness and to be free from suffering. Everyone has the Buddha-nature and the potential to become Buddha.\" Then there is a reason to cultivate loving-kindness, compassion, and bodhicitta toward all of them, and through this practice we get all the opportunity to purify our own defilements."
   ], {
@@ -225,8 +224,7 @@ const SLIDES = [
   // "Some takeaways" keypoints stopping slide at 00:43:17.867
   takeaways([
     "The synonyms of family: it is called potential, because whoever has the Buddha nature has the potential to become Buddha; it is called seed; and it is called sphere-element. Sphere means all-pervasive: the potential is there; it is infinite.",
-    "The shravakas and pratyekabuddhas purify just the obscuration of the afflictions. They cut through self-grasping, realize selflessness, and attain the arhat state.",
-    "The bodhisattvas become Buddha when the two obscurations — the obscuration of the mental afflictions and the subtle knowledge obscuration — are both thoroughly purified. That is why the mahayana family is called fully awakened, that is why it is called superior. But arhats also can attain Buddhahood.",
+    "The shravakas and pratyekabuddhas purify only the obscuration of the afflictions: they cut through self-grasping, realize selflessness, and attain the arhat state. The bodhisattvas become Buddha because the two obscurations — the obscuration of the mental afflictions and the subtle knowledge obscuration — are both thoroughly purified; then the Mahayana family is fully awakened, and that is why it is called superior. But arhats also can attain Buddhahood.",
     "Those of the disconnected family take a long time to become Buddha. In the indefinite family, those who connect to the Mahayana, it won't take too long, but those who connect to the shravakas and pratyekabuddhas take a longer time. Shravakas and pratyekabuddhas take a long time, but much sooner than the disconnected family. Those who belong to the Mahayana, it won't take too long to become Buddha."
   ], {
     at: "00:43:17.867",
