@@ -24,7 +24,7 @@ const SLIDES = [
   // into the teaching.
   refuge("slides/refuge.webp", { audio: "audio/refuge.mp3" }),
 
-  // "Coming up" keypoints stopping slide at 00:00:29.300. Shares the timestamp
+  // "Coming up" keypoints stopping slide at 00:00:28.167. Shares the timestamp
   // with the announcement below; slide priority shows this first.
   comingUp([
     "Please appreciate today's opportunity to reflect on the Buddha's wisdom on how to handle suffering.",
@@ -33,17 +33,17 @@ const SLIDES = [
     "The fully awakened Buddha revealed the total reality-nature, achieved total peace and happiness, and taught the Dharma to all, so that everybody has a chance to reflect and gain wisdom.",
     "In the world, we support each other as a community, so the peace or happiness that we receive comes from all sentient beings. Reflect on this and cultivate such an enlightened mind for every sentient being, based on loving-kindness and compassion."
   ], {
-    at: "00:00:29.300",
+    at: "00:00:28.167",
     title: "Coming up: Motivation & the nature of mind",
     buttonText: "Continue lesson"
   }),
 
-  // Announcement banner at 00:00:29.300. Shares the timestamp with the
+  // Announcement banner at 00:00:28.167. Shares the timestamp with the
   // coming-up above; slide priority shows that first.
   announcement(
     "Motivation and the Nature of Mind",
     "Essence of the Jewel Ornament of Liberation, Ch. 1: Buddha-nature",
-    { at: "00:00:29.300" }
+    { at: "00:00:28.167" }
   ),
 
   // "Some takeaways" keypoints stopping slide at 00:09:57.633
