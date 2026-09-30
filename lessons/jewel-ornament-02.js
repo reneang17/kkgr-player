@@ -13,7 +13,10 @@ const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image 
 
 // 1. VIDEO SEGMENTS (Chapters / Lecture parts shown in the "Segments" list)
 const SEGMENTS = [
-  { at: "0:00", title: "Start of the Video", note: "Opening remarks" }
+  { at: "0:00", title: "Start of the Video", note: "Opening remarks" },
+  // Takes over the list entry of the "Please take a deep breath" banner at the
+  // same moment; the banner itself still shows on the video.
+  { at: "00:40:33.133", title: "End of the Video", note: "Final takeaways & conclusion" }
 ];
 
 // 2. SLIDES & OVERLAYS

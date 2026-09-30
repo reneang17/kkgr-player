@@ -226,16 +226,17 @@ const SLIDES = [
     buttonText: "Continue lesson"
   }),
 
-  // Dedication at 00:53:32.933. Shares the timestamp with the closing slide;
-  // slide priority shows it after the final takeaways and before the thanks.
+  // Final closing stopping slide at 00:53:32.933. Shares the timestamp with the
+  // takeaways above; slide priority shows it after them.
+  finalSlide("Thank you everybody", {
+    at: "00:53:32.933"
+  }),
+
+  // Dedication at 00:53:32.933, closing the session. Slide priority shows it
+  // last, after the takeaways and the thanks.
   dedication("slides/dedication.webp", {
     at: "00:53:32.933",
     audio: "audio/dedication.mp3"
-  }),
-
-  // Final closing stopping slide at 00:53:32.933
-  finalSlide("Thank you everybody", {
-    at: "00:53:32.933"
   })
 ];
 

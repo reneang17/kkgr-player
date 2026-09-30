@@ -95,7 +95,7 @@ early cuts off the teacher mid-sentence.
 
 Slides may be listed in any order; the engine sorts them. When two slides share a
 timestamp, they are shown in priority order: takeaways → coming-up → final →
-other stopping slides → announcements.
+image slides (dedication) → other stopping slides → announcements.
 
 ## Slide archetypes
 
@@ -137,10 +137,10 @@ const SLIDES = [
 
   // ... the lesson ...
 
-  // Same timestamp as the closing slide; priority puts it after the final
-  // takeaways and before "Thanks for watching".
-  dedication('slides/dedication.webp', { at: '00:53:32.933' }),
-  finalSlide('Thanks for watching!', { at: '00:53:32.933' })
+  // Same timestamp as the closing takeaways; priority puts the thanks after
+  // them and the dedication last.
+  finalSlide('Thank you everybody', { at: '00:53:32.933' }),
+  dedication('slides/dedication.webp', { at: '00:53:32.933' })
 ];
 ```
 
@@ -174,10 +174,16 @@ That is two independent options, not one:
 | :--- | :--- |
 | `openFromSegment` | also list it in the segments panel as an action |
 | `onTimeline` | whether the teaching reaches it at `at` (default `true`) |
+| `segmentPlacement` | `'before'` (default) or `'after'` a segment sharing its timestamp |
 
 `refuge()` sets `openFromSegment: true, onTimeline: false` — its `0:00` is where
 it is listed, not a cue, so the timeline must never fire it. `dedication()` sets
-`openFromSegment: true` and leaves `onTimeline` at its default.
+`openFromSegment: true` and leaves `onTimeline` at its default, and lists itself
+`'after'`, so it sits below the "End of the Video" segment.
+
+**Give every lesson an "End of the Video" segment** at the timestamp of its
+closing takeaways, so a viewer can go straight to them. Put the dedication at
+that same timestamp: the list then reads "End of the Video", then "Dedication".
 
 **The artwork is fitted with `contain`, not `cover`.** These images carry lesson
 text, and cropping would cut words off the slide (invariant 5). Supply 16:9 so

@@ -6,14 +6,15 @@
  * See docs/AUTHORING-LESSONS.md.
  */
 
-import { announcement, comingUp, takeaways, refuge } from '../slide-utils/index.js';
+import { announcement, comingUp, takeaways, refuge, dedication } from '../slide-utils/index.js';
 
 const VIDEO_ID = "uM8RbGPaOxA";
 const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
 
 // 1. VIDEO SEGMENTS (Chapters / Lecture parts shown in the "Segments" list)
 const SEGMENTS = [
-  { at: "0:00", title: "Start of the Video", note: "Opening remarks" }
+  { at: "0:00", title: "Start of the Video", note: "Opening remarks" },
+  { at: "00:48:20.500", title: "End of the Video", note: "Final takeaways & conclusion" }
 ];
 
 // 2. SLIDES & OVERLAYS
@@ -265,6 +266,13 @@ const SLIDES = [
     at: "00:48:20.500",
     title: "Some Takeaways: Concluding remarks",
     buttonText: "Continue lesson"
+  }),
+
+  // Dedication at 00:48:20.500, closing the teaching. Shares the timestamp with
+  // the takeaways above (the video ends here); slide priority shows those first.
+  dedication("slides/dedication.webp", {
+    at: "00:48:20.500",
+    audio: "audio/dedication.mp3"
   })
 ];
 
@@ -277,7 +285,14 @@ export const lesson = {
   videoId: VIDEO_ID,
   slideBg: SLIDE_BG,
   segments: SEGMENTS,
-  slides: SLIDES
+  slides: SLIDES,
+
+  // Printable copy of the slide bullet points, offered from the control bar.
+  handout: {
+    file: 'handouts/jewel-ornament-03-points-to-remember.pdf',
+    label: 'Some takeaways',
+    filename: 'Jewel Ornament of Liberation - Buddha-nature - Some takeaways.pdf'
+  }
 };
 
 export default lesson;

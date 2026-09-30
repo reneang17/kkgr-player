@@ -28,6 +28,9 @@
  *                                           refuge slide only the segment
  *   @param {string}  [options.segmentTitle] - label for that segment entry
  *   @param {string}  [options.segmentNote]  - secondary line for that entry
+ *   @param {'before'|'after'} [options.segmentPlacement='before'] - where that
+ *                                           entry goes relative to a segment at
+ *                                           the same timestamp
  *   @param {'contain'|'cover'} [options.imageFit='contain']
  *   @param {string}  [options.title]      - accessible name; never rendered
  *   @param {string}  [options.buttonText]
@@ -53,6 +56,7 @@ export function imageSlide(src, options = {}) {
     onTimeline: options.onTimeline !== undefined ? options.onTimeline : true,
     segmentTitle: options.segmentTitle || options.title || '',
     segmentNote: options.segmentNote || '',
+    segmentPlacement: options.segmentPlacement === 'after' ? 'after' : 'before',
     title: options.title || '',
     bullets: [],
     bg: src,
@@ -97,8 +101,9 @@ export function refuge(src, options = {}) {
 
 /**
  * Dedication slide, shown near the end of the teaching. Place it at the same
- * timestamp as the closing slide: slide priority puts the dedication after the
- * final takeaways and before "Thanks for watching".
+ * timestamp as the closing takeaways: slide priority puts the dedication after
+ * them, and after the closing "Thank you" slide if there is one, so dedicating
+ * the merit is the last thing the viewer does.
  *
  * Unlike the refuge slide it does both: the teaching reaches it in its proper
  * place, and it is also listed in the segments panel so a viewer can go to it
@@ -116,6 +121,9 @@ export function dedication(src, options = {}) {
     openFromSegment: true,
     segmentTitle: 'Dedication',
     segmentNote: 'Dedicate the merit of the teaching',
+    // Listed below "End of the Video" when they share a timestamp: the teaching
+    // reaches the closing takeaways first.
+    segmentPlacement: 'after',
     ...options
   });
 }
