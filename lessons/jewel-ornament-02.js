@@ -8,7 +8,7 @@
 
 import { announcement, comingUp, takeaways, refuge, dedication } from '../slide-utils/index.js';
 
-const VIDEO_ID = "pSF8WODjf94";
+const VIDEO_ID = "3lkPWbY4000";
 const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
 
 // 1. VIDEO SEGMENTS (Chapters / Lecture parts shown in the "Segments" list)
