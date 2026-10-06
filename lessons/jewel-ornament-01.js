@@ -28,11 +28,11 @@ const SLIDES = [
   // into the teaching.
   refuge("slides/refuge.webp", { audio: "audio/refuge.mp3" }),
 
-  // Announcement banner at 00:00:39.333
+  // Announcement banner at 00:00:39.000
   announcement(
     "Essence of the Jewel Ornament of Liberation",
     "Introduction written by Gampopa",
-    { at: "00:00:39.333" }
+    { at: "00:00:39.000" }
   ),
 
   // "Coming up" keypoints stopping slide at 00:03:15.000
