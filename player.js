@@ -59,6 +59,17 @@ function playerGetState() {
   return -1;
 }
 
+// YT.PlayerState.ENDED, named here so it can be checked before the API loads.
+const YT_STATE_ENDED = 0;
+
+// Resume after a slide. YouTube answers playVideo() on an ended video by
+// restarting it from 0:00, so closing the last slide of a lesson whose closing
+// slides sit at the very end would otherwise throw the viewer back to the start.
+function playerResume() {
+  if (playerGetState() === YT_STATE_ENDED) return;
+  playerPlay();
+}
+
 /* ==========================================================================
    LESSON CONTENT
    The engine never hard-codes lesson content. It loads one lesson descriptor
@@ -449,7 +460,38 @@ function seekToSegment(seg) {
   lastKnownTime = seg.atSeconds;
 
   playerSeekTo(seg.atSeconds);
+
+  // Keypoint slides at the segment's own timestamp are shown straight away
+  // rather than left for the playback loop. A seek lands on a keyframe, and for
+  // slides less than a second or so before the end of the video that keyframe is
+  // the end itself: the video ends, playback never passes the marker, and the
+  // segment appears to do nothing. Matching uses the same 0.2 s tolerance the
+  // slide sort treats as "the same timestamp".
+  const slidesHere = pauseToggle.checked
+    ? normalizedSlides.filter(s =>
+        s.onTimeline && s.isStopping && Math.abs(s.atSeconds - seg.atSeconds) < 0.2)
+    : [];
+  if (slidesHere.length > 0) {
+    slidesHere.forEach(s => { s.passed = true; });
+    showStoppingSlides(slidesHere);
+    return;
+  }
+
   playerPlay();
+}
+
+// Pause and show stopping slides in priority order, or queue them behind the
+// one already on screen.
+function showStoppingSlides(slides) {
+  slides.sort((a, b) => getSlidePriority(a) - getSlidePriority(b));
+  if (!activeStoppingSlide) {
+    playerPause();
+    const firstSlide = slides.shift();
+    stoppingQueue.push(...slides);
+    openStoppingSlide(firstSlide);
+  } else {
+    stoppingQueue.push(...slides);
+  }
 }
 
 function renderSegmentsList() {
@@ -1076,7 +1118,7 @@ function closeStoppingSlide(resumePlayback = true) {
       return;
     } else {
       // Carry on from where they were; the playhead was never moved.
-      playerPlay();
+      playerResume();
     }
 
     updateTopCornerMenuVisibility();
@@ -1084,7 +1126,7 @@ function closeStoppingSlide(resumePlayback = true) {
   }
 
   if (resumePlayback) {
-    playerPlay();
+    playerResume();
 
     if (pendingAnnouncements.length > 0) {
       const ann = pendingAnnouncements.shift();
@@ -1412,15 +1454,7 @@ function checkPlaybackTime() {
 
   // If one or more stopping slides were triggered
   if (triggeredStoppingSlides.length > 0) {
-    triggeredStoppingSlides.sort((a, b) => getSlidePriority(a) - getSlidePriority(b));
-    if (!activeStoppingSlide) {
-      playerPause();
-      const firstSlide = triggeredStoppingSlides.shift();
-      stoppingQueue.push(...triggeredStoppingSlides);
-      openStoppingSlide(firstSlide);
-    } else {
-      stoppingQueue.push(...triggeredStoppingSlides);
-    }
+    showStoppingSlides(triggeredStoppingSlides);
   }
 
   // Handle triggered announcements
