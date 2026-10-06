@@ -12,13 +12,13 @@
 
 import { announcement, comingUp, takeaways, finalSlide, refuge, dedication } from '../slide-utils/index.js';
 
-const VIDEO_ID = "fS7C9dPBN4g";
+const VIDEO_ID = "Q6PBRS-aOPU";
 const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
 
 // 1. VIDEO SEGMENTS (Chapters / Lecture parts shown in the "Segments" list)
 const SEGMENTS = [
   { at: "0:00", title: "Start of the Video", note: "Opening remarks" },
-  { at: "00:53:32.933", title: "End of the Video", note: "Final takeaways & conclusion" }
+  { at: "00:53:33.000", title: "End of the Video", note: "Final takeaways & conclusion" }
 ];
 
 // 2. SLIDES & OVERLAYS (Interactive stopping slides, timed side panels, announcements)
@@ -214,28 +214,28 @@ const SLIDES = [
     { at: "00:47:22.900" }
   ),
 
-  // "Some takeaways" keypoints stopping slide at 00:53:32.933
+  // "Some takeaways" keypoints stopping slide at 00:53:33.000
   takeaways([
     "When does this confusion become transformed into primordial wisdom? When one attains unsurpassable enlightenment — that means buddhahood.",
     "Within Buddhahood, the Dharmakaya. When one actualizes the Dharmakaya, then all these confusions... there is nothing but wisdom.",
     "The nature of confusion is emptiness. When you realize the nature of confusion as emptiness, then primordial wisdom is percieved or achieved.",
     "For this we need to study and practice the Dharma."
   ], {
-    at: "00:53:32.933",
+    at: "00:53:33.000",
     title: "Takeaways: The error of confusion",
     buttonText: "Continue lesson"
   }),
 
-  // Final closing stopping slide at 00:53:32.933. Shares the timestamp with the
+  // Final closing stopping slide at 00:53:33.000. Shares the timestamp with the
   // takeaways above; slide priority shows it after them.
   finalSlide("Thank you everybody", {
-    at: "00:53:32.933"
+    at: "00:53:33.000"
   }),
 
-  // Dedication at 00:53:32.933, closing the session. Slide priority shows it
+  // Dedication at 00:53:33.000, closing the session. Slide priority shows it
   // last, after the takeaways and the thanks.
   dedication("slides/dedication.webp", {
-    at: "00:53:32.933",
+    at: "00:53:33.000",
     audio: "audio/dedication.mp3"
   })
 ];
