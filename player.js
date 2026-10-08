@@ -62,6 +62,11 @@ function playerGetState() {
 // YT.PlayerState.ENDED, named here so it can be checked before the API loads.
 const YT_STATE_ENDED = 0;
 
+// How far before the end a segment seek is allowed to land. YouTube dropped a
+// seek 0.02 s before the end, while closing slides 0.4–0.9 s before the end have
+// always seeked fine, so half a second keeps clear of the dead band.
+const END_SEEK_MARGIN_SECONDS = 0.5;
+
 // Resume after a slide. YouTube answers playVideo() on an ended video by
 // restarting it from 0:00, so closing the last slide of a lesson whose closing
 // slides sit at the very end would otherwise throw the viewer back to the start.
@@ -457,9 +462,16 @@ function seekToSegment(seg) {
       slide.passed = false;
     }
   });
-  lastKnownTime = seg.atSeconds;
+  // YouTube ignores a seek that lands within a few hundredths of a second of the
+  // end, so a segment there would leave the playhead where it was. Stop just
+  // short of the end instead; the slides at the segment open directly below.
+  const duration = playerGetDuration();
+  const seekTarget = duration > 0
+    ? Math.min(seg.atSeconds, duration - END_SEEK_MARGIN_SECONDS)
+    : seg.atSeconds;
+  lastKnownTime = seekTarget;
 
-  playerSeekTo(seg.atSeconds);
+  playerSeekTo(seekTarget);
 
   // Keypoint slides at the segment's own timestamp are shown straight away
   // rather than left for the playback loop. A seek lands on a keyframe, and for
