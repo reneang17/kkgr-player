@@ -123,21 +123,21 @@ const SLIDES = [
   // "Coming up" keypoints stopping slide at 00:11:09.200. Shares the timestamp
   // with the takeaways above; slide priority shows those first.
   comingUp([
-    "It is precious for two reasons: it is difficult to achieve, and it brings great benefit.",
+    "It is precious for two reasons: it is difficult to obtain, and it brings great benefit.",
     "You can read why it is difficult to achieve, but just one important point is: how can beings in the hell, hungry ghost, and animal realms be reborn human? To have this precious life the foundation is the five precepts (as mentioned in the Madhyamakāvatāra), which is why ethics is so important; much accumulation of merit is needed.",
     "Having practiced the five precepts makes the perfect condition to be born as a human, as a precious human life.",
-    "You can read the benefits. Just briefly, with a precious human life, even one whose mental power is not so strong can be reborn human in the next life; the mediocre person can be free from samsara, achieve arhatship; the great capacity mind can become Buddha, bodhisattvas.",
+    "You can read the benefits in the book, but briefly: with a precious human life, a person of modest capacity can at least be reborn human again; a person of middling capacity can become free from samsara and achieve arhatship; and a person of great capacity can become a bodhisattva and even a Buddha.",
     "As Acharya Chandragomin said: \"How great are the beneficial effects of a precious human life! By obtaining this precious human life, one can become free from the ocean of rebirth,\" free from samsara. Beyond samsara its sufferings do not exist. Not only that, one can \"sow the seed of supreme enlightenment,\" which means we can cultivate bodhicitta."
   ], {
     at: "00:11:09.200",
-    title: "Coming up: It is difficult to achieve and of great benefit",
+    title: "Coming up: It is difficult to obtain and of great benefit",
     buttonText: "Continue lesson"
   }),
 
   // Announcement banner at 00:11:09.200. Shares the timestamp with the
   // takeaways and coming-up above; slide priority shows those first.
   announcement(
-    "II. A - II. B It is difficult to achieve and of great benefit",
+    "II. A - II. B It is difficult to obtain and of great benefit",
     "Contemplating precious human life is very important",
     { at: "00:11:09.200" }
   ),
@@ -145,10 +145,10 @@ const SLIDES = [
   // "Some takeaways" keypoints stopping slide at 00:18:37.800
   takeaways([
     "At the bodhisattva vow, one joyfully, happily performs the vow, saying: \"I cultivated aspiration and embraced action bodhicitta. I'm so grateful, so happy.\" It is because of this precious human life we have. So how precious this is!",
-    "Cultivating bodhicitta is the direct cause and consummate method to achieve Buddhahood. Because of bodhicitta we practice the six paramitas: generosity, ethics, patience, perseverance, concentration, and insight. All this we can practice because of this precious human life.",
-    "Some people think contemplating precious human life is not important but it is very important, to inspire ourselves to practice and not waste the opportunity.",
-    "Just as you need such a good car to arrive at a very beautiful destination, the car has all the conditions. Like this, the precious human life is like a car to drive to destination of enlightenment. Reflect on this.",
-    "In Dharma practice, always you practice joyfully. Samsara is not the place to stay. Say: \"I have been in samsara so long; now I have this precious human life to be free and achieve enlightenment.\""
+    "Cultivating bodhicitta is the direct cause and consummate method to achieve Buddhahood. Because of bodhicitta we practice the six paramitas: generosity, ethics, patience, perseverance, concentration, and insight. All the six paramitas we can practice because of this precious human life.",
+    "Some people think contemplating on the precious human life is not important but it is very important, to inspire ourselves to practice and not waste the opportunity.",
+    "Just as you need such a good car to arrive at a very beautiful destination, the car needs to have all the required conditions. Like this, the precious human life is like a car to drive to destination of enlightenment. Reflect on this, meditate",
+    "In Dharma practice, always you practice joyfully. Samsara is not the place to stay overtime. Say: \"I have been in samsara so long; now I have this precious human life to be free and achieve enlightenment.\""
   ], {
     at: "00:18:37.800",
     title: "Some Takeaways: The vehicle to enlightenment",
@@ -158,9 +158,9 @@ const SLIDES = [
   // "Coming up" keypoints stopping slide at 00:18:37.800. Shares the timestamp
   // with the takeaways above; slide priority shows those first.
   comingUp([
-    "Next, the working basis is the mind: the mind needs interest to be free from samsara and to attain Buddhahood. Without interest, even with the opportunity, we say: \"I like to go outside; there's a beautiful movie to see!\" Sitting here seems boring, because we have not seen the direct suffering of samsara.",
+    "Next, the working basis is the mind: the mind needs interest to be free from samsara and to attain Buddhahood. Without interest, even with the opportunity, when we try to sit: \"I want to go outside; there's a beautiful movie to see!\" Sitting seems boring, because we have not seen the direct suffering of samsara.",
     "Gampopa speaks of three faiths or interests: trusting faith, longing faith, and clear faith.",
-    "When the Buddha taught the four noble truths, he said, \"You should know suffering,\" meaning that it is reality everyone should understand. Then he taught the truth of the cause, where the suffering is coming from. Suffering does not come without cause, nor from a wrong or incomplete cause, but from the direct, right cause. So the Buddha said, avoid these causes of suffering. Understanding that is trusting faith.",
+    "Trusting faith is the understanding of causality: that suffering has a cause, and that the cause can be avoided. When the Buddha taught the four noble truths, he said, “You should know suffering,” meaning that it is reality everyone should understand. Then he taught the truth of the cause, where the suffering is coming from. The truth of the cause is that suffering does not come without cause, nor from a wrong or incomplete cause, but from the direct, right cause. So the Buddha said, “Avoid these causes of suffering.” Understanding this is trusting faith.",
     "Sometimes people think karma, emptiness, and rebirth are just Buddhist beliefs, culture, or something the Buddha created. In reality, causality is not a Buddhist belief; it is the reality of all phenomena. Through causes and conditions you can see how things are manifesting. This is very clear, obvious; we cannot ignore it; we have to be very smart."
   ], {
     at: "00:18:37.800",
@@ -179,9 +179,9 @@ const SLIDES = [
   // "Some takeaways" keypoints stopping slide at 00:26:54.633
   takeaways([
     "In the 21st century, people are so smart and educated, yet we are completely besotted with our mental confusion.",
-    "For example: \"I'm besotted with someone; it's taking my freedom.\" So our freedom is taken by our mental afflictions. Look at this: even though we know it, we sacrifice, and then we have to pay the price. The suffering is there because we create its cause.",
-    "Seeing the complete nature of samsara, the Buddha taught this wisdom. His wisdom is beyond measurement; his compassion is undefiled, beyond measurement.",
-    "The Buddha taught the teachings with compassion to all sentient beings because for everyone, anywhere, everywhere, rich or poor, educated or not, human or non-human, all our concern is suffering and how to be free from it. On that basis, we make efforts and work hard, yet sometimes create more chaos, more suffering. So the Buddha taught: understand suffering and avoid its cause. Understanding this is trusting faith.",
+    "For example: \"I'm besotted with someone; it's taking my freedom.\" So our freedom is taken by our mental afflictions. Look at this: even though we know it, we sacrifice, and then we have to pay the price. The suffering is there because we create its cause of suffering.",
+    "Seeing the complete nature of samsara, the Buddha taught this wisdom. His wisdom is beyond measurement; his compassion is undefiled compassion, beyond measurement.",
+    "The Buddha taught the teachings with compassion to all sentient beings because for everyone, anywhere, everywhere, rich or poor, educated or not, human or non-human, all our concern is suffering and how to be free from it. On that basis, we make efforts and work hard, yet sometimes create more chaos, more suffering. So the Buddha taught: understand suffering and avoid the causes of suffering. Understanding this is trusting faith.",
     "Then he taught that to achieve nirvana, the cessation of suffering, we follow the path: generally the thirty-seven branches of enlightenment, especially the eightfold path. First understand, then follow; that is Dharma practice."
   ], {
     at: "00:26:54.633",
