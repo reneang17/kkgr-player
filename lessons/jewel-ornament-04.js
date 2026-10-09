@@ -137,7 +137,7 @@ const SLIDES = [
   // Announcement banner at 00:11:09.200. Shares the timestamp with the
   // takeaways and coming-up above; slide priority shows those first.
   announcement(
-    "II. A/B It is difficult to achieve and of great benefit",
+    "II. A - II. B It is difficult to achieve and of great benefit",
     "Contemplating precious human life is very important",
     { at: "00:11:09.200" }
   ),
