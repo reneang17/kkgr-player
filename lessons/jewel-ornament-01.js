@@ -105,6 +105,7 @@ const SLIDES = [
 
   // "Coming up" keypoints stopping slide at 00:25:25.400
   comingUp([
+    "This introduction here has a very important point: we should understand why we need to study and practice dharma.",
     "All phenomena fall into two: samsara and nirvana — both empty by nature.",
     "Empty means no independent entity: everything is illusory, changing, never staying by itself.",
     "Samsara is a confused mental formation/projection; its defining characteristic is suffering.",
