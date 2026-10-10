@@ -212,7 +212,7 @@ const SLIDES = [
   // "Some takeaways" keypoints stopping slide at 00:30:23.467
   takeaways([
     "As I mentioned, when you look at the mind, when negative thoughts invade your mind, where do they abide? When you look carefully, these negative thoughts, these illusions, have no place; they just dissolve into emptiness. That's taking care of the obscurations. When we are taking care of the obscurations, then the clarity, the effulgence of the mind, manifests slowly, slowly, clear.",
-    "Then you see: \"Yes, it makes sense; everything is impermanent, everything is illusory in nature.\" There is great joy, happiness, which just manifests by itself, without attachment.",
+    "Then you see: \"Yes, it makes sense; everything is impermanent, everything is illusory nature.\" There is great joy, happiness, which just manifests by itself, without attachment.",
     "Looking at this: the Buddha achieved such excellent qualities, a very clear mind. The Dharma teaching is the wisdom the Buddha has: \"I must study, I must practice the Dharma teaching for my own benefit and for others' benefit.\" And the Sangha, the great bodhisattvas who study and practice these, are so precious. So Buddha, Dharma, Sangha are so precious: this is clear faith.",
     "We need this clear faith; with it, our study and practice will be very productive."
   ], {
