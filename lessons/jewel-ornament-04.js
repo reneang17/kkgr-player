@@ -181,8 +181,8 @@ const SLIDES = [
     "In the 21st century, people are so smart and educated, yet we are completely besotted with our mental confusion.",
     "For example: \"I'm besotted with someone; it's taking my freedom.\" So our freedom is taken by our mental afflictions. Look at this: even though we know it, we sacrifice, and then we have to pay the price. The suffering is there because we create its cause of suffering.",
     "Seeing the complete nature of samsara, the Buddha taught this wisdom. His wisdom is beyond measurement; his compassion is undefiled compassion, beyond measurement.",
-    "The Buddha taught the teachings with compassion to all sentient beings because for everyone, anywhere, everywhere, rich or poor, educated or not, human or non-human, all our concern is suffering and how to be free from it. On that basis, we make efforts and work hard, yet sometimes create more chaos, more suffering. So the Buddha taught: understand suffering and avoid the causes of suffering. Understanding this is trusting faith.",
-    "Then he taught that to achieve nirvana, the cessation of suffering, we follow the path: generally the thirty-seven branches of enlightenment, especially the eightfold path. First understand, then follow; that is Dharma practice."
+    "The Buddha taught the teachings with compassion to all sentient beings because for everyone, anywhere, everywhere, rich or poor, educated or not, human or non-human, all our concern is suffering and how to be free from it. On that basis, we make efforts and work hard, yet sometimes create more chaos, more suffering. So the Buddha taught: understand suffering and avoid the causes of suffering.",
+    "Then he taught that to achieve nirvana, the cessation of suffering, we follow the path: generally the thirty-seven branches of enlightenment, especially the eightfold path. First understand, then follow; that is Dharma practice. Understanding this is trusting faith."
   ], {
     at: "00:26:54.633",
     title: "Some Takeaways: Causality is the reality",
