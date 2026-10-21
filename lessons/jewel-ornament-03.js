@@ -7,6 +7,7 @@
  */
 
 import { announcement, comingUp, takeaways, finalSlide, refuge, dedication } from '../slide-utils/index.js';
+import { WATER_DROP_ON_THE_LAKE, DREAMY_NIGHT } from './credits.js';
 
 const VIDEO_ID = "cDXmZOndRPw";
 const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
@@ -290,6 +291,9 @@ export const lesson = {
   slideBg: SLIDE_BG,
   segments: SEGMENTS,
   slides: SLIDES,
+
+  // Third-party works shown in this teaching, listed under the segments.
+  credits: [WATER_DROP_ON_THE_LAKE, DREAMY_NIGHT],
 
   // Printable copy of the slide bullet points, offered from the control bar.
   handout: {

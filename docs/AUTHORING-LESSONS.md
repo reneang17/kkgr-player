@@ -262,6 +262,32 @@ export const lesson = {
 It is a plain download link, so the browser's own "save as" and open-in-new-tab
 behaviours work as the viewer expects.
 
+## Crediting third-party works
+
+Photographs and other works by someone else are acknowledged under the segments
+list, as "Image credits". Define each work once in `lessons/credits.js`, then
+list the ones a lesson shows:
+
+```js
+import { WATER_DROP_ON_THE_LAKE } from './credits.js';
+
+export const lesson = {
+  // ...
+  credits: [WATER_DROP_ON_THE_LAKE]
+};
+```
+
+- `work`, `author` — title of the work and who made it (`author` optional).
+- `via` — the library it was shared through, e.g. Unsplash. Renders as
+  "Credit to Leon Rohrwild for *Water drop on the lake*, shared via Unsplash".
+- `courtesy` — instead of `via`, for a work lent by an archive. Renders as
+  "*Gampopa & Pagmodrubpa*. Courtesy of Himalayan Art Resources".
+- `sourceUrl` — optional link on the `via` / `courtesy` name.
+
+Every lesson that closes with the dedication slide lists
+`WATER_DROP_ON_THE_LAKE`, the photograph in `slides/dedication.webp`. A lesson
+with no `credits` shows no section.
+
 ## Where assets go
 
 Put every runtime asset in **both** `public/<dir>/` and `<dir>/` at the repo root:
@@ -285,6 +311,7 @@ a good source size; the bundled art is 1024×576, which is adequate but soft on 
 
 ## Checklist before committing a lesson
 
+- [ ] Every third-party image it shows is in `credits`.
 - [ ] Timestamps verified against the actual video, not the transcript.
 - [ ] No `titleSize` / `bulletSize` overrides.
 - [ ] No "exceeds readable content capacity" warnings in the console.

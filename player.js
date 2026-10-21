@@ -34,6 +34,10 @@ function playerPause() {
 
 function playerSeekTo(seconds) {
   if (ytPlayerInstance && typeof ytPlayerInstance.seekTo === 'function') {
+    // Before the video has ever played, some browsers (Safari in particular)
+    // do not keep the seek: playback later starts from 0:00. Remember where
+    // we meant to be so the first real playback can be put back there.
+    if (!hasStartedPlayback) pendingSeekTarget = seconds;
     ytPlayerInstance.seekTo(seconds, true);
   }
 }
@@ -94,6 +98,30 @@ const currentSlideBg = activeLesson.slideBg || '';
 const currentSegments = activeLesson.segments || [];
 const currentSlides = activeLesson.slides || [];
 
+/**
+ * Appends lesson text to an element, turning `*phrase*` into <em>phrase</em>.
+ *
+ * Lesson files are pure data, so they cannot carry markup; this one marker is
+ * how they flag words to italicise — chiefly passages quoted verbatim from a
+ * root text. Built from text nodes rather than innerHTML so lesson text can
+ * never inject markup. An unpaired `*` is left as a literal character.
+ *
+ * @param {HTMLElement} el
+ * @param {string} text
+ */
+function appendWithEmphasis(el, text) {
+  String(text).split(/\*([^*]+)\*/).forEach((part, i) => {
+    if (!part) return;
+    if (i % 2 === 1) {
+      const em = document.createElement('em');
+      em.textContent = part;
+      el.append(em);
+    } else {
+      el.append(part);
+    }
+  });
+}
+
 /* Let the page chrome follow the lesson, so one template serves every video. */
 if (typeof document !== 'undefined') {
   const titleEl = document.querySelector('.page-header h1');
@@ -129,6 +157,46 @@ if (typeof document !== 'undefined') {
     } else {
       handoutBtn.hidden = true;
     }
+  }
+
+  /* Optional credits for third-party works (photographs and the like). Built
+     with textContent rather than innerHTML so a credit can never inject markup. */
+  const creditsSection = document.getElementById('credits-section');
+  const creditsList = document.getElementById('credits-list');
+  const credits = Array.isArray(activeLesson.credits) ? activeLesson.credits : [];
+  if (creditsSection && creditsList) {
+    creditsList.replaceChildren(...credits.map((credit) => {
+      const item = document.createElement('li');
+      item.className = 'credit-item';
+      // A free-text acknowledgement, e.g. for quotations, rather than a work.
+      if (credit.note) {
+        appendWithEmphasis(item, credit.note);
+        return item;
+      }
+      const work = document.createElement('span');
+      work.className = 'credit-work';
+      work.textContent = credit.work;
+      // Thank the person first when we know who made it ("Credit to <author>
+      // for <work>"); otherwise the work stands alone.
+      if (credit.author) item.append(`Credit to ${credit.author} for `);
+      item.append(work);
+      const source = credit.via || credit.courtesy;
+      if (source) {
+        item.append(credit.via ? ', shared via ' : '. Courtesy of ');
+        if (credit.sourceUrl) {
+          const link = document.createElement('a');
+          link.href = credit.sourceUrl;
+          link.target = '_blank';
+          link.rel = 'noopener';
+          link.textContent = source;
+          item.append(link);
+        } else {
+          item.append(source);
+        }
+      }
+      return item;
+    }));
+    creditsSection.hidden = credits.length === 0;
   }
 }
 
@@ -310,6 +378,43 @@ normalizedSlides.forEach((slide, idx) => {
   slide.index = idx;
 });
 
+/* Two slides "share a timestamp" when they are within this of each other; the
+   same tolerance the sort above and the segment seek use. */
+const SAME_MOMENT_SECONDS = 0.2;
+
+/* The playback loop fires a slide once the playhead is at or up to this far
+   past its timestamp, so a slide missed by one poll, or landed just after by a
+   seek, still shows. */
+const SLIDE_TRIGGER_WINDOW_SECONDS = 2.0;
+
+/* The takeaways that close the section just before `slide`, i.e. the takeaways
+   at the same moment as a "Coming up", or just before it (within the trigger
+   window: some lessons time them a second or two ahead). Null when there are
+   none (the first section of a teaching has nothing before it). */
+function takeawaysBefore(slide) {
+  const candidates = normalizedSlides.filter(s =>
+    s.kind === 'takeaways' && s.onTimeline &&
+    s.atSeconds < slide.atSeconds + SAME_MOMENT_SECONDS &&
+    s.atSeconds > slide.atSeconds - SLIDE_TRIGGER_WINDOW_SECONDS);
+  return candidates.length > 0 ? candidates[candidates.length - 1] : null;
+}
+
+/* The takeaways that close the section starting at `seg`: the last takeaways
+   after the segment's own moment and no later than the next segment's. A
+   section's takeaways are timed at the start of the next one, which is why the
+   upper bound is inclusive and the lower one is not. */
+function sectionTakeaways(seg) {
+  if (seg.opensSlideIndex !== undefined) return null;
+  const next = normalizedSegments.find(other =>
+    other.opensSlideIndex === undefined &&
+    other.atSeconds > seg.atSeconds + SAME_MOMENT_SECONDS);
+  const end = next ? next.atSeconds + SAME_MOMENT_SECONDS : Infinity;
+  const inSection = normalizedSlides.filter(s =>
+    s.kind === 'takeaways' && s.onTimeline &&
+    s.atSeconds > seg.atSeconds + SAME_MOMENT_SECONDS && s.atSeconds < end);
+  return inSection.length > 0 ? inSection[inSection.length - 1] : null;
+}
+
 /* ==========================================================================
    DOM ELEMENTS
    ========================================================================== */
@@ -347,6 +452,7 @@ const chantBtnText = document.getElementById('chant-btn-text');
 const chantAudio = document.getElementById('chant-audio');
 const continueBtnText = document.getElementById('continue-btn-text');
 const slideHint = document.getElementById('slide-hint');
+const backBtn = document.getElementById('back-btn');
 
 // Timed panel elements
 const timedPanelLayer = document.getElementById('timed-panel');
@@ -375,6 +481,123 @@ if (window.KKGRSlideLayout) {
   window.KKGRSlideLayout.controller = slideLayout;
 }
 
+/* --------------------------------------------------------------------------
+   Scroll indicator for a slide whose bullets scroll.
+
+   Native scrollbars cannot be relied on to say "there is more below": macOS,
+   iOS and Android draw overlay scrollbars that stay hidden until the viewer is
+   already scrolling, and none of them can be forced visible on every browser.
+   A slide whose first bullet happens to fill the card then looks complete. So
+   the list's own scrollbar is hidden (style.css) and this track is drawn
+   instead, permanently, whenever the bullets scroll. It also works as a
+   scrollbar: the thumb can be dragged and the wheel scrolls over it.
+   -------------------------------------------------------------------------- */
+
+/* Smallest thumb, as a fraction of the track: a very long list would otherwise
+   give a sliver too small to see or grab. */
+const SCROLL_THUMB_MIN_FRACTION = 0.12;
+/* Logical px between the text column and the track. Bounded by the room the
+   layout leaves (the card's side padding, or coming-up's side margin). */
+const SCROLL_TRACK_GAP = 24;
+/* The track rests as a faint line and brightens while the viewer scrolls,
+   hovers or drags it. How long it stays bright after the last scroll: long
+   enough not to flicker between wheel ticks, short enough to get out of the
+   way of the text promptly. */
+const SCROLL_ACTIVE_LINGER_MS = 1000;
+
+const scrollTrack = document.createElement('div');
+scrollTrack.className = 'slide-scroll-track';
+scrollTrack.setAttribute('aria-hidden', 'true');
+scrollTrack.hidden = true;
+const scrollThumb = document.createElement('div');
+scrollThumb.className = 'slide-scroll-thumb';
+scrollTrack.append(scrollThumb);
+
+function updateScrollIndicator() {
+  const list = stoppingBullets;
+  const maxScroll = list.scrollHeight - list.clientHeight;
+  const scrolls = Boolean(activeStoppingSlide) && slideCanvas
+    && slideCanvas.dataset.slideOverflow === 'true' && maxScroll > 1;
+  scrollTrack.hidden = !scrolls;
+  if (!scrolls) return;
+
+  // Positions are logical px within the bullets box (the canvas is scaled as a
+  // whole, so offset* values are already in the right units).
+  const listRight = list.offsetLeft + list.offsetWidth;
+  const room = stoppingBulletsBox.clientWidth - listRight - scrollTrack.offsetWidth;
+  scrollTrack.style.left = `${listRight + Math.max(0, Math.min(SCROLL_TRACK_GAP, room / 2))}px`;
+  scrollTrack.style.top = `${list.offsetTop}px`;
+  scrollTrack.style.height = `${list.clientHeight}px`;
+
+  const trackHeight = list.clientHeight;
+  const thumbHeight = Math.max(trackHeight * SCROLL_THUMB_MIN_FRACTION,
+    trackHeight * (list.clientHeight / list.scrollHeight));
+  scrollThumb.style.height = `${thumbHeight}px`;
+  scrollThumb.style.transform =
+    `translateY(${(list.scrollTop / maxScroll) * (trackHeight - thumbHeight)}px)`;
+}
+
+let scrollActiveTimer = null;
+let scrollDragging = false;
+function markScrollActive() {
+  scrollTrack.classList.add('is-active');
+  clearTimeout(scrollActiveTimer);
+  if (scrollDragging) return;            // stays bright until the drag ends
+  scrollActiveTimer = setTimeout(() => {
+    scrollTrack.classList.remove('is-active');
+  }, SCROLL_ACTIVE_LINGER_MS);
+}
+
+if (stoppingBulletsBox && stoppingBullets) {
+  stoppingBulletsBox.append(scrollTrack);
+  stoppingBullets.addEventListener('scroll', () => {
+    updateScrollIndicator();
+    markScrollActive();
+  }, { passive: true });
+  if (typeof ResizeObserver === 'function') {
+    new ResizeObserver(updateScrollIndicator).observe(stoppingBullets);
+  }
+  if (slideCanvas && typeof MutationObserver === 'function') {
+    new MutationObserver(updateScrollIndicator)
+      .observe(slideCanvas, { attributes: true, attributeFilter: ['data-slide-overflow'] });
+  }
+
+  // Wheel over the track scrolls the list, as it would over a native scrollbar.
+  scrollTrack.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    stoppingBullets.scrollTop += e.deltaY;
+  }, { passive: false });
+
+  // Dragging the thumb. Pointer events cover mouse, pen and touch alike.
+  let drag = null;
+  scrollThumb.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    scrollThumb.setPointerCapture(e.pointerId);
+    // Screen px per logical px: the canvas is scaled, the pointer is not.
+    const scale = scrollTrack.getBoundingClientRect().height / scrollTrack.offsetHeight || 1;
+    const list = stoppingBullets;
+    const travel = scrollTrack.offsetHeight - scrollThumb.offsetHeight;
+    drag = {
+      startY: e.clientY,
+      startScroll: list.scrollTop,
+      ratio: travel > 0 ? (list.scrollHeight - list.clientHeight) / (travel * scale) : 0
+    };
+    scrollDragging = true;
+    markScrollActive();
+  });
+  scrollThumb.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    stoppingBullets.scrollTop = drag.startScroll + (e.clientY - drag.startY) * drag.ratio;
+  });
+  const endDrag = () => {
+    drag = null;
+    scrollDragging = false;
+    markScrollActive();                  // fade back after the usual linger
+  };
+  scrollThumb.addEventListener('pointerup', endDrag);
+  scrollThumb.addEventListener('pointercancel', endDrag);
+}
+
 // State
 let activeStoppingSlide = null;
 let stoppingQueue = [];
@@ -388,6 +611,35 @@ let lastKnownTime = 0;
 /* Has the viewer started the teaching at all this session? Used to decide where
    "Begin lesson" returns to — see segmentReturn below. */
 let hasStartedPlayback = false;
+
+/* A seek made before the video first played, not yet confirmed by playback
+   (see playerSeekTo). When playback does start, onStateChange checks it landed
+   there and seeks again if it did not. */
+let pendingSeekTarget = null;
+
+/* A seek in flight (a segment jump, or the correction above). For a moment
+   after a seek the player can still report the old position — or 0:00, on its
+   way to a corrected one — and the playback loop would read that as the viewer
+   rewinding: it would close the slide just opened and re-arm the ones already
+   shown, which then replay from the previous section's takeaways. So the loop
+   is held until the reported time arrives (see holdUntilSeekLands). */
+let seekLandingTarget = null;
+
+/* How far from the intended position counts as "the seek was lost". Seeks
+   land on a keyframe, a second or so either side, so this must be wider than
+   that; a lost seek is off by minutes. */
+const SEEK_LANDED_TOLERANCE_SECONDS = 3;
+/* Longest the timeline is held waiting for a seek to land. Seeks normally
+   land well within a second; this only matters if the viewer moves the video
+   elsewhere themselves meanwhile, which must not leave the slides switched off. */
+const SEEK_LANDING_TIMEOUT_MS = 5000;
+let seekLandingDeadline = 0;
+
+function holdUntilSeekLands(target) {
+  seekLandingTarget = target;
+  seekLandingDeadline = Date.now() + SEEK_LANDING_TIMEOUT_MS;
+  lastKnownTime = target;
+}
 
 /* Where to go back to when the viewer continues from a slide they opened out of
    the segments list. Opening such a slide does not move the playhead, so the
@@ -440,15 +692,7 @@ function seekToSegment(seg) {
   // the refuge slide means the teaching starts from the beginning.
   if (seg.opensSlideIndex !== undefined) {
     const slide = normalizedSlides.find(s => s.originalIndex === seg.opensSlideIndex);
-    if (slide) {
-      segmentReturn = {
-        forSlide: slide,
-        slide: interruptedSlide,
-        hadStarted: hasStartedPlayback
-      };
-      playerPause();
-      openStoppingSlide(slide);
-    }
+    if (slide) openSlideFromSegment(slide, interruptedSlide);
     return;
   }
 
@@ -469,8 +713,7 @@ function seekToSegment(seg) {
   const seekTarget = duration > 0
     ? Math.min(seg.atSeconds, duration - END_SEEK_MARGIN_SECONDS)
     : seg.atSeconds;
-  lastKnownTime = seekTarget;
-
+  holdUntilSeekLands(seekTarget);
   playerSeekTo(seekTarget);
 
   // Keypoint slides at the segment's own timestamp are shown straight away
@@ -479,17 +722,77 @@ function seekToSegment(seg) {
   // the end itself: the video ends, playback never passes the marker, and the
   // segment appears to do nothing. Matching uses the same 0.2 s tolerance the
   // slide sort treats as "the same timestamp".
+  //
+  // The takeaways at this moment close the PREVIOUS section, so a viewer who
+  // chose this section starts at its "Coming up" instead; the takeaways stay
+  // one click away (the back button on that slide, or the previous segment's
+  // Takeaways button). They are still marked passed, so playback does not
+  // show them a moment later.
   const slidesHere = pauseToggle.checked
     ? normalizedSlides.filter(s =>
-        s.onTimeline && s.isStopping && Math.abs(s.atSeconds - seg.atSeconds) < 0.2)
+        s.onTimeline && s.isStopping && Math.abs(s.atSeconds - seg.atSeconds) < SAME_MOMENT_SECONDS)
     : [];
-  if (slidesHere.length > 0) {
-    slidesHere.forEach(s => { s.passed = true; });
-    showStoppingSlides(slidesHere);
+  slidesHere.forEach(s => { s.passed = true; });
+  // Likewise anything timed just before the segment, inside the trigger window:
+  // landing here would otherwise fire it. Lessons sometimes put the previous
+  // section's takeaways a second or two before the next section's banner.
+  normalizedSlides.forEach(s => {
+    if (s.atSeconds < seg.atSeconds - SAME_MOMENT_SECONDS &&
+        s.atSeconds > seg.atSeconds - SLIDE_TRIGGER_WINDOW_SECONDS) {
+      s.passed = true;
+    }
+  });
+  const slidesToShow = slidesHere.filter(s => s.kind !== 'takeaways');
+  if (slidesToShow.length > 0) {
+    showStoppingSlides(slidesToShow);
     return;
   }
 
   playerPlay();
+}
+
+/* Opens a slide on request (refuge, dedication, a section's takeaways) without
+   moving the playhead. Continuing from it returns the viewer to where they were
+   — see segmentReturn. */
+function openSlideFromSegment(slide, interruptedSlide) {
+  segmentReturn = {
+    forSlide: slide,
+    slide: interruptedSlide,
+    hadStarted: hasStartedPlayback
+  };
+  playerPause();
+  openStoppingSlide(slide);
+}
+
+/* A segment's Takeaways button. Tears down whatever is on screen exactly as a
+   segment does, then opens the section's takeaways as a review. */
+function openSectionTakeaways(slide) {
+  const interruptedSlide = activeStoppingSlide;
+  stoppingQueue = [];
+  pendingAnnouncements = [];
+  if (activeStoppingSlide) closeStoppingSlide(false);
+  if (activeAnnouncement) closeAnnouncement();
+  openSlideFromSegment(slide, interruptedSlide);
+}
+
+/* The back button on a "Coming up": show the previous section's takeaways, then
+   come back to this slide. Done through the queue, so Continue on the takeaways
+   returns here and anything already queued behind this slide still follows. */
+function showPreviousTakeaways() {
+  if (!activeStoppingSlide) return;
+  const target = takeawaysBefore(activeStoppingSlide);
+  if (!target) return;
+  stoppingQueue.unshift(target, activeStoppingSlide);
+  closeStoppingSlide(false);
+}
+
+/* Offer the back button only on a "Coming up" that has takeaways before it. It
+   takes the place of the keyboard hint, which keeps the footer to one line. */
+function configureBackButton(slide) {
+  if (!backBtn) return;
+  const show = slide.kind === 'coming-up' && Boolean(takeawaysBefore(slide));
+  backBtn.hidden = !show;
+  if (slideHint) slideHint.hidden = show;
 }
 
 // Pause and show stopping slides in priority order, or queue them behind the
@@ -506,15 +809,74 @@ function showStoppingSlides(slides) {
   }
 }
 
+/* A second, smaller button beside a segment that has closing takeaways, which
+   opens them for review (see openSectionTakeaways). A separate button rather
+   than part of the segment row, so the row itself still means "go here". */
+function appendTakeawaysButton(li, seg, className, timestampClass, beforeOpen) {
+  const slide = sectionTakeaways(seg);
+  if (!slide) return;
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = className;
+  // An invisible copy of the segment's timestamp. When the button sits under
+  // its segment (narrow screens) it lays out in the same columns as the row
+  // above, so this pushes the label exactly under the segment title whatever
+  // the timestamp's width. Hidden by CSS when the button sits beside the row.
+  const align = document.createElement('span');
+  align.className = `${timestampClass} takeaways-align`;
+  align.setAttribute('aria-hidden', 'true');
+  align.textContent = formatTime(seg.atSeconds);
+  const label = document.createElement('span');
+  label.className = 'takeaways-label';
+  label.textContent = 'Takeaways';
+  btn.append(align, label);
+  btn.setAttribute('aria-label', `Takeaways for ${seg.title}`);
+  btn.addEventListener('click', () => {
+    beforeOpen();
+    openSectionTakeaways(slide);
+  });
+  li.classList.add('has-takeaways');
+  li.appendChild(btn);
+}
+
+/* Segment rows are not <button>s: Safari and Firefox never let a viewer select
+   text inside a button, and the titles and notes are teaching text people want
+   to copy. So a row is a plain element given a button's role, focus and
+   keyboard behaviour (Enter and Space), which keeps it identical for keyboard
+   and screen-reader users. */
+function createSelectableRow() {
+  const row = document.createElement('div');
+  row.setAttribute('role', 'button');
+  row.tabIndex = 0;
+  return row;
+}
+
+function onRowActivate(row, activate) {
+  row.addEventListener('click', () => {
+    // A drag that selected text inside the row also ends in a click. That was
+    // the viewer copying, not choosing the segment.
+    const selection = window.getSelection();
+    if (selection && !selection.isCollapsed && row.contains(selection.anchorNode)) return;
+    activate();
+  });
+  row.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();          // Space would otherwise scroll the page
+    // Keep the window-level slide shortcuts (Space/Enter continue a slide) from
+    // also acting on this key press.
+    e.stopPropagation();
+    activate();
+  });
+}
+
 function renderSegmentsList() {
   if (!segmentsList) return;
   segmentsList.innerHTML = '';
   normalizedSegments.forEach((seg) => {
     const li = document.createElement('li');
-    const btn = document.createElement('button');
+    const btn = createSelectableRow();
     btn.className = 'segment-button';
     btn.id = `segment-btn-${seg.index}`;
-    btn.setAttribute('type', 'button');
     // An action segment opens a slide instead of moving the playhead, so it
     // shows no timestamp and is described as opening rather than seeking.
     const isAction = seg.opensSlideIndex !== undefined;
@@ -545,11 +907,12 @@ function renderSegmentsList() {
     btn.appendChild(timeSpan);
     btn.appendChild(contentWrapper);
 
-    btn.addEventListener('click', () => {
+    onRowActivate(btn, () => {
       seekToSegment(seg);
     });
 
     li.appendChild(btn);
+    appendTakeawaysButton(li, seg, 'segment-takeaways-btn', 'segment-timestamp', () => {});
     segmentsList.appendChild(li);
   });
 }
@@ -559,10 +922,9 @@ function renderChaptersDrawer() {
   chaptersDrawerList.innerHTML = '';
   normalizedSegments.forEach((seg) => {
     const li = document.createElement('li');
-    const btn = document.createElement('button');
+    const btn = createSelectableRow();
     btn.className = 'drawer-chapter-btn';
     btn.id = `drawer-chapter-btn-${seg.index}`;
-    btn.setAttribute('type', 'button');
     const isAction = seg.opensSlideIndex !== undefined;
     btn.setAttribute('aria-label', isAction
       ? `Open ${seg.title}`
@@ -591,12 +953,13 @@ function renderChaptersDrawer() {
     btn.appendChild(timeSpan);
     btn.appendChild(contentWrapper);
 
-    btn.addEventListener('click', () => {
+    onRowActivate(btn, () => {
       closeChaptersDrawer();
       seekToSegment(seg);
     });
 
     li.appendChild(btn);
+    appendTakeawaysButton(li, seg, 'drawer-takeaways-btn', 'drawer-timestamp', closeChaptersDrawer);
     chaptersDrawerList.appendChild(li);
   });
 }
@@ -1006,13 +1369,14 @@ function openStoppingSlide(slide) {
   if (Array.isArray(slide.bullets)) {
     slide.bullets.forEach((bulletText) => {
       const li = document.createElement('li');
-      li.textContent = bulletText;
+      appendWithEmphasis(li, bulletText);
       stoppingBullets.appendChild(li);
     });
   }
 
   // Offer this slide's chant recording, if it has one.
   configureChant(slide);
+  configureBackButton(slide);
 
   // Update Continue button label
   if (continueBtnText) {
@@ -1028,9 +1392,12 @@ function openStoppingSlide(slide) {
     continueBtn.classList.add('ready');
     slideHint.textContent = isFinal ? 'Lesson complete' : 'Press Enter, Escape, or Continue lesson';
   } else {
-    continueBtn.disabled = true;
+    // Clicking the slide no longer advances (see the click handler below), so
+    // the button reveals each point in turn and only then continues.
+    continueBtn.disabled = false;
     continueBtn.classList.remove('ready');
-    slideHint.textContent = 'Click or press Space for next point';
+    if (continueBtnText) continueBtnText.textContent = 'Next point';
+    slideHint.textContent = 'Press Space or Next point';
     advanceStoppingBullet();
   }
 
@@ -1050,6 +1417,7 @@ function openStoppingSlide(slide) {
   if (slideLayout) {
     slideLayout.layout(slide);
   }
+  updateScrollIndicator();
 
   stoppingSlideLayer.focus();
 
@@ -1070,10 +1438,13 @@ function advanceStoppingBullet() {
     stoppingBulletIndex++;
   }
 
-  // If all bullets are shown, enable Continue button
+  // If all bullets are shown, the button continues the lesson
   if (stoppingBulletIndex >= bulletElements.length) {
     continueBtn.disabled = false;
     continueBtn.classList.add('ready');
+    if (continueBtnText) {
+      continueBtnText.textContent = activeStoppingSlide.buttonText || 'Continue';
+    }
     slideHint.textContent = 'Press Enter, Escape, or Continue lesson';
   }
 }
@@ -1167,7 +1538,7 @@ function openTimedPanel(slide) {
   if (Array.isArray(slide.bullets)) {
     slide.bullets.forEach((bulletText) => {
       const li = document.createElement('li');
-      li.textContent = bulletText;
+      appendWithEmphasis(li, bulletText);
       timedBullets.appendChild(li);
     });
   }
@@ -1301,30 +1672,27 @@ if (pseudoFsExitBtn) {
 document.addEventListener('fullscreenchange', updateFullscreenState);
 document.addEventListener('webkitfullscreenchange', updateFullscreenState);
 
-// Click on stopping slide triggers next bullet
-stoppingSlideLayer.addEventListener('click', (e) => {
-  // If click was on the Continue button, handle continue
-  if (e.target.closest('#continue-btn')) {
-    if (!continueBtn.disabled) {
-      closeStoppingSlide(true);
-    }
-    return;
-  }
+// A click or tap on the slide itself does nothing. It used to advance, but on a
+// slide that scrolls, a tap that was meant to start a scroll (or a click that
+// misses the scrollbar) skipped the rest of the slide and resumed the video.
+// Browsers cannot reliably tell those apart from a deliberate tap, so leaving a
+// slide takes an explicit action: the Continue button, Enter or Escape (Space
+// on the keyboard also steps through it).
 
-  // If more bullets remain, show next bullet
-  const bulletElements = stoppingBullets.querySelectorAll('li');
-  if (stoppingBulletIndex < bulletElements.length) {
-    advanceStoppingBullet();
-  } else {
-    // If all bullets already revealed, clicking slide also continues
-    closeStoppingSlide(true);
-  }
-});
+if (backBtn) {
+  backBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showPreviousTakeaways();
+  });
+}
 
-// Continue button click
+// Continue button: reveals the next point while any remain, then continues.
 continueBtn.addEventListener('click', (e) => {
   e.stopPropagation();
-  if (!continueBtn.disabled) {
+  if (continueBtn.disabled) return;
+  if (stoppingBulletIndex < stoppingBullets.querySelectorAll('li').length) {
+    advanceStoppingBullet();
+  } else {
     closeStoppingSlide(true);
   }
 });
@@ -1373,12 +1741,63 @@ window.addEventListener('keydown', (e) => {
    TIMESTAMP-WATCHING LOOP
    Polls player time at high frequency (~100ms) to trigger slides and re-arm.
    ========================================================================== */
+/* Lights up the segment the given time falls in, in the segments list and the
+   chapters drawer. */
+function highlightActiveSegment(time) {
+  let activeIndex = -1;
+  for (let i = 0; i < normalizedSegments.length; i++) {
+    // Action segments open a slide; they are not places in the video, so they
+    // never light up as "where we are".
+    if (normalizedSegments[i].opensSlideIndex !== undefined) continue;
+    if (time >= normalizedSegments[i].atSeconds) {
+      activeIndex = i;
+    }
+  }
+  normalizedSegments.forEach((seg) => {
+    const btn = document.getElementById(`segment-btn-${seg.index}`);
+    if (btn) {
+      if (seg.index === activeIndex) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    }
+    const drawerBtn = document.getElementById(`drawer-chapter-btn-${seg.index}`);
+    if (drawerBtn) {
+      if (seg.index === activeIndex) {
+        drawerBtn.classList.add('active');
+      } else {
+        drawerBtn.classList.remove('active');
+      }
+    }
+  });
+}
+
 function checkPlaybackTime() {
   const currentTime = playerGetCurrentTime();
   const duration = playerGetDuration();
 
+  // A segment was chosen before the video first played. Until it does, the
+  // reported time is not trustworthy: a browser that dropped the seek reports
+  // 0:00, which the rewind check below would read as the viewer going back and
+  // close the slide they are reading. Show where they asked to be and wait for
+  // playback (onStateChange makes sure it starts there).
+  if (pendingSeekTarget !== null) {
+    timeDisplay.textContent = `${formatTime(pendingSeekTarget)} / ${formatTime(duration)}`;
+    highlightActiveSegment(pendingSeekTarget);
+    return;
+  }
+
   // Update control bar timestamp
   timeDisplay.textContent = `${formatTime(currentTime)} / ${formatTime(duration)}`;
+
+  // Hold everything below until a seek in flight has landed (see
+  // seekLandingTarget).
+  if (seekLandingTarget !== null) {
+    const landed = Math.abs(currentTime - seekLandingTarget) <= SEEK_LANDED_TOLERANCE_SECONDS;
+    if (!landed && Date.now() < seekLandingDeadline) return;
+    seekLandingTarget = null;
+  }
 
   // 1. RE-ARMING ON REWIND: If user rewinds backwards before a slide timestamp, reset its passed state
   if (currentTime < lastKnownTime - 0.5) {
@@ -1404,33 +1823,7 @@ function checkPlaybackTime() {
   lastKnownTime = currentTime;
 
   // 2. ACTIVE SEGMENT HIGHLIGHT in segment list and in-player chapters drawer
-  let activeIndex = -1;
-  for (let i = 0; i < normalizedSegments.length; i++) {
-    // Action segments open a slide; they are not places in the video, so they
-    // never light up as "where we are".
-    if (normalizedSegments[i].opensSlideIndex !== undefined) continue;
-    if (currentTime >= normalizedSegments[i].atSeconds) {
-      activeIndex = i;
-    }
-  }
-  normalizedSegments.forEach((seg) => {
-    const btn = document.getElementById(`segment-btn-${seg.index}`);
-    if (btn) {
-      if (seg.index === activeIndex) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
-    }
-    const drawerBtn = document.getElementById(`drawer-chapter-btn-${seg.index}`);
-    if (drawerBtn) {
-      if (seg.index === activeIndex) {
-        drawerBtn.classList.add('active');
-      } else {
-        drawerBtn.classList.remove('active');
-      }
-    }
-  });
+  highlightActiveSegment(currentTime);
 
 
   // 3. SLIDE & ANNOUNCEMENT TRIGGER DETECTION
@@ -1444,7 +1837,7 @@ function checkPlaybackTime() {
     // at all (the refuge slide).
     if (!slide.onTimeline) return;
     // Trigger condition: current time reached marker and slide hasn't fired yet
-    if (!slide.passed && currentTime >= slide.atSeconds && currentTime < slide.atSeconds + 2.0) {
+    if (!slide.passed && currentTime >= slide.atSeconds && currentTime < slide.atSeconds + SLIDE_TRIGGER_WINDOW_SECONDS) {
       slide.passed = true;
 
       if (slide.kind === 'announcement') {
@@ -1536,6 +1929,17 @@ window.onYouTubeIframeAPIReady = function() {
         if (event.data === YT.PlayerState.PLAYING) {
           hasStartedPlayback = true;
           const cur = playerGetCurrentTime();
+          // First playback after a segment was chosen: if the browser dropped
+          // that seek and started from the beginning, go where the viewer asked.
+          if (pendingSeekTarget !== null) {
+            const target = pendingSeekTarget;
+            pendingSeekTarget = null;
+            if (Math.abs(cur - target) > SEEK_LANDED_TOLERANCE_SECONDS) {
+              holdUntilSeekLands(target);
+              playerSeekTo(target);
+              return;
+            }
+          }
           if (cur < 1.0) {
             normalizedSlides.forEach(s => s.passed = false);
           }

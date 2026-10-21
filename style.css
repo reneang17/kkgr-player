@@ -256,9 +256,17 @@ header.page-header p.lesson-name {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.35s ease, visibility 0.35s ease;
-  cursor: pointer;
-  user-select: none;
   overflow: hidden;
+}
+
+/* Slide text can be selected and copied. Clicking the slide no longer moves on
+   (only Continue, Enter or Escape do), so the text no longer needs to let clicks
+   fall through to the layer behind it. */
+.stopping-slide-layer.active .stopping-slide-content {
+  pointer-events: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
 }
 
 .stopping-slide-layer.active {
@@ -420,7 +428,11 @@ header.page-header p.lesson-name {
   pointer-events: none;
 }
 
-.continue-btn {
+/* The back button ("Previous takeaways", bottom left of a coming-up slide)
+   shares Continue's look exactly: both move the viewer between slides, so they
+   read as a matched pair at either end of the footer. */
+.continue-btn,
+.back-btn {
   appearance: none;
   border: 1px solid var(--border-light);
   background: rgba(26, 30, 28, 0.8);
@@ -441,7 +453,8 @@ header.page-header p.lesson-name {
   pointer-events: auto;
 }
 
-.continue-btn.ready {
+.continue-btn.ready,
+.back-btn {
   cursor: pointer;
   background: var(--accent-celadon);
   color: #0e1210;
@@ -450,12 +463,14 @@ header.page-header p.lesson-name {
   font-weight: 600;
 }
 
-.continue-btn.ready:hover {
+.continue-btn.ready:hover,
+.back-btn:hover {
   background: var(--accent-celadon-light);
   transform: translateY(-1px);
 }
 
-.continue-btn:focus-visible {
+.continue-btn:focus-visible,
+.back-btn:focus-visible {
   outline: 2px solid var(--accent-celadon);
   outline-offset: 2px;
 }
@@ -496,6 +511,11 @@ header.page-header p.lesson-name {
 .chant-btn[hidden] {
   display: none;
 }
+
+.back-btn[hidden] {
+  display: none;
+}
+
 
 .chant-btn:hover {
   background: rgba(30, 38, 33, 0.92);
@@ -561,7 +581,10 @@ header.page-header p.lesson-name {
   min-height: 0;
   overflow-y: auto;
   overflow-anchor: none;          /* see .stopping-slide-content */
-  scrollbar-width: thin;
+  /* The native scrollbar is replaced by .slide-scroll-track, which stays
+     visible. Overlay scrollbars (macOS, iOS, Android) hide until the viewer is
+     already scrolling, so they cannot say "there is more below". */
+  scrollbar-width: none;
   overscroll-behavior: contain;   /* scrolling the slide never scrolls the page */
   /* A scroll region with no visible edge reads as text cut off mid-line. The
      fade says "there is more below". The matching bottom padding lets the last
@@ -571,6 +594,83 @@ header.page-header p.lesson-name {
   -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent);
   mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent);
   padding-bottom: 48px;
+}
+
+.stopping-slide-layer .slide-canvas[data-slide-overflow="true"] .slide-bullets::-webkit-scrollbar {
+  display: none;
+}
+
+/* The track is positioned against the bullets box by player.js. */
+.slide-canvas[data-slide-overflow="true"] .slide-bullets-box {
+  position: relative;
+}
+
+/* Always-visible scroll indicator (see updateScrollIndicator in player.js).
+   Two states: at rest a faint thin line, enough to say "there is more below"
+   without competing with the text; while the viewer scrolls, hovers or drags
+   it (.is-active), wider and brighter. Sizes are divided by --slide-scale so
+   they stay the same on screen at every player size.
+
+   The element itself is a wider, invisible hit area, so the thin resting line
+   is still easy to grab; the visible rail is ::before and the thumb is centred
+   in it. */
+.slide-scroll-track {
+  position: absolute;
+  width: calc(14px / var(--slide-scale, 1));
+  touch-action: none;
+}
+
+.slide-scroll-track[hidden] {
+  display: none;
+}
+
+.slide-scroll-track::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: calc(6px / var(--slide-scale, 1));
+  transform: translateX(-50%);
+  border-radius: calc(3px / var(--slide-scale, 1));
+  background: rgba(255, 255, 255, 0);
+  transition: background-color 0.25s ease;
+}
+
+.slide-scroll-thumb {
+  position: relative;
+  width: calc(3px / var(--slide-scale, 1));
+  margin: 0 auto;
+  border-radius: calc(3px / var(--slide-scale, 1));
+  background: rgba(255, 255, 255, 0.35);
+  cursor: grab;
+  transition: width 0.25s ease, background-color 0.25s ease;
+}
+
+.slide-scroll-track.is-active::before {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.slide-scroll-track.is-active .slide-scroll-thumb {
+  width: calc(6px / var(--slide-scale, 1));
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Hover only where a pointer can hover: on touch screens :hover sticks after a
+   tap, which would leave the bar bright. */
+@media (hover: hover) {
+  .slide-scroll-track:hover::before {
+    background: rgba(255, 255, 255, 0.22);
+  }
+
+  .slide-scroll-track:hover .slide-scroll-thumb {
+    width: calc(6px / var(--slide-scale, 1));
+    background: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.slide-scroll-thumb:active {
+  cursor: grabbing;
 }
 
 /* ---- Smaller canvases (small windows, tablets, phones) ----
@@ -1482,6 +1582,183 @@ body.has-pseudo-fullscreen {
   color: var(--text-dim);
 }
 
+/* Credits for third-party works. Deliberately quieter than the segments above:
+   an acknowledgement, not navigation. */
+.credits-section {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.credits-section[hidden] {
+  display: none;
+}
+
+.credits-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.credit-work {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.credits-list a {
+  color: var(--text-muted);
+}
+
+.credits-list a:hover {
+  color: var(--accent-celadon);
+}
+
+/* A segment with closing takeaways is one card in two parts: the segment
+   itself, and a "Takeaways" part joined to it with a thin divider, so the
+   button reads as belonging to that segment rather than as a separate control.
+   Wide screens put the part on the right; narrow ones (below) put it along the
+   bottom, full width. Each part is still its own button, with its own hover. */
+.segments-list li.has-takeaways,
+.chapters-drawer-list li.has-takeaways {
+  display: flex;
+  align-items: stretch;
+}
+
+.segments-list li.has-takeaways .segment-button,
+.chapters-drawer-list li.has-takeaways .drawer-chapter-btn {
+  flex: 1;
+  min-width: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right-width: 0;
+}
+
+.segment-takeaways-btn,
+.drawer-takeaways-btn {
+  appearance: none;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  /* The divider between the two parts. Dashed, so it reads as a join within
+     one card rather than the edge of another. */
+  border-left-style: dashed;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 0 1rem;
+  color: var(--accent-celadon);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.takeaways-label::after {
+  content: ' \2192';
+}
+
+/* Only used to line the label up under the title on narrow screens. */
+.takeaways-align {
+  display: none;
+  visibility: hidden;
+}
+
+.drawer-takeaways-btn {
+  background: rgba(28, 33, 30, 0.55);
+  border-color: transparent;
+  border-left-color: var(--border-color);
+}
+
+.segment-takeaways-btn:hover,
+.drawer-takeaways-btn:hover {
+  background: var(--surface-hover);
+  color: var(--accent-celadon-light);
+}
+
+.segment-takeaways-btn:focus-visible,
+.drawer-takeaways-btn:focus-visible {
+  outline: 2px solid var(--accent-celadon);
+  outline-offset: 2px;
+}
+
+/* The current segment is outlined in celadon; the outline carries round its
+   Takeaways part too, so the whole card is highlighted, not half of it. */
+.segments-list li.has-takeaways:has(.segment-button.active) .segment-takeaways-btn,
+.chapters-drawer-list li.has-takeaways:has(.drawer-chapter-btn.active) .drawer-takeaways-btn {
+  border-color: var(--accent-celadon);
+  border-left-color: var(--border-light);
+  background: var(--accent-celadon-dim);
+}
+
+/* Narrow screens: side by side would squeeze the title into a thin column, so
+   the Takeaways part becomes a full-width strip along the bottom of the card,
+   its label lined up with the segment titles above it. */
+@media (max-width: 600px) {
+  .segments-list li.has-takeaways,
+  .chapters-drawer-list li.has-takeaways {
+    flex-direction: column;
+  }
+
+  .segments-list li.has-takeaways .segment-button,
+  .chapters-drawer-list li.has-takeaways .drawer-chapter-btn {
+    border-right-width: 1px;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    border-bottom-width: 0;
+  }
+
+  .segment-takeaways-btn,
+  .drawer-takeaways-btn {
+    justify-content: flex-start;
+    border-left-style: solid;
+    border-top-style: dashed;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
+
+  /* Same columns, gap and side padding as the row above, with an invisible
+     copy of its timestamp in the first column, so the label sits exactly under
+     the segment title (see appendTakeawaysButton). The page list's columns are
+     set beside .segment-button's own phone layout, further down. */
+  .segment-takeaways-btn {
+    display: grid;
+    justify-items: start;
+  }
+
+  .drawer-takeaways-btn {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: clamp(0.65rem, 1.8cqw, 1rem);
+    justify-items: start;
+    padding-left: clamp(0.75rem, 2cqw, 1rem);
+    padding-right: clamp(0.75rem, 2cqw, 1rem);
+  }
+
+  .takeaways-align {
+    display: inline;
+  }
+
+  .drawer-takeaways-btn {
+    border-left-color: transparent;
+    border-top-color: var(--border-color);
+  }
+
+  .segments-list li.has-takeaways:has(.segment-button.active) .segment-takeaways-btn,
+  .chapters-drawer-list li.has-takeaways:has(.drawer-chapter-btn.active) .drawer-takeaways-btn {
+    border-left-color: var(--accent-celadon);
+    border-top-color: var(--border-light);
+  }
+}
+
 /* Accessibility: Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -1507,6 +1784,15 @@ body.has-pseudo-fullscreen {
     grid-template-columns: 65px 1fr;
     gap: 0.75rem;
     padding: 0.75rem 0.85rem;
+  }
+
+  /* Keep a segment's Takeaways strip in the same columns as the row above it
+     (see the narrow-screen takeaways rules). */
+  .segment-takeaways-btn {
+    grid-template-columns: 65px 1fr;
+    gap: 0.75rem;
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
   }
   
   .timed-panel-layer {
