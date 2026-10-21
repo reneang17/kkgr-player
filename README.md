@@ -147,3 +147,18 @@ npm test          # layout model checks (no test framework required)
 
 The runtime has **no third-party dependencies**. Vite is a build-time dev
 dependency; the YouTube IFrame API loads from Google at runtime.
+
+---
+
+## License
+
+This repository holds two kinds of material, under two licenses:
+
+- **Player code** (JavaScript, HTML, CSS) — [MIT](LICENSE). Reuse it freely.
+- **Teaching content** (lesson text, handouts, chant recordings, slide texts) —
+  © Vajra Publications, [CC BY-NC-ND 4.0](LICENSE-CONTENT). Share it unchanged
+  and non-commercially, with credit; no modified versions or translations
+  without permission.
+
+Third-party images are acknowledged in [CREDITS.md](CREDITS.md) and remain under
+their owners' terms.

@@ -556,6 +556,13 @@
       canvas.dataset.slideFit = result.fit.toFixed(2);
       if (result.overflow) {
         canvas.dataset.slideOverflow = 'true';
+        // Reset again now that the list is a scroll container. The reset above
+        // ran while it was not one (release() cleared the attribute when the
+        // previous slide closed), and browsers keep a non-scrolling element's
+        // old offset and restore it when it scrolls again — so a viewer who
+        // read the previous slide to the bottom met this one already scrolled
+        // to the bottom.
+        content.querySelectorAll('.slide-bullets').forEach((el) => { el.scrollTop = 0; });
       } else {
         delete canvas.dataset.slideOverflow;
       }

@@ -50,6 +50,12 @@
                footprint is reserved out of the canvas so it cannot cover slide text. -->
           <div class="stopping-slide-footer" id="stopping-footer">
             <span class="slide-tip" id="slide-hint">Click or press Space for next point</span>
+            <!-- Shown on a "Coming up" slide that has takeaways just before it,
+                 in place of the hint, so the viewer can go back and read them. -->
+            <button class="back-btn" id="back-btn" type="button" hidden>
+              <span aria-hidden="true">&larr;</span>
+              <span>Previous takeaways</span>
+            </button>
             <!-- Grouped so the pair stays together on the right, with the chant
                  button immediately left of Continue. -->
             <div class="stopping-slide-actions">
@@ -198,6 +204,15 @@
       <ul class="segments-list" id="segments-list">
         <!-- Dynamically generated from SEGMENTS and SLIDES array -->
       </ul>
+    </section>
+
+    <!-- 5. Credits for third-party works shown in this teaching; filled from the
+         lesson's `credits` and hidden when it has none. -->
+    <section class="credits-section" id="credits-section" aria-label="Acknowledgements" hidden>
+      <div class="segments-header">
+        <span class="segments-title">Acknowledgements</span>
+      </div>
+      <ul class="credits-list" id="credits-list"></ul>
     </section>
   </div>
 
