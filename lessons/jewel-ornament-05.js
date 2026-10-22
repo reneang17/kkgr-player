@@ -75,7 +75,7 @@ const SLIDES = [
     "With or without a title doesn’t matter; the important thing is quality. That’s why it says “wise lama,” because one receives good qualities from him or her. Our qualities depend on the teacher: with a good teacher, your quality, your ability of experiencing the teachings grows."
   ], {
     at: "00:10:59.733",
-    title: "Coming up: Quality, not title",
+    title: "Coming up: Qualities, not titles",
     buttonText: "Continue lesson"
   }),
 
