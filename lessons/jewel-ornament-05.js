@@ -113,7 +113,7 @@ const SLIDES = [
   // Announcement banner at 00:18:25.600. Shares the timestamp with the
   // takeaways and coming-up above; slide priority shows those first.
   announcement(
-    "I.B Logical reason: the means depends on the spiritual master",
+    "I.B-C Logic & simile reasons, the means depends on the spiritual master",
     "To gather merit and wisdom, and to purify our obscurations.",
     { at: "00:18:25.600" }
   ),
@@ -123,7 +123,8 @@ const SLIDES = [
     "Gampopa explains: *In order to achieve the complete, perfect Buddhahood, all the accumulations, including merit and primordial wisdom, must be gathered. The means to do that depends on the spiritual master.*",
     "Not only that: *All the obscurations, including the afflicting emotions and the subtle obscurations to enlightenment, must be purified. The method to abandon these obscurations depends on the spiritual master.*",
     "So there are two reasons. The first reason is to gather all the collections of merit and wisdom. We don’t know how at the beginning; it depends on the spiritual master. So we need an authentic spiritual master.",
-    "Second, we need to purify all the gross and subtle obscurations, and we individually don’t know how, we are overpowered by our mental afflictions, and we are enslaved by them — totally, completely besotted with our mental afflictions, and then have no chance. So to free ourselves from this, we need such a spiritual master, a great teacher, to skillfully purify all the obscurations and revealing our nature."
+    "Second, we need to purify all the gross and subtle obscurations, and we individually don’t know how, we are overpowered by our mental afflictions, and we are enslaved by them — totally, completely besotted with our mental afflictions, and then have no chance. So to free ourselves from this, we need such a spiritual master, a great teacher, to skillfully purify all the obscurations and revealing our nature.",
+    "The similes, or examples, are easy... So you can read them."
   ], {
     at: "00:22:29.333",
     title: "Takeaways: Gathering merit and purifying obscurations",
