@@ -134,7 +134,7 @@ const SLIDES = [
   // "Coming up" keypoints stopping slide at 00:22:29.333. Shares the timestamp
   // with the takeaways above; slide priority shows those first.
   comingUp([
-    "Now the division, or the classification: there are four spiritual masters — the ordinary spiritual master; the bodhisattva spiritual master, who has attained certain bhūmis; the Nirmāṇakāya spiritual master; and the Sambhogakāya spiritual master.",
+    "Now, the division or classification. *There are four spiritual masters: the ordinary spiritual master; the bodhisattva spiritual master, who has attained certain bhūmis; the Nirmāṇakāya spiritual master; and the Sambhogakāya spiritual master.*",
     "For example, Buddha Śākyamuni was the Nirmāṇakāya during his time, and taught all those teachings to all the different levels. Then, a Buddha Sambhogakāya, in a Buddha field, a pure land, teaches through the great bodhisattvas. And bodhisattvas from the first bhūmi to the tenth bhūmi have different qualities and abilities, and different teachings to give to disciples. You can read more about them.",
     "To the ordinary spiritual master we will pay a little bit of attention, because right now we don’t see Buddhas, and there are great bodhisattvas out there, but we don’t know who, or what different levels they have achieved. But we see the ordinary spiritual masters on a day-to-day basis in our life.",
     "Gampopa made the ordinary spiritual masters into three divisions: those who possess eight qualities, those who possess four qualities, and those who possess two qualities."
