@@ -28,7 +28,7 @@ const SLIDES = [
   // into the teaching.
   refuge("slides/refuge.webp", { audio: "audio/refuge.mp3" }),
 
-  // "Coming up" keypoints stopping slide at 00:01:04.833. Shares the timestamp
+  // "Coming up" keypoints stopping slide at 00:01:03.700. Shares the timestamp
   // with the announcement below; slide priority shows this first.
   comingUp([
     "Please first relax physically and mentally. Then, just please feel we are so fortunate to get this precious opportunity to touch the wisdom of the Buddha.",
@@ -37,17 +37,17 @@ const SLIDES = [
     "On the basis of this, we cultivate our altruistic thought to free ourselves and all sentient beings from the confusion, and to heal our mind and the minds of all sentient beings.",
     "Today I will touch on the subject of the Buddha’s teaching. Just appreciate and rejoice."
   ], {
-    at: "00:01:04.833",
+    at: "00:01:03.700",
     title: "Coming up: Relax, reflect and rejoice",
     buttonText: "Continue lesson"
   }),
 
-  // Announcement banner at 00:01:04.833. Shares the timestamp with the
+  // Announcement banner at 00:01:03.700. Shares the timestamp with the
   // coming-up above; slide priority shows that first.
   announcement(
     "Relaxing, reflecting and rejoicing",
     "Cultivate the thought to free yourself and others",
-    { at: "00:01:04.833" }
+    { at: "00:01:03.700" }
   ),
 
   // "Some takeaways" keypoints stopping slide at 00:04:49.533
