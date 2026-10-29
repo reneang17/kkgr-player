@@ -7,7 +7,7 @@
  * See docs/AUTHORING-LESSONS.md.
  */
 
-import { finalSlide, refuge, dedication } from '../slide-utils/index.js';
+import { announcement, comingUp, takeaways, finalSlide, refuge, dedication } from '../slide-utils/index.js';
 import { WATER_DROP_ON_THE_LAKE } from './credits.js';
 
 const VIDEO_ID = "n6jUpXZsEH8";
@@ -27,6 +27,40 @@ const SLIDES = [
   // Video". Shown only if the viewer chooses it; pressing play goes straight
   // into the teaching.
   refuge("slides/refuge.webp", { audio: "audio/refuge.mp3" }),
+
+  // "Coming up" keypoints stopping slide at 00:01:04.833. Shares the timestamp
+  // with the announcement below; slide priority shows this first.
+  comingUp([
+    "Please first relax physically and mentally. Then, just please feel we are so fortunate to get this precious opportunity to touch the wisdom of the Buddha.",
+    "The wisdom of the Buddha means special insight and compassion — that is the principal method of how to relax mentally, inner peace.",
+    "Now, we just reflect that everybody desires peace and happiness, and everybody desires to be free from suffering; this is the reality nature.",
+    "On the basis of this, we cultivate our altruistic thought to free ourselves and all sentient beings from the confusion, and to heal our mind and the minds of all sentient beings.",
+    "Today I will touch on the subject of the Buddha’s teaching. Just appreciate and rejoice."
+  ], {
+    at: "00:01:04.833",
+    title: "Coming up: Relax, reflect and rejoice",
+    buttonText: "Continue lesson"
+  }),
+
+  // Announcement banner at 00:01:04.833. Shares the timestamp with the
+  // coming-up above; slide priority shows that first.
+  announcement(
+    "Relaxing, reflecting and rejoicing",
+    "Cultivate the thought to free yourself and others",
+    { at: "00:01:04.833" }
+  ),
+
+  // "Some takeaways" keypoints stopping slide at 00:04:49.533
+  takeaways([
+    "With this, please take a deep breath: inhale fully, and exhale all our tension, physically and mentally.",
+    "Inhale all the Buddha’s wisdom and compassion into us, and we meditate; it heals our body and mind. Exhale all our confusion.",
+    "Once more, please inhale fully all the wisdom and compassion of the Buddha, and exhale all our confusion and suffering.",
+    "Then the mind just relaxes like the nature of space — an unconfined state of the mind, total freedom, not occupied by confusion, the cause of suffering."
+  ], {
+    at: "00:04:49.533",
+    title: "Takeaways: Using breath fully",
+    buttonText: "Continue lesson"
+  }),
 
   // Final closing stopping slide at 00:58:17.333, just before the video ends.
   finalSlide("Thank you everybody", {
