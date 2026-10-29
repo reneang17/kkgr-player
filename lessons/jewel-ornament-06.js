@@ -62,6 +62,40 @@ const SLIDES = [
     buttonText: "Continue lesson"
   }),
 
+  // "Coming up" keypoints stopping slide at 00:04:49.533. Shares the timestamp
+  // with the takeaways above; slide priority shows those first.
+  comingUp([
+    "These next few months we are studying the Jewel Ornament of Liberation, a book compiled by Dharma Lord Gampopa, an enlightened master.",
+    "This book that Gampopa wrote has served so greatly in benefiting sentient beings through many centuries; beginners and highly realized ones, great scholars, they all appreciate this special book.",
+    "Everyone uses this book as a guideline; they follow the path step by step, so that everyone can be free from the vicious cycle of samsara.",
+    "This book has six topics: the primary cause; the working basis; the spiritual master; the method, the instruction of the spiritual master; the result, Buddhahood; and the activities of the Buddha."
+  ], {
+    at: "00:04:49.533",
+    title: "Coming up: A special book in six topics",
+    buttonText: "Continue lesson"
+  }),
+
+  // Announcement banner at 00:04:49.533. Shares the timestamp with the
+  // takeaways and coming-up above; slide priority shows those first.
+  announcement(
+    "Reviewing what we have touched on so far",
+    "The seed, the working basis and the spiritual master",
+    { at: "00:04:49.533" }
+  ),
+
+  // "Some takeaways" keypoints stopping slide at 00:11:00.967
+  takeaways([
+    "So far we have touched on the primary cause: the innate goodness, a seed, the potential seed for enlightenment, to see the effulgent nature of the mind.",
+    "As you see in samsara, everywhere, all over the world, people and animals are suffering so much — those who are rich, those who are poor, those with a high status and those without, young or old. Everyone is going through a vicious cycle in their life due to the lack of the wisdom to see the effulgent nature of the mind.",
+    "Our mind is occupied by this ignorance, bewilderment; we are in the jungle of the confusion. So this book first starts with how much potential, the seed, we have to achieve total peace and happiness. That’s why it is said dharmakaya is pervaded to all the sentient beings. So first we appreciate this.",
+    "To reveal the total nature of the effulgence, the enlightenment, we need a working basis, the precious human life — physically the leisures and endowments, and mentally trusting, longing, and clear faith. Thus, well equipped, the working basis has all the ability to purify all our obscurations.",
+    "But that much is not enough: we need the spiritual master who has all these excellent qualities for enlightenment to show to others — the ability, the skill, the altruistic mind, the bodhicitta."
+  ], {
+    at: "00:11:00.967",
+    title: "Takeaways: What we have touched on so far",
+    buttonText: "Continue lesson"
+  }),
+
   // Final closing stopping slide at 00:58:17.333, just before the video ends.
   finalSlide("Thank you everybody", {
     at: "00:58:17.333"
