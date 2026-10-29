@@ -8,7 +8,7 @@
  */
 
 import { announcement, comingUp, takeaways, finalSlide, refuge, dedication } from '../slide-utils/index.js';
-import { WATER_DROP_ON_THE_LAKE } from './credits.js';
+import { WATER_DROP_ON_THE_LAKE, JEWEL_ORNAMENT_QUOTES } from './credits.js';
 
 const VIDEO_ID = "n6jUpXZsEH8";
 const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
@@ -129,6 +129,44 @@ const SLIDES = [
     buttonText: "Continue lesson"
   }),
 
+  // "Coming up" keypoints stopping slide at 00:15:38.600. Shares the timestamp
+  // with the takeaways above; slide priority shows those first.
+  // Text between *asterisks* is quoted from the root text and shows in italics.
+  comingUp([
+    "*Since we have the primary cause, Buddha-nature, we have come from a continuous stream since beginningless samsara. At some time, we must have gained a precious human life and also met with a spiritual master.* Not so often, but just imagine: just like in this life, there are so many people who have encountered some spiritual masters, an opportunity to study and meditate.",
+    "What went wrong? *What faults have prevented us from attaining Buddhahood in the past?* What obstacles did we face? What impediments did we encounter? Why are we still in samsara?",
+    "This is a very important question to reflect on ourselves. It is the way to have conviction; this will help us to follow the path without flinching, without going back, going only forward.",
+    "Otherwise, sometimes we think, “Buddha’s teachings are beautiful, wonderful, but I was not born with that. It’s okay, I’m happy. My life is all right.” There are so many like that, but we have to look at the complete picture of our life.",
+    "Why have we not been freed from samsara? So the answer is here: *We have been overpowered by the four obstacles* — four different impediments, four different obstacles we encountered.",
+    "Gampopa asked such an important question for us, because we don’t know which questions we should ask — so that we wake up: “I can see there’s a Buddha nature within me; now I have a precious human life. Still, I cannot practice so well. Why?”"
+  ], {
+    at: "00:15:38.600",
+    title: "Coming up: What went wrong?",
+    buttonText: "Continue lesson"
+  }),
+
+  // Announcement banner at 00:15:38.600. Shares the timestamp with the
+  // takeaways and coming-up above; slide priority shows those first.
+  announcement(
+    "0. Why are we still in samsara?",
+    "We are overpowered by four obstacles",
+    { at: "00:15:38.600" }
+  ),
+
+  // "Some takeaways" keypoints stopping slide at 00:26:21.200
+  takeaways([
+    "*What are the four obstacles or impediments to the attainment of Buddhahood?* First, *being attached to this life’s activities* — not only business, not only politics; even sometimes we use Dharma practice just for this life’s benefit.",
+    "Second, *being attached to the pleasure of samsara* means in the god realm, in the human realm. We try to make this life as perfect as possible; then, if we believe in the next life, we hope for a human rebirth in a good place. Some humans live like in the god realm, with such a joyous, good life: “This is enough for me. I feel good about this. I don’t need Dharma practice; I don’t need to meditate. I’m just well off.”",
+    "Third, *being attached to peace* means sometimes we feel samsara is a state of suffering — occasionally good, but always with some problems, difficulties: “I cannot be totally free from that kind of suffering in samsara. I must be free from samsara, but for myself; I cannot do this for others. I need myself to be free from this vicious cycle of suffering.” So I am attached to my own peace, liberation.",
+    "Fourth, *not understanding the method by which enlightenment is achieved*. For example: “Yes, I want to achieve complete enlightenment, but I don’t know how. Can you tell me?”",
+    "We encounter these four, but not necessarily all four — any one of those. Some may not be so attached to this life’s activities, nor to the pleasure of samsara; they want to help others and are not so attached to their own peace, but they don’t know how to attain Buddhahood.",
+    "So first we should get these four very important points. Just open our heart; don’t take it as a personal “I like” or “don’t like,” but look whether it makes sense or not."
+  ], {
+    at: "00:26:21.200",
+    title: "Takeaways: The four obstacles to Buddhahood",
+    buttonText: "Continue lesson"
+  }),
+
   // Final closing stopping slide at 00:58:17.333, just before the video ends.
   finalSlide("Thank you everybody", {
     at: "00:58:17.333"
@@ -154,7 +192,7 @@ export const lesson = {
   slides: SLIDES,
 
   // Third-party works shown in this teaching, listed under the segments.
-  credits: [WATER_DROP_ON_THE_LAKE]
+  credits: [WATER_DROP_ON_THE_LAKE, JEWEL_ORNAMENT_QUOTES]
 };
 
 export default lesson;
