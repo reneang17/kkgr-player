@@ -337,6 +337,42 @@ const SLIDES = [
     buttonText: "Continue lesson"
   }),
 
+  // "Coming up" keypoints stopping slide at 00:52:15.633. Shares the timestamp
+  // with the takeaways above; slide priority shows those first.
+  comingUp([
+    "*These are the factors used to cultivate the mind and to develop bodhicitta.* These are all methods: impermanence is a method, reflecting on the suffering of samsara and on karma and its result is a method, loving-kindness and compassion are all a method to develop bodhicitta. At the end of the day, our focus is bodhicitta, but we need all these factors.",
+    "That’s why it’s called *various factors: from the time one starts taking refuge until one meditates on the meaning of the two selflessnesses, or from the five paths until the ten bhumis, all Dharma teachings are included in the cultivation of bodhicitta.*",
+    "*Some practices form the foundation through which to cultivate the enlightened mind, some are the objects of the cultivation of the mind, some are methods to cultivate the mind, some are the training in the cultivation of the mind* — the mind means bodhicitta — *some are the beneficial effects of the cultivation of the mind, and some are the results of the cultivation of the mind, so all the Mahayana teachings are included in cultivation of the mind, bodhicitta.*",
+    "*Therefore, all these instructions are imparted, given by the spiritual master,* depending on the spiritual master. So we depend on the spiritual master."
+  ], {
+    at: "00:52:15.633",
+    title: "Coming up: At the end of the day, bodhicitta",
+    buttonText: "Continue lesson"
+  }),
+
+  // Announcement banner at 00:52:15.633. Shares the timestamp with the
+  // takeaways and coming-up above; slide priority shows those first.
+  announcement(
+    "All teachings are included in bodhicitta",
+    "Depending on the spiritual master",
+    { at: "00:52:15.633" }
+  ),
+
+  // "Some takeaways" keypoints stopping slide at 00:58:17.333. Shares the
+  // timestamp with the closing slides below; slide priority shows this first.
+  takeaways([
+    "*The Planting of the Noble Stalk says, “The spiritual master is the source of all virtuous teachings.” The attainment of omniscience depends on the instructions of the spiritual master.*",
+    "So the spiritual master who gave us these teachings is so precious, so kind, so generous.",
+    "In any school, when a good teacher gives you all this wisdom, the students become wonderful. But the student also has a responsibility: those students who are very attentive, who follow the advice, the instructions given by the teacher respectfully, attentively, become much better.",
+    "In the Dharma it is the same — interdependent. When the student attends respectfully, with awareness, with mindfulness, you can get so much benefit. If you are always arguing, you can get nothing.",
+    "Of course, one should have the special insight to investigate right or wrong. The Buddha gave us all this perfect opportunity and explained everything so perfectly. As we went through, he explained the qualities and the ability a spiritual master should have, and then how much responsibility the student has.",
+    "So I think this introduction is very important. Repeat this; be aware of this again and again: “Why am I practicing Dharma? Why should I do this?”"
+  ], {
+    at: "00:58:17.333",
+    title: "Takeaways: Qualities and responsibility",
+    buttonText: "Continue lesson"
+  }),
+
   // Final closing stopping slide at 00:58:17.333, just before the video ends.
   finalSlide("Thank you everybody", {
     at: "00:58:17.333"
