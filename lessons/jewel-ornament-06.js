@@ -148,8 +148,8 @@ const SLIDES = [
   // Announcement banner at 00:15:38.600. Shares the timestamp with the
   // takeaways and coming-up above; slide priority shows those first.
   announcement(
-    "0. Why are we still in samsara?",
-    "We are overpowered by four obstacles",
+    "Why are we still in samsara?",
+    "We were overpowered by four obstacles",
     { at: "00:15:38.600" }
   ),
 
@@ -164,6 +164,45 @@ const SLIDES = [
   ], {
     at: "00:26:21.200",
     title: "Takeaways: The four obstacles to Buddhahood",
+    buttonText: "Continue lesson"
+  }),
+
+  // "Coming up" keypoints stopping slide at 00:26:21.200. Shares the timestamp
+  // with the takeaways above; slide priority shows those first.
+  comingUp([
+    "*How can these four obstacles be dispelled? They are dispelled — gotten rid of — by practicing the instruction heard from the spiritual master.* That’s how the spiritual master is so important, and how important it is for the spiritual master to have all these qualities.",
+    "It’s not the title. Sometimes we are so much involved with the title — “What title do you have? What title does he/she have?” — and not looking at the qualities. It’s very important to have the qualities, the ability to help others.",
+    "*How many instructions of the spiritual master are there? In summary: meditation on impermanence* — first, to release attachment to this life.",
+    "Second, *meditation on the faults of samsara and cause and result*. The faults of samsara means the suffering of samsara, the unsatisfactory nature of samsara; no matter how much we enjoy in samsara, never satisfied. And the cause of that, and the result.",
+    "Third, *meditation on loving-kindness and compassion*. Everyone has some kind of love and compassion, whether emotionally, out of attachment, or else. But here it means love and compassion to all sentient beings.",
+    "Fourth, *various elements of the cultivation of bodhicitta*: through different methods we cultivate bodhicitta. Bodhicitta practice is how to attain Buddhahood. *These four comprise the instruction of the spiritual master.*"
+  ], {
+    at: "00:26:21.200",
+    title: "Coming up: The four instructions",
+    buttonText: "Continue lesson"
+  }),
+
+  // Announcement banner at 00:26:21.200. Shares the timestamp with the
+  // takeaways and coming-up above; slide priority shows those first.
+  announcement(
+    "How can these four obstacles be dispelled?",
+    "By practicing the instruction heard from the spiritual master",
+    { at: "00:26:21.200" }
+  ),
+
+  // "Some takeaways" keypoints stopping slide at 00:34:52.667
+  takeaways([
+    "*To restate,* to make more clear how to get out of these four obstacles they are instructions on the meditation practice regarding such four.",
+    "It’s not enough to just say, for example, “I understand impermanence”; it’s not enough just to say, “I know samsara is a state of suffering.” But here meditation practice means to bring it into our heart, then see that nature, convince ourselves, and follow the path. That is what is meant by meditation practice.",
+    "These are the direct methods to counteract, to dispel the obstacles. When we are totally convinced about the impermanence of all phenomena — when we see that in the heart and just say, “Yes, I can see it” — then it helps to release attachment to this life.",
+    "When we see the suffering of samsara, one after another, it helps to release the attachment to the pleasure of samsara.",
+    "When you see all sentient beings as our mother, our sister, our brother, who are suffering, then it helps to release the attachment to only individual self-liberation.",
+    "Then, when you know the bodhicitta practice, then you open the door towards complete Buddhahood.",
+    "Look at these four obstacles carefully; investigate. Every country has a constitution, but this is the constitution of the Buddha’s teaching to achieve Buddhahood — the complete constitution, no more, no less.",
+    "When we have this constitution understood in our heart, the practitioner feels so happy: “Yes! Now I know. I was practicing Dharma for many years, but didn’t know really what for, or how.” Or, “I like to meditate; really, I want to. I feel the suffering of samsara is so much, but I didn’t know. But now I know what this means.” And the joy you receive cannot be replaced by anything, and when you are working for enlightenment, all the hardships are nothing."
+  ], {
+    at: "00:34:52.667",
+    title: "Takeaways: The constitution of the Buddha’s teaching",
     buttonText: "Continue lesson"
   }),
 
