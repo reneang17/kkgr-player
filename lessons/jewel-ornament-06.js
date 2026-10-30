@@ -206,6 +206,74 @@ const SLIDES = [
     buttonText: "Continue lesson"
   }),
 
+  // "Coming up" keypoints stopping slide at 00:34:52.667. Shares the timestamp
+  // with the takeaways above; slide priority shows those first.
+  comingUp([
+    "That’s why the life story of Milarepa is always so beautiful: he went through that life but he went through it so joyfully.",
+    "From outside he looked so poor, so weak. Some hunters went up the mountain and saw Milarepa with nothing to eat, nothing to wear, in a cave, and they said, “What a poor man you are! You didn’t know how to live your life.”",
+    "Milarepa answered, “I know what I’m doing, you don’t. This is because of the wisdom of Marpa, from whom I received the teachings.” He knew he would definitely be free from the vicious cycle of samsara.",
+    "And he was so excited to go through purifying all these inveterate, deeply rooted habits. One needs such courage. Dharma practice is not for weak people. People ask why are monks and nuns ordained? We need such a courageous mind, a courageous body, strength physically and mentally, and go forward.",
+    "This is for such wise people, weak people cannot handle this. So we should have such great joy; that’s why this is so precious. These points are so important first, to capture the root, the rudiments of Dharma practice."
+  ], {
+    at: "00:34:52.667",
+    title: "Coming up: Joyful courage",
+    buttonText: "Continue lesson"
+  }),
+
+  // Announcement banner at 00:34:52.667. Shares the timestamp with the
+  // takeaways and coming-up above; slide priority shows those first.
+  announcement(
+    "Contemplating impermanence",
+    "It remedies attachment to this life’s activities",
+    { at: "00:34:52.667" }
+  ),
+
+  // "Some takeaways" keypoints stopping slide at 00:40:45.367
+  takeaways([
+    "*Thus, contemplating the subject of impermanence remedies attachment to this life’s activities.*",
+    "Not only those who are not Buddhist, but even Buddhist business people, Buddhist politicians, are so corrupted for this life, because they are so attached to this life’s achievement. They have not received the Buddha’s message; they misunderstood it.",
+    "We should have a clear picture of what this means. It doesn’t mean we don’t care for this life. Of course we have to eat, have a place to live, wear clothes; we need to sustain this life. But how much do you need? We have one stomach, one mouth. If you eat too much it’s a problem.",
+    "Some people are totally focused on this life: “Can you say some prayers so that my business is very successful, so that I’m promoted to a higher status, get a good title?” All the focus is only for this life. We even forget the next life, let alone enlightenment.",
+    "Meditate on this; reflect on this. This impermanence helps us to remove our obstacle of focusing only on this life."
+  ], {
+    at: "00:40:45.367",
+    title: "Takeaways: Contemplating impermanence",
+    buttonText: "Continue lesson"
+  }),
+
+  // "Coming up" keypoints stopping slide at 00:40:45.367. Shares the timestamp
+  // with the takeaways above; slide priority shows those first.
+  comingUp([
+    "Then, *reflecting on the faults of samsara*. The faults of samsara means the suffering of samsara. In the human realm, we are not always bad: sometimes it’s a beautiful day, our health is good, and we have very good food to enjoy — “Life is beautiful, life is perfect.” But it’s not always that way.",
+    "Sometimes things go in the wrong direction and we suffer: “What should I do? Can you say some prayers? My life is not going well.” So we have to reflect on both sides, good and bad — but it is always changing.",
+    "*…and on karma, cause and its result, remedies attachment to the pleasure of samsara.* So don’t be too attached to samsara: whether you are born in the god realm or in the human realm, still there’s suffering.",
+    "Of course, in the hell realm, as hungry ghosts or animals, the suffering is so profound, so deep. Still, in the human realm, you can see the suffering of the very rich people, of the leaders of the powerful countries — how much suffering they have!",
+    "Sometimes you feel, “Why do you want to be the leader of a country?” Still, people are attached to that, without knowing. So if you see these teachings, then you say, “Oh, there are some alternatives.”"
+  ], {
+    at: "00:40:45.367",
+    title: "Coming up: Life is always changing",
+    buttonText: "Continue lesson"
+  }),
+
+  // Announcement banner at 00:40:45.367. Shares the timestamp with the
+  // takeaways and coming-up above; slide priority shows those first.
+  announcement(
+    "The last three remedies",
+    "Reflecting on samsara, compassion and bodhicitta",
+    { at: "00:40:45.367" }
+  ),
+
+  // "Some takeaways" keypoints stopping slide at 00:43:11.500
+  takeaways([
+    "Third, *meditating on loving-kindness and compassion remedies* — purifies, is the antidote for — *attachment to the pleasure of individual peace*. This peace is not samsaric peace; this peace is the liberation, like a partial nirvana.",
+    "And the fourth, *cultivating the supreme bodhicitta*. Everybody has a mind, but the mind which desires to attain Buddhahood, the mind which cultivates bodhicitta, is the supreme mind.",
+    "The mind which desires to help all sentient beings is such a sublime mind, such a precious mind. *That is the antidote for not understanding the method by which to achieve enlightenment.*"
+  ], {
+    at: "00:43:11.500",
+    title: "Takeaways: The supreme mind",
+    buttonText: "Continue lesson"
+  }),
+
   // Final closing stopping slide at 00:58:17.333, just before the video ends.
   finalSlide("Thank you everybody", {
     at: "00:58:17.333"
