@@ -274,6 +274,69 @@ const SLIDES = [
     buttonText: "Continue lesson"
   }),
 
+  // "Coming up" keypoints stopping slide at 00:44:45.033. Shares the timestamp
+  // with the announcement below; slide priority shows this first.
+  comingUp([
+    "Please reflect on this, the four obstacles and remedies, very carefully. It’s good to repeat, and then maybe memorize; then meditate on this: “Why am I practicing Dharma?” This is the real wisdom of the Buddha, how to uproot the total suffering.",
+    "How many great empowerments have you received? Such highest yoga deity empowerments you have received many times, not only once. It is precious; it is fortunate to receive such powerful deity empowerments.",
+    "But how much benefit did you get from this? It has not much affected your mind to free it from our mental afflictions.",
+    "So all our Dharma practice, deep down, if we look carefully: we need to purify the mind. That’s what the Buddha said."
+  ], {
+    at: "00:44:45.033",
+    title: "Coming up: We need to purify the mind",
+    buttonText: "Continue lesson"
+  }),
+
+  // Announcement banner at 00:44:45.033. Shares the timestamp with the
+  // coming-up above; slide priority shows that first.
+  announcement(
+    "Why am I practicing Dharma?",
+    "The real enemy and the real medicine",
+    { at: "00:44:45.033" }
+  ),
+
+  // "Some takeaways" keypoints stopping slide at 00:49:59.500
+  takeaways([
+    "The real enemy of sentient beings is our mental afflictions. The person we say is “my enemy” is temporary: one day he or she is your enemy, the next day they can become such a wonderful friend. But the mental afflictions, negative thoughts, we cannot become friends with at all. They always take away our peace and happiness.",
+    "Mental afflictions will always destroy our peace and happiness. Look at desire, attachment; look at our anger, aversion, jealousy. As soon as they arise in our heart, they take away all our peace and happiness — and without knowing, we blame somebody else outside: “I feel miserable because he or she did this.”",
+    "These four obstacles and the remedies are four very, very important points. These remedies are the real medicine; they can heal our mind. Our mind is so wounded, so much wounded.",
+    "The wisdom, the love, the compassion and the bodhicitta are the real ambrosia, undefiled ambrosia, undefiled nectar. They heal our body, they will heal our mind, make our mind fresh, and they will make our life very productive, useful."
+  ], {
+    at: "00:49:59.500",
+    title: "Takeaways: The real medicine",
+    buttonText: "Continue lesson"
+  }),
+
+  // "Coming up" keypoints stopping slide at 00:49:59.667. Shares the timestamp
+  // with the announcement below; slide priority shows this first.
+  comingUp([
+    "What we are studying and practicing has nothing to do with Buddhism; it is the reality nature of samsara. Everywhere in the world you see suffering because of these mental afflictions.",
+    "Of course, there are some outside forces — when there’s no rain, a flood — that give us suffering, but once in a while. These mental afflictions give us suffering 24 hours, every day in our life, life after life, no matter where we are reborn."
+  ], {
+    at: "00:49:59.667",
+    title: "Coming up: The reality nature of samsara",
+    buttonText: "Continue lesson"
+  }),
+
+  // Announcement banner at 00:49:59.667. Shares the timestamp with the
+  // coming-up above; slide priority shows that first.
+  announcement(
+    "The reality-nature of samsara",
+    "Nothing to do with Buddhism",
+    { at: "00:49:59.667" }
+  ),
+
+  // "Some takeaways" keypoints stopping slide at 00:52:15.633
+  takeaways([
+    "So the Buddha’s teaching is this: true peace, peace within. It takes time, because we are so perniciously habituated; we need to repeat again and again.",
+    "We need these powerful teachings to purify and replace [the afflictions] by the wisdom, our Buddha nature. Our Buddha nature is the total peace; it is the embodiment of all the wisdom that we need to reveal.",
+    "To reveal that, first we need to study and practice the Buddha’s teaching; we need to meditate ourselves, and practice."
+  ], {
+    at: "00:52:15.633",
+    title: "Takeaways: Peace within",
+    buttonText: "Continue lesson"
+  }),
+
   // Final closing stopping slide at 00:58:17.333, just before the video ends.
   finalSlide("Thank you everybody", {
     at: "00:58:17.333"
