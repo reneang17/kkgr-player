@@ -258,8 +258,8 @@ const SLIDES = [
   // Announcement banner at 00:40:45.367. Shares the timestamp with the
   // takeaways and coming-up above; slide priority shows those first.
   announcement(
-    "The last three remedies",
-    "Reflecting on samsara, compassion and bodhicitta",
+    "The remedies for the latter three obstacles",
+    "Reflections on samsara, compassion and the supreme bodhicitta",
     { at: "00:40:45.367" }
   ),
 
