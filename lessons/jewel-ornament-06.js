@@ -10,7 +10,7 @@
 import { announcement, comingUp, takeaways, finalSlide, refuge, dedication } from '../slide-utils/index.js';
 import { WATER_DROP_ON_THE_LAKE, JEWEL_ORNAMENT_QUOTES } from './credits.js';
 
-const VIDEO_ID = "n6jUpXZsEH8";
+const VIDEO_ID = "h-twagrzfpg";
 const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
 
 // 1. VIDEO SEGMENTS (Chapters / Lecture parts shown in the "Segments" list)
