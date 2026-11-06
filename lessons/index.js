@@ -31,6 +31,7 @@ import { lesson as jewelOrnament03 } from './jewel-ornament-03.js';
 import { lesson as jewelOrnament04 } from './jewel-ornament-04.js';
 import { lesson as jewelOrnament05 } from './jewel-ornament-05.js';
 import { lesson as jewelOrnament06 } from './jewel-ornament-06.js';
+import { lesson as jewelOrnament07 } from './jewel-ornament-07.js';
 
 /**
  * id -> lesson descriptor. The id is what appears in the `?lesson=` query
@@ -46,7 +47,8 @@ export const LESSONS = {
   'jewel-ornament-03': jewelOrnament03,
   'jewel-ornament-04': jewelOrnament04,
   'jewel-ornament-05': jewelOrnament05,
-  'jewel-ornament-06': jewelOrnament06
+  'jewel-ornament-06': jewelOrnament06,
+  'jewel-ornament-07': jewelOrnament07
 };
 
 /** Used when no `?lesson=` is given. */
