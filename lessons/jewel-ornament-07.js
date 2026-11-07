@@ -10,7 +10,7 @@
 import { finalSlide, refuge, dedication } from '../slide-utils/index.js';
 import { WATER_DROP_ON_THE_LAKE } from './credits.js';
 
-const VIDEO_ID = "DmYCCbOxcvs";
+const VIDEO_ID = "KLFTDfj8qVg";
 const SLIDE_BG = "slides/slide-1.png";   // optional 1920x1080 background image for stopping slides
 
 // 1. VIDEO SEGMENTS (Chapters / Lecture parts shown in the "Segments" list)
@@ -44,7 +44,7 @@ const SLIDES = [
 /** The lesson descriptor consumed by the player engine. */
 export const lesson = {
   id: 'jewel-ornament-07',
-  name: 'Chapter 4: Impermanence',
+  name: 'Impermanence',
   title: 'Khenchen Rinpoche',
   subtitle: 'Teachings on the Jewel Ornament of Liberation',
   videoId: VIDEO_ID,
