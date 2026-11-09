@@ -459,7 +459,14 @@ export const lesson = {
   slides: SLIDES,
 
   // Third-party works shown in this teaching, listed under the segments.
-  credits: [WATER_DROP_ON_THE_LAKE, JEWEL_ORNAMENT_QUOTES]
+  credits: [WATER_DROP_ON_THE_LAKE, JEWEL_ORNAMENT_QUOTES],
+
+  // Printable copy of the slide bullet points, offered from the control bar.
+  handout: {
+    file: 'handouts/jewel-ornament-07-points-to-remember.pdf',
+    label: 'Some takeaways',
+    filename: 'Jewel Ornament of Liberation - Impermanence - Some takeaways.pdf'
+  }
 };
 
 export default lesson;
