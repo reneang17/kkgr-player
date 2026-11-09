@@ -1,5 +1,20 @@
 # Changelog
 
+## Takeaways Buttons Continue From the Takeaways' Moment
+
+Continue on takeaways opened from a segment's Takeaways button used to return the
+viewer to wherever they had been, as the refuge and dedication do. It now takes
+them to the takeaways' own timestamp and carries on from there, as choosing a
+segment does: the next section's "Coming up" opens, then the teaching plays. A
+viewer reviewing a section's points has usually come to pick the teaching up at
+that point, and the takeaways, unlike the refuge and dedication, are a place in
+the teaching.
+
+The landing logic of `seekToSegment()` moved into `jumpToMoment()`, which both
+now use, so the two land identically, including the last takeaways at the very
+end of a video (the seek stops just short of the end and the closing slides open
+directly). The refuge and dedication still return the viewer where they were.
+
 ## Announcement Banner Raised Above the Subtitles
 
 The lower-third banner sat at 5.3% of the frame height from the bottom, which
