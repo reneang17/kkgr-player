@@ -650,8 +650,11 @@ function holdUntilSeekLands(target) {
      - a point in the video -> carry on from there
 
    Holds { forSlide, slide, hadStarted }; `forSlide` identifies the instance that
-   was segment-opened, so a dedication reached by the timeline (which is also
-   listed as a segment) is unaffected. */
+   was segment-opened. A section's takeaways instead hold { forSlide, resumeAt }:
+   they continue from their own moment in the teaching, not from where the viewer
+   was (see openSectionTakeaways). Keying the return to `forSlide` means a
+   dedication reached by the timeline (which is also listed as a segment) is
+   unaffected. */
 let segmentReturn = null;
 
 /* Apply optional custom background if provided.
@@ -699,10 +702,17 @@ function seekToSegment(seg) {
   // A normal seek discards any pending return: the viewer has chosen a new place
   // in the teaching, so there is nothing to come back to.
   segmentReturn = null;
+  jumpToMoment(seg.atSeconds);
+}
 
+/* Moves the teaching to `atSeconds` and carries on from there exactly as if
+   playback had just reached it: the keypoint slides at that moment open, and
+   otherwise the video plays. Shared by the segment rows and by Continue on a
+   section's takeaways (see openSectionTakeaways), so both land the same way. */
+function jumpToMoment(atSeconds) {
   // Reset passed state for slides at or after this timestamp so stopping slides fire
   normalizedSlides.forEach((slide) => {
-    if (slide.atSeconds >= seg.atSeconds - 0.5) {
+    if (slide.atSeconds >= atSeconds - 0.5) {
       slide.passed = false;
     }
   });
@@ -711,8 +721,8 @@ function seekToSegment(seg) {
   // short of the end instead; the slides at the segment open directly below.
   const duration = playerGetDuration();
   const seekTarget = duration > 0
-    ? Math.min(seg.atSeconds, duration - END_SEEK_MARGIN_SECONDS)
-    : seg.atSeconds;
+    ? Math.min(atSeconds, duration - END_SEEK_MARGIN_SECONDS)
+    : atSeconds;
   holdUntilSeekLands(seekTarget);
   playerSeekTo(seekTarget);
 
@@ -723,22 +733,22 @@ function seekToSegment(seg) {
   // segment appears to do nothing. Matching uses the same 0.2 s tolerance the
   // slide sort treats as "the same timestamp".
   //
-  // The takeaways at this moment close the PREVIOUS section, so a viewer who
-  // chose this section starts at its "Coming up" instead; the takeaways stay
-  // one click away (the back button on that slide, or the previous segment's
-  // Takeaways button). They are still marked passed, so playback does not
-  // show them a moment later.
+  // The takeaways at this moment close the PREVIOUS section. A viewer who chose
+  // this section starts at its "Coming up" instead, the takeaways one click away
+  // (the back button on that slide, or the previous segment's Takeaways
+  // button); a viewer continuing from those takeaways has just read them. Either
+  // way they are marked passed, so playback does not show them a moment later.
   const slidesHere = pauseToggle.checked
     ? normalizedSlides.filter(s =>
-        s.onTimeline && s.isStopping && Math.abs(s.atSeconds - seg.atSeconds) < SAME_MOMENT_SECONDS)
+        s.onTimeline && s.isStopping && Math.abs(s.atSeconds - atSeconds) < SAME_MOMENT_SECONDS)
     : [];
   slidesHere.forEach(s => { s.passed = true; });
   // Likewise anything timed just before the segment, inside the trigger window:
   // landing here would otherwise fire it. Lessons sometimes put the previous
   // section's takeaways a second or two before the next section's banner.
   normalizedSlides.forEach(s => {
-    if (s.atSeconds < seg.atSeconds - SAME_MOMENT_SECONDS &&
-        s.atSeconds > seg.atSeconds - SLIDE_TRIGGER_WINDOW_SECONDS) {
+    if (s.atSeconds < atSeconds - SAME_MOMENT_SECONDS &&
+        s.atSeconds > atSeconds - SLIDE_TRIGGER_WINDOW_SECONDS) {
       s.passed = true;
     }
   });
@@ -751,9 +761,9 @@ function seekToSegment(seg) {
   playerPlay();
 }
 
-/* Opens a slide on request (refuge, dedication, a section's takeaways) without
-   moving the playhead. Continuing from it returns the viewer to where they were
-   — see segmentReturn. */
+/* Opens a slide on request (the refuge or dedication) without moving the
+   playhead. Continuing from it returns the viewer to where they were — see
+   segmentReturn. A section's takeaways open through openSectionTakeaways. */
 function openSlideFromSegment(slide, interruptedSlide) {
   segmentReturn = {
     forSlide: slide,
@@ -765,14 +775,22 @@ function openSlideFromSegment(slide, interruptedSlide) {
 }
 
 /* A segment's Takeaways button. Tears down whatever is on screen exactly as a
-   segment does, then opens the section's takeaways as a review. */
+   segment does, then opens the section's takeaways.
+
+   Unlike the refuge and dedication, Continue does not return the viewer to where
+   they were: it takes them to the moment the takeaways belong to, as choosing a
+   segment does, and the teaching carries on from there (the next section's
+   "Coming up" first). A viewer reviewing a section's points has usually come to
+   pick the teaching up again at that point, and the takeaways are a place in
+   the teaching where the refuge and dedication are not. */
 function openSectionTakeaways(slide) {
-  const interruptedSlide = activeStoppingSlide;
   stoppingQueue = [];
   pendingAnnouncements = [];
   if (activeStoppingSlide) closeStoppingSlide(false);
   if (activeAnnouncement) closeAnnouncement();
-  openSlideFromSegment(slide, interruptedSlide);
+  segmentReturn = { forSlide: slide, resumeAt: slide.atSeconds };
+  playerPause();
+  openStoppingSlide(slide);
 }
 
 /* The back button on a "Coming up": show the previous section's takeaways, then
@@ -1490,7 +1508,10 @@ function closeStoppingSlide(resumePlayback = true) {
   if (resumePlayback && pendingReturn) {
     segmentReturn = null;
 
-    if (!pendingReturn.hadStarted) {
+    if (pendingReturn.resumeAt !== undefined) {
+      // A section's takeaways: carry on from their moment in the teaching.
+      jumpToMoment(pendingReturn.resumeAt);
+    } else if (!pendingReturn.hadStarted) {
       // Refuge taken before watching anything: begin the teaching at the start.
       playerSeekTo(0);
       lastKnownTime = 0;
