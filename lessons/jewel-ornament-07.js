@@ -34,9 +34,9 @@ const SLIDES = [
   // Text between *asterisks* is quoted from the root text and shows in italics.
   comingUp([
     "I will read a few lines and explain, and then you can read more details. *Of these, the first instruction is the meditation on impermanence as the antidote/remedy to attachment to this life.*",
-    "*“All composite phenomena…”* A composite phenomena are produced through many causes and conditions, which then produces it. Just like a writing pen: the pen is composed of, or a product of, many causes and conditions. So Buddha said all those are impermanent.",
+    "*“All composite phenomena…”* Composite phenomena are produced through many causes and conditions, which then produce one. Just like a writing pen: the pen is composed of, or a product of, many causes and conditions. So Buddha said all those are impermanent.",
     "*“O monks, all composite phenomena are impermanent.”* Monks and nuns need a lot of reminders of impermanence. Wearing Dharma robes without contemplating impermanence is not so good. So then, mental afflictions come; attachment comes, and the fighting.",
-    "So, to hundreds of thousands of monks and nuns the Buddha said: *“O monks and nuns, all composite phenomena are impermanent.”* Then all the bubbling of the mind just slow down. All the attachment around there is lessened, and the mind becomes more peaceful, physically more peaceful. We just reflect and meditate on this.",
+    "So, to hundreds of thousands of monks and nuns the Buddha said: *“O monks and nuns, all composite phenomena are impermanent.”* Then all the bubbling of the mind just slows down. All the attachment around there is lessened, and the mind becomes more peaceful, physically more peaceful. We just reflect and meditate on this.",
     "Just meditate on it. For example, when there’s deep suffering, meditate on impermanence. Take a deep breath: everything is impermanent. When you are taking all your attention to the suffering, this helps to release the suffering, “Oh, the suffering is not permanent, it will change.” Meditate.",
     "When strong anger arises, meditate on impermanence. The person to whom you have the anger is impermanent. So, “Why are you so vicious about your anger to that person?” It helps to release that power.",
     "It’s very easy to do but it’s very important to do off and on. Just sit, just take a deep breath and meditate. When you are next to a tree, the wind blows, the tree moves making noise; meditate, “Oh, this is impermanent, it’s changing, everything has this nature.” While I talk about impermanence, please meditate on this."
@@ -73,7 +73,7 @@ const SLIDES = [
   comingUp([
     "Now, there are four points which are very important. In what way are they impermanent? *“The end of accumulation is dispersion or exhaustion.”* This is the first point.",
     "You accumulate wealth, but at the end it exhausts — disperses, or reduces. There are some very rich people who at the end of their life have nothing: exhausted, consumed. If you read the history of the past you’ll see.",
-    "Nowadays you see in some countries, when they become the leader of the country, with greed they accumulate so much. They have so much, but the people don’t have. So now people are protesting — it’s a cause of suffering — so they have to run away. Then, what’s the benefit to accumulate all this? Look at this."
+    "Nowadays you see in some countries, when they become the leader of the country, with greed they accumulate so much. They have so much, but the people don’t have anything. So now people are protesting — it’s a cause of suffering — so they have to run away. Then, what’s the benefit to accumulate all this? Look at this."
   ], {
     at: "00:10:26.733",
     title: "Coming up: Accumulation ends in exhaustion",
@@ -250,7 +250,7 @@ const SLIDES = [
 
   // "Some takeaways" keypoints stopping slide at 00:31:43.933
   takeaways([
-    "So we are deluded to perceive that, because the continuity is similar. That’s why I say, “I saw this river last year”, “I saw this river yesterday.” Actually, it’s gone; it’s gone to the ocean. What I’m seeing now, today, is different from yesterday. But I am deluded to see the same river that I saw yesterday and today. So how much we are deluded, you see?",
+    "So we are deluded to perceive that, because the continuity is similar. That’s why I say, “I saw this river last year”, “I saw this river yesterday.” Actually, it’s gone; it’s gone to the ocean. What I’m seeing now, today, is different from yesterday. But I am deluded to see the same river that I saw yesterday and today. So how deluded we are, you see?",
     "So the river is constantly changing. Past is past, future is future, but, like the river, this present moment is changing. That means that nature itself is emptiness. So through this practice, meditation, from the impermanence you can realize the emptiness. So meditate on this.",
     "And that’s your mind — how your mind can change and can improve. For example, “Oh yes, my friend — first I like so much, and by just one instance, then I say I don’t like you.” Everything is kind of delicate, changing. So meditate on this.",
     "So that is the Mahamudra, Dzogchen. That’s very profound, but because our gross mind finds it difficult to comprehend, we don’t see it that way. That’s the impermanence of the outer phenomena."
@@ -323,7 +323,7 @@ const SLIDES = [
     "Instead of only focusing on this life, focus on enlightenment, on buddhahood. So, “I should use this body not only for this life’s enjoyment, but I should use this body for the enlightenment of all sentient beings.”",
     "So for this, reading the life stories of great masters is so precious, how they have practiced, how they have benefited sentient beings.",
     "So, as mentioned, it’s not just a religious training. Our inveterate mind of habits is so arrogant. So the training of the mind is so that we can break through this arrogant mind, make the mind flexible, make the mind like space.",
-    "Impermanence has a lot of subjects there; you can read them, and as I mentioned, it’s so precious. Then look at this: whenever you see people dying, reflect, “One day it will also happen to me like this. I must practice Dharma.” Just reminding this, reminding again and again."
+    "Impermanence has a lot of subjects there; you can read them, and as I mentioned, it’s so precious. Then look at this: whenever you see people dying, reflect, “One day it will also happen to me like this. I must practice Dharma.” Just remind yourself of this, again and again."
   ], {
     at: "00:44:48.667",
     title: "Takeaways: Make the mind flexible",
@@ -356,7 +356,7 @@ const SLIDES = [
   takeaways([
     "*“… and it quickly frees one from attachment and hatred.”* So through this mindfulness of impermanence, it helps us to release our attachment, our aversion, hatred. As earlier I mentioned, when this attachment and hatred are purified that’s the real peace that can be experienced in the mind.",
     "There are some individuals… very vicious to you. So if we are kind of vicious back to that individual, then our hatred mind brings a lot of pain, suffering: “How can I get rid of this person? How should I respond to this?”",
-    "Instead, reflect: this person is so stupid, ignorant, doesn’t know how to handle, doesn’t know how to bring peace and happiness; he or she oneself is suffering so much. All these are impermanent, moment to moment changing, and that person doesn’t know how to do that.",
+    "Instead, reflect: this person is so stupid, ignorant, doesn’t know how to handle, doesn’t know how to bring peace and happiness; he or she is suffering so much. All these are impermanent, moment to moment changing, and that person doesn’t know how to do that.",
     "So you reflect about the suffering of that person and develop love and compassion, and all your mental suffering just disappears. That disappearing of that suffering is called the practice of emptiness."
   ], {
     at: "00:49:08.667",
@@ -372,7 +372,7 @@ const SLIDES = [
     "So this is the wisdom of the Buddha, the wisdom of Gampopa. So meditate on this. That’s why it says here, *“… it becomes a cause for the realization of the equal nature of all phenomena”* — that means emptiness.",
     "When you practice this way, step by step, then you see, as I mentioned, the impermanence of every second. Then you divide: past is past, future is future, and you cannot find now something permanent. That itself is emptiness.",
     "All this gross that we see, all the dust particles we see: if you divide, investigate through the intellect, it functions within the emptiness. Like, for example, the modern quantum physics theory. The scientists there have now proved, or they’ve realized, that all these dust particles are nothing but empty. But they don’t know how to meditate on them, so they got rid of it: “This is empty, now we cannot do anything. No use.”",
-    "But for us, emptiness is the best thing we can use: “Yes, there’s nothing that functions independently; their nature is emptiness. There’s nothing to attach to, nothing to hate.” So that understanding itself is the wisdom. Through that wisdom, we get all the excellent opportunity to purify all the mental afflictions."
+    "But for us, emptiness is the best thing we can use: “Yes, there’s nothing that functions independently; their nature is emptiness. There’s nothing to attach to, nothing to hate.” So that understanding itself is the wisdom. Through that wisdom, we get all the excellent opportunities to purify all the mental afflictions."
   ], {
     at: "00:49:08.667",
     title: "Coming up: The peace is in our hand",
@@ -389,7 +389,7 @@ const SLIDES = [
 
   // "Some takeaways" keypoints stopping slide at 00:55:14.533
   takeaways([
-    "Meditate, and that develops such great love and compassion, special insight, and it can really bring peace in the world. I wish all the great scientists realize that — how to meditate on emptiness — and bring peace in the world.",
+    "Meditate, and that develops such great love and compassion, special insight, and it can really bring peace in the world. I wish all the great scientists would realize that — how to meditate on emptiness — and bring peace in the world.",
     "So we follow that path, then life is beautiful with a precious human life. That is what makes life so precious. Instead of the center of the problems, instead of the center of all the suffering, the life becomes the center of the peace, happiness and joy to all others. This is what is called Dharma practice, and there you can practice the bodhicitta.",
     "So this big subject of impermanence, so many pages we have covered. Reflect on this, meditate, relax. Not just today, as mentioned, but in your daily life. In the morning, reflect on impermanence; meditate on loving kindness, compassion. In the evening, reflect on the bodhicitta; you go to sleep with the bodhicitta, or with all the other practices you have.",
     "But impermanence! Don’t treat impermanence as some small thing. Impermanence is so important, from the beginning to the end of your practice."
